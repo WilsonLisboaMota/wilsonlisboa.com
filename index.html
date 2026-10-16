@@ -64,8 +64,7 @@ h1 .dot{display:inline;color:var(--signal)}
 /* Labels sit on the structure; their position is set from the 3D scene every frame. */
 .forces{position:absolute;inset:0;z-index:3;pointer-events:none}
 .force{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:3px;padding:2px 0 6px 20px;margin-top:-9px;text-decoration:none;color:var(--mist);opacity:0;visibility:hidden;pointer-events:auto;white-space:nowrap;will-change:transform,opacity}
-.force::before{content:"";position:absolute;left:0;top:10px;width:12px;height:1px;background:var(--mist-45);transition:background-color .2s var(--ease),width .3s var(--ease)}
-.force .n{font-size:10px;color:var(--mist-45)}
+.force::before{content:"";position:absolute;left:0;top:12px;width:12px;height:1px;background:var(--mist-45);transition:background-color .2s var(--ease),width .3s var(--ease)}
 .force b{font-weight:600;font-size:15px;letter-spacing:-.005em;transition:color .2s var(--ease);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}
 .force i{font-style:normal;font-size:13px;line-height:1.3;color:var(--mist-70);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}
 .force.hot b,.force:focus-visible b{color:var(--signal)}
@@ -116,7 +115,7 @@ h1 .dot{display:inline;color:var(--signal)}
   <section class="hero" id="top" aria-labelledby="title">
     <div class="stage">
       <canvas id="gl" aria-hidden="true"></canvas>
-      <p class="sr-only">Visual: a translucent surface made of fine lines, with a line chart running across it. Four structures behind it push it into shape. Scrolling carries you through the surface to the other side, where the four become visible: Business Intelligence, AI, Leadership and Entrepreneurship. The data is illustrative.</p>
+      <p class="sr-only">Visual: a translucent surface made of fine lines, with a line chart running across it. Four structures behind it push it into shape. Scrolling carries you through the surface to the other side, where the four become visible: Business Intelligence, Artificial Intelligence, Leadership and Entrepreneurship. The data is illustrative.</p>
 
       <header class="top">
         <a class="name" href="#top">Wilson Mota</a>
@@ -147,10 +146,10 @@ h1 .dot{display:inline;color:var(--signal)}
       </div>
 
       <nav class="forces" id="forces" aria-label="What lies behind the dashboard">
-        <a class="force" href="#bi" data-k="0"><span class="n mono">01</span><b>Business Intelligence</b><i>Power BI · Dremio · Databricks · SSIS</i></a>
-        <a class="force" href="#ai" data-k="1"><span class="n mono">02</span><b>AI</b><i>Trading bot · Personal CFO · Property viability</i></a>
-        <a class="force" href="#leadership" data-k="2"><span class="n mono">03</span><b>Leadership</b><i>From analyst to team manager</i></a>
-        <a class="force" href="#entrepreneurship" data-k="3"><span class="n mono">04</span><b>Entrepreneurship</b><i>Ideas tested, some shipped</i></a>
+        <a class="force" href="#bi" data-k="0"><b>Business Intelligence</b><i>Power BI · Dremio · Databricks · SSIS</i></a>
+        <a class="force" href="#ai" data-k="1"><b>Artificial Intelligence</b><i>Trading bot · Personal CFO · Property viability</i></a>
+        <a class="force" href="#leadership" data-k="2"><b>Leadership</b><i>From analyst to team manager</i></a>
+        <a class="force" href="#entrepreneurship" data-k="3"><b>Entrepreneurship</b><i>Ideas tested, some shipped</i></a>
       </nav>
     </div>
   </section>
@@ -161,7 +160,7 @@ h1 .dot{display:inline;color:var(--signal)}
     <p>Each force will open its own section. None of them is built yet.</p>
     <ul class="todo">
       <li id="bi">Business Intelligence <span class="mono">Not built</span></li>
-      <li id="ai">AI <span class="mono">Not built</span></li>
+      <li id="ai">Artificial Intelligence <span class="mono">Not built</span></li>
       <li id="leadership">Leadership <span class="mono">Not built</span></li>
       <li id="entrepreneurship">Entrepreneurship <span class="mono">Not built</span></li>
     </ul>
