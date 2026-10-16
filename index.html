@@ -281,11 +281,13 @@ function init() {
     uMist: { value: new THREE.Color(0xE4ECE9) },
     uSignal: { value: new THREE.Color(0xE0952F) },
     uGlyphs: { value: null },
+    uAiMode: { value: new URLSearchParams(location.search).get('ai') === 'pulse' ? 1 : 0 },
+    uAiGain: { value: +(new URLSearchParams(location.search).get('aig') || 1) },
     uCell: { value: new THREE.Vector2(0.085, 0.13) },
   };
 
   const FIELD = /* glsl */`
-    uniform float uTime, uSpeed, uReduced, uIntro, uBehind, uHot, uHotAmt;
+    uniform float uTime, uSpeed, uReduced, uIntro, uBehind, uHot, uHotAmt, uAiMode, uAiGain;
     uniform vec4 uF[4];
     uniform vec2 uROff[4];
     uniform vec3 uCursor;
@@ -294,8 +296,33 @@ function init() {
     uniform vec4 uYield;
     uniform vec3 uSize;
 
-    float gWave, gGlyph;
+    float gWave, gGlyph, gAiGlow;
     vec2 gOff;
+
+    // Preview (?ai=pulse): the AI force beats instead of rippling. Each beat is a single front with a
+    // sharp leading edge and a fast decay, sent out in a heartbeat rhythm, and it advances in discrete steps.
+    float aiPulses(vec2 d, out float glow) {
+      glow = 0.0;
+      if (uReduced > 0.5) return 0.0;
+      // Slightly squared distance: the front reads as a signal on a grid, not a ring on water.
+      float dist = mix(length(d), max(abs(d.x), abs(d.y)), 0.3);
+      float zone = exp(-dist * dist / 7.5);
+      float period = 2.8, z = 0.0;
+      float cycle = floor(uTime / period);
+      for (int j = 0; j < 2; j++) {
+        for (int k = 0; k < 2; k++) {
+          float te = (cycle - float(j)) * period + (k == 0 ? 0.0 : 0.34);
+          float age = uTime - te;
+          if (age < 0.0 || age > 2.4) continue;
+          float stepped = floor(age / 0.085) * 0.085;
+          float f = dist - stepped * 1.8;
+          float amp = (k == 0 ? 1.0 : 0.55) * exp(-age * 1.0) * zone;
+          z += amp * (f > 0.0 ? exp(-f * f * 70.0) : exp(f * 3.5));
+          glow += amp * (f > 0.0 ? exp(-f * f * 90.0) : exp(f * 9.0));
+        }
+      }
+      return z;
+    }
 
     // z: how far the membrane is pushed towards the viewer. ring: where it is momentarily see-through.
     // wave: crest energy. glyph: the disturbance band where the code shows. off: in-plane pull.
@@ -308,7 +335,13 @@ function init() {
       z += uF[0].z * exp(-dot(d, d) / (uF[0].w * uF[0].w));
       d = p - uF[1].xy;
       float e = exp(-dot(d, d) / (uF[1].w * uF[1].w));
-      z += uF[1].z * e * (0.8 + 0.2 * sin(length(d - vec2(0.32, 0.1)) * 10.0 - uTime * 1.3) * sin(length(d + vec2(0.3, -0.12)) * 8.5 - uTime * 0.9));
+      gAiGlow = 0.0;
+      if (uAiMode < 0.5) {
+        z += uF[1].z * e * (0.8 + 0.2 * sin(length(d - vec2(0.32, 0.1)) * 10.0 - uTime * 1.3) * sin(length(d + vec2(0.3, -0.12)) * 8.5 - uTime * 0.9));
+      } else {
+        z += uF[1].z * e * 0.8 + 0.42 * uAiGain * aiPulses(d, gAiGlow);
+        gAiGlow *= 2.5 * uAiGain;
+      }
       d = p - uF[2].xy;
       float r = dot(d, d) / (uF[2].w * uF[2].w);
       z += uF[2].z * exp(-r * r);
@@ -437,9 +470,9 @@ function init() {
         float energy = pow(0.5 + 0.5 * sin(position.x * 0.9 - uTime * 0.5 + aRow * 7.3), 16.0) * (1.0 - uReduced);
         float cur = cursorNear(position.xy, 0.9);
         float crest = clamp(gWave, 0.0, 1.0);
-        vA = edge * (0.14 + 0.2 * diff + 0.75 * spec + 0.12 * energy + 0.3 * crest) * (1.0 - 0.88 * clamp(ring + 0.5 * crest, 0.0, 1.0)) * (1.0 - 0.5 * cur) * introAt(position.x);
+        vA = edge * (0.14 + 0.2 * diff + 0.75 * spec + 0.12 * energy + 0.3 * crest + 0.9 * clamp(gAiGlow, 0.0, 1.0)) * (1.0 - 0.88 * clamp(ring + 0.5 * crest, 0.0, 1.0)) * (1.0 - 0.5 * cur) * introAt(position.x);
         vA *= nearCam(wp.xyz) * mix(1.0, 0.72, uBehind);
-        vCol = mix(uBlue + vec3(0.06, 0.16, 0.22), uMist, clamp(0.45 * spec + 0.08 * diff + 0.25 * crest, 0.0, 1.0));
+        vCol = mix(uBlue + vec3(0.06, 0.16, 0.22), uMist, clamp(0.45 * spec + 0.08 * diff + 0.25 * crest + 0.6 * gAiGlow, 0.0, 1.0));
         gl_Position = projectionMatrix * viewMatrix * wp;
       }`,
     fragmentShader: /* glsl */`
