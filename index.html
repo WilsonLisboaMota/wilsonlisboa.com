@@ -308,7 +308,8 @@ function init() {
       z += uF[0].z * exp(-dot(d, d) / (uF[0].w * uF[0].w));
       d = p - uF[1].xy;
       float e = exp(-dot(d, d) / (uF[1].w * uF[1].w));
-      z += uF[1].z * e * (0.8 + 0.2 * sin(length(d - vec2(0.32, 0.1)) * 10.0 - uTime * 1.3) * sin(length(d + vec2(0.3, -0.12)) * 8.5 - uTime * 0.9));
+      // AI lifts the wall smoothly; its life shows as signals running along the lines (see aiSignal), not as ripples.
+      z += uF[1].z * e * 0.82;
       d = p - uF[2].xy;
       float r = dot(d, d) / (uF[2].w * uF[2].w);
       z += uF[2].z * exp(-r * r);
@@ -399,6 +400,22 @@ function init() {
       return smoothstep(0.0, 0.35, uIntro * 1.5 - (x / uSize.x + 0.5));
     }
 
+    // Signals running along the wall's own lines towards the AI point: information converging,
+    // as the structure behind does. Some rows carry one small comet of light, from the left or the right.
+    float aiSignal(vec2 p, float row) {
+      float h1 = fract(sin(row * 127.1) * 43758.5453);
+      float h2 = fract(sin(row * 311.7 + 1.3) * 24634.6345);
+      if (h1 < 0.55 || uReduced > 0.5) return 0.0;
+      vec2 dA = p - uF[1].xy;
+      float zone = exp(-dot(dA, dA) / 12.0);
+      float side = h2 > 0.5 ? 1.0 : -1.0;
+      float s = fract(uTime * (0.07 + 0.06 * h2) + h1 * 9.0);
+      float xc = uF[1].x + side * 3.6 * (1.0 - s);
+      float along = (p.x - xc) * side;
+      float pk = along > 0.0 ? exp(-along * along / 0.16) : exp(-along * along / 0.012);
+      return pk * zone * smoothstep(0.0, 0.15, s) * (1.0 - smoothstep(0.82, 1.0, s));
+    }
+
     // Anything right in front of the camera fades, so the crossing never fills the screen with a smear.
     float nearCam(vec3 wp) {
       return smoothstep(0.3, 1.7, distance(wp, cameraPosition));
@@ -435,11 +452,12 @@ function init() {
         float spec = pow(max(dot(reflect(-L, N), V), 0.0), 22.0);
         float edge = smoothstep(0.5, 0.34, abs(position.x) / uSize.x) * smoothstep(0.5, 0.28, abs(position.y - uSize.z) / uSize.y);
         float energy = pow(0.5 + 0.5 * sin(position.x * 0.9 - uTime * 0.5 + aRow * 7.3), 16.0) * (1.0 - uReduced);
+        float sig = aiSignal(position.xy, aRow);
         float cur = cursorNear(position.xy, 0.9);
         float crest = clamp(gWave, 0.0, 1.0);
-        vA = edge * (0.14 + 0.2 * diff + 0.75 * spec + 0.12 * energy + 0.3 * crest) * (1.0 - 0.88 * clamp(ring + 0.5 * crest, 0.0, 1.0)) * (1.0 - 0.5 * cur) * introAt(position.x);
+        vA = edge * (0.14 + 0.2 * diff + 0.75 * spec + 0.12 * energy + 0.3 * crest + 1.1 * sig) * (1.0 - 0.88 * clamp(ring + 0.5 * crest, 0.0, 1.0)) * (1.0 - 0.5 * cur) * introAt(position.x);
         vA *= nearCam(wp.xyz) * mix(1.0, 0.72, uBehind);
-        vCol = mix(uBlue + vec3(0.06, 0.16, 0.22), uMist, clamp(0.45 * spec + 0.08 * diff + 0.25 * crest, 0.0, 1.0));
+        vCol = mix(uBlue + vec3(0.06, 0.16, 0.22), uMist, clamp(0.45 * spec + 0.08 * diff + 0.25 * crest + 0.8 * sig, 0.0, 1.0));
         gl_Position = projectionMatrix * viewMatrix * wp;
       }`,
     fragmentShader: /* glsl */`
