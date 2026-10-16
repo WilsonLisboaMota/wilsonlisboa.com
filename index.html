@@ -98,6 +98,7 @@ h1 .dot{display:inline;color:var(--signal)}
   .force::before{width:9px}
   .force b{font-size:13px}
   .force i{display:none}
+  .force.hot i{display:block}
   .fallback{left:5%;top:14%;width:90%;height:34%}
 }
 @media (max-width:759px) and (max-height:700px){
@@ -941,7 +942,7 @@ function init() {
     tilt: { x: 0, y: 0, vx: 0, vy: 0 }, tiltT: { x: 0, y: 0 },
     nextRipple: 0, autoRipple: !reduced, autoAt: 1.7,
     scrollP: 0, u: 0, uv: 0, forceU: null,
-    hotPointer: -1, hotLabel: -1, hot: -1, hotAmt: 0,
+    hotPointer: -1, hotLabel: -1, hotTouch: -1, hot: -1, hotAmt: 0,
   };
   const L = { w: 1, h: 1, mobile: null, cx: 0, cy: 0, ex: 0, ey: 0, fov: 30, fovMid: 50, fovEnd: 40, rEnd: 13 };
   const BASE_RY = -0.3, BASE_RX = 0.06;
@@ -1002,7 +1003,8 @@ function init() {
     });
 
     // Crossing progress follows the scroll, with a little inertia.
-    const target = S.forceU !== null ? S.forceU : reduced ? (S.scrollP > 0.45 ? 1 : 0) : clamp(S.scrollP / 0.9, 0, 1);
+    // The crossing spans the whole pinned scroll, so the far side settles exactly as the hero releases: no dead scroll.
+    const target = S.forceU !== null ? S.forceU : reduced ? (S.scrollP > 0.45 ? 1 : 0) : clamp(S.scrollP, 0, 1);
     if (reduced || S.forceU !== null) { S.u = target; S.uv = 0; }
     else {
       const kk = 30, c = 2 * Math.sqrt(kk);
@@ -1054,7 +1056,8 @@ function init() {
     if (S.cursor.s > 0.2) dotPos.forEach((p, i) => { const d = (p[0] - S.cursor.x) ** 2 + (p[1] - S.cursor.y) ** 2; if (d < bd) { bd = d; best = i; } });
     uniforms.uNearest.value = best;
 
-    S.hot = u > 0.85 ? (S.hotLabel >= 0 ? S.hotLabel : S.hotPointer) : -1;
+    if (u <= 0.85) S.hotTouch = -1;
+    S.hot = u > 0.85 ? (S.hotLabel >= 0 ? S.hotLabel : S.hotPointer >= 0 ? S.hotPointer : S.hotTouch) : -1;
     if (S.hot >= 0) uniforms.uHot.value = S.hot;
     S.hotAmt = lerp(S.hotAmt, S.hot >= 0 ? 1 : 0, 1 - Math.exp(-dt * 10));
     uniforms.uHotAmt.value = S.hotAmt;
@@ -1064,18 +1067,18 @@ function init() {
   }
 
   // ---------- DOM synced to the scene ----------
-  let lastSide = null, lastHot = -2;
+  let lastSide = null, lastHot = -2, lastHint = '';
   function updateDom(u) {
     const out = smooth(0, 0.16, u);
     copyEl.style.opacity = (1 - out).toFixed(3);
     copyEl.style.visibility = out > 0.99 ? 'hidden' : '';
     copyEl.style.transform = reduced ? '' : `translate3d(0,${(-28 * out).toFixed(1)}px,0)`;
-    const bo = smooth(0.84, 0.98, u);
+    const bo = smooth(0.82, 0.96, u);
     // Only faded, never hidden: screen readers get this sentence whether or not the visitor has crossed.
     behindEl.style.opacity = bo.toFixed(3);
-    hintEl.style.opacity = smooth(0.86, 0.96, u).toFixed(3);
+    hintEl.style.opacity = smooth(0.84, 0.96, u).toFixed(3);
 
-    const lo = smooth(0.86, 1, u);
+    const lo = smooth(0.84, 0.96, u);
     if (lo < 0.01) {
       labels.forEach(el => { if (el._on) { el.style.opacity = '0'; el.style.visibility = 'hidden'; el._on = false; } });
     } else {
@@ -1100,17 +1103,15 @@ function init() {
       });
     }
     if (S.hot !== lastHot) {
-      labels.forEach((el, k) => el.classList.toggle('hot', S.hot === k));
+      labels.forEach((el, k) => { el.classList.toggle('hot', S.hot === k); el._w = 0; });
       lastHot = S.hot;
     }
 
+    // The front needs no instructions: the surface shows it reacts. Only the far side gets a hint.
     const side = u > 0.5;
-    if (side !== lastSide) {
-      lastSide = side;
-      // The front needs no instructions: the surface shows it reacts. Only the far side gets a hint.
-      hintEl.textContent = mqFine.matches ? 'Point at a force' : 'Tap a force';
-      hintEl.hidden = !side;
-    }
+    if (side !== lastSide) { lastSide = side; hintEl.hidden = !side; }
+    const hint = mqFine.matches ? 'Point at a force' : S.hotTouch >= 0 ? 'Tap again to open' : 'Tap a force';
+    if (hint !== lastHint) { hintEl.textContent = hint; lastHint = hint; }
   }
 
   // Living: it keeps breathing while visible. With reduced motion it renders only on change.
@@ -1177,8 +1178,13 @@ function init() {
       addRipple(p.x, p.y);
       if (e.pointerType !== 'mouse') { dragging = true; S.cursorT.x = p.x; S.cursorT.y = p.y; S.cursorT.s = 1; S.cursor.x = p.x; S.cursor.y = p.y; }
     } else if (S.u > 0.85) {
-      const k = pickForce(e.clientX, e.clientY);
-      if (k >= 0) labels[k].click();
+      if (e.pointerType === 'mouse') {
+        const k = pickForce(e.clientX, e.clientY);
+        if (k >= 0) openForce(k);
+      } else {
+        // On touch nothing happens on contact: only a deliberate tap counts, never the start of a scroll.
+        tapStart = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() };
+      }
     }
     kick();
   });
@@ -1186,11 +1192,46 @@ function init() {
   addEventListener('pointerup', release);
   addEventListener('pointercancel', release);
 
+  // Touch mirrors the mouse in two taps: the first lights a force up (as hovering does), the second opens it.
+  let tapStart = null;
+  canvas.addEventListener('pointerup', e => {
+    const t = tapStart;
+    tapStart = null;
+    if (!t || t.id !== e.pointerId || S.u <= 0.85) return;
+    if (Math.hypot(e.clientX - t.x, e.clientY - t.y) > 10 || performance.now() - t.t > 450) return;
+    const k = pickForce(e.clientX, e.clientY);
+    if (k < 0) S.hotTouch = -1;
+    else if (k === S.hotTouch) openForce(k);
+    else S.hotTouch = k;
+    kick();
+  });
+  canvas.addEventListener('pointercancel', () => { tapStart = null; });
+
+  // Opening a force glides to its section instead of jumping there.
+  function openForce(k) {
+    S.hotTouch = -1;
+    const target = document.querySelector(labels[k].getAttribute('href'));
+    if (!target) return;
+    const toY = () => target.getBoundingClientRect().top + scrollY - 24;
+    if (reduced) { stopJourney(); scrollTo(0, toY()); }
+    else travel([{ to: toY, ms: d => clamp(d * 0.7, 700, 1600), ease: cubicInOut }]);
+    kick();
+  }
+
+  let labelPointer = 'mouse';
   labels.forEach((el, k) => {
     el.addEventListener('mouseenter', () => { S.hotLabel = k; kick(); });
     el.addEventListener('mouseleave', () => { S.hotLabel = -1; kick(); });
-    el.addEventListener('focus', () => { S.hotLabel = k; kick(); });
+    el.addEventListener('focus', () => { if (labelPointer === 'mouse') S.hotLabel = k; kick(); });
     el.addEventListener('blur', () => { S.hotLabel = -1; kick(); });
+    el.addEventListener('pointerdown', e => { labelPointer = e.pointerType || 'mouse'; });
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const touch = labelPointer !== 'mouse';
+      labelPointer = 'mouse';
+      if (touch && S.hotTouch !== k) { S.hotTouch = k; kick(); return; }
+      openForce(k);
+    });
   });
 
   // ---------- guided journeys: a calm, scripted scroll that the visitor can interrupt at any moment ----------
@@ -1198,7 +1239,7 @@ function init() {
   const sine = t => 0.5 - 0.5 * Math.cos(Math.PI * t);
   const cubicInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const heroTop = () => hero.getBoundingClientRect().top + scrollY;
-  const behindY = () => heroTop() + (hero.offsetHeight - innerHeight) * 0.94;
+  const behindY = () => heroTop() + (hero.offsetHeight - innerHeight) * 0.985;
   const workY = () => document.getElementById('work').getBoundingClientRect().top + scrollY;
 
   function stopJourney() {
@@ -1266,6 +1307,7 @@ function init() {
     ripple(x, y) { addRipple(x, y); kick(); },
     cursor(x, y) { S.cursorT.x = S.cursor.x = x; S.cursorT.y = S.cursor.y = y; S.cursorT.s = 1; kick(); },
     setU(u) { S.forceU = u; kick(); },
+    get journeyTarget() { return journey && journey.legs ? 'running' : null; },
     time(frames = 120) {
       const gl = renderer.getContext(), px = new Uint8Array(4), t0 = performance.now();
       for (let i = 0; i < frames; i++) { step(1 / 60); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); }
