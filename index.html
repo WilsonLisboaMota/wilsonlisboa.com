@@ -1,0 +1,1293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Beyond the Dashboards</title>
+<meta name="description" content="Wilson Mota. Business Intelligence, AI, leadership and the things I build beyond the dashboard.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#021C2A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,200..900&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap">
+<style>
+:root{
+  --deep:#021C2A;
+  --ink:#0D1B24;
+  --blue:#00486F;
+  --mist:#E4ECE9;
+  --signal:#E0952F;
+  --mist-70:rgba(228,236,233,.72);
+  --mist-45:rgba(228,236,233,.48);
+  --mist-15:rgba(228,236,233,.16);
+  --sans:'Mona Sans','Helvetica Neue',Arial,sans-serif;
+  --mono:'Martian Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --gutter:clamp(16px,3.4vw,48px);
+  --base:clamp(28px,7vh,72px);
+  --ease:cubic-bezier(.2,.7,.2,1);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--deep)}
+body{color:var(--mist);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--signal);outline-offset:4px;border-radius:2px}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.mono{font-family:var(--mono);font-size:11px;line-height:1.4;font-weight:450;letter-spacing:.09em;text-transform:uppercase}
+
+/* ---------- hero: the stage stays put while the scroll carries the visitor through the membrane ---------- */
+.hero{position:relative;height:260vh;height:260svh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;isolation:isolate}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;-webkit-tap-highlight-color:transparent;cursor:crosshair}
+
+.top{position:absolute;inset:0 0 auto 0;z-index:4;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:calc(env(safe-area-inset-top,0px) + 18px) var(--gutter) 0;pointer-events:none}
+.top a{pointer-events:auto}
+.top .name{font-weight:600;font-size:15px;letter-spacing:-.005em;text-decoration:none;padding:10px 0}
+.top nav{display:flex;gap:clamp(16px,2.4vw,34px)}
+.top nav a{font-size:15px;text-decoration:none;color:var(--mist-70);padding:10px 0;background:linear-gradient(currentColor,currentColor) 0 calc(100% - 7px)/0 1px no-repeat;transition:color .2s var(--ease),background-size .4s var(--ease)}
+.top nav a:hover{color:var(--mist);background-size:100% 1px}
+
+.copy{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:1040px;pointer-events:none;will-change:opacity,transform}
+.copy a{pointer-events:auto}
+.kicker{margin:0 0 18px;color:var(--mist-45)}
+h1{margin:0;font-size:clamp(52px,9.4vw,164px);line-height:.86;font-weight:620;font-stretch:112%;letter-spacing:-.042em;text-shadow:0 0 42px rgba(2,28,42,.7)}
+h1 span{display:block}
+h1 .dot{display:inline;color:var(--signal)}
+.under{display:flex;flex-wrap:wrap;align-items:center;gap:18px 36px;margin-top:clamp(20px,3.2vh,34px)}
+.lede{margin:0;font-size:clamp(17px,1.45vw,21px);line-height:1.35;color:var(--mist-70);max-width:24ch;text-shadow:0 0 24px rgba(2,28,42,.9)}
+.cta{display:inline-flex;align-items:center;gap:12px;height:48px;padding:0 20px 0 22px;background:var(--mist);color:var(--deep);text-decoration:none;font-weight:600;font-size:15px;border-radius:3px;transition:background-color .25s var(--ease)}
+.cta:hover{background:#fff}
+
+.behind{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:620px;opacity:0;pointer-events:none}
+.behind .big{margin:0;font-size:clamp(25px,2.6vw,40px);line-height:1.12;font-weight:480;font-stretch:104%;letter-spacing:-.022em;max-width:24ch;text-shadow:0 0 30px rgba(2,28,42,.9)}
+
+/* Labels sit on the structure; their position is set from the 3D scene every frame. */
+.forces{position:absolute;inset:0;z-index:3;pointer-events:none}
+.force{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:3px;padding:2px 0 6px 20px;margin-top:-9px;text-decoration:none;color:var(--mist);opacity:0;visibility:hidden;pointer-events:auto;white-space:nowrap;will-change:transform,opacity}
+.force::before{content:"";position:absolute;left:0;top:10px;width:12px;height:1px;background:var(--mist-45);transition:background-color .2s var(--ease),width .3s var(--ease)}
+.force .n{font-size:10px;color:var(--mist-45)}
+.force b{font-weight:600;font-size:15px;letter-spacing:-.005em;transition:color .2s var(--ease);text-shadow:0 0 18px rgba(2,28,42,.95)}
+.force i{font-style:normal;font-size:13px;line-height:1.3;color:var(--mist-70);text-shadow:0 0 18px rgba(2,28,42,.95)}
+.force.hot b,.force:focus-visible b{color:var(--signal)}
+.force.hot::before,.force:focus-visible::before{background:var(--signal);width:16px}
+.force:focus-visible{outline-offset:2px}
+
+.readout{position:absolute;z-index:4;right:var(--gutter);bottom:var(--base);display:flex;flex-direction:column;align-items:flex-end;gap:12px;text-align:right;pointer-events:none}
+.readout p{margin:0}
+.r-hint{color:var(--mist-70)}
+.r-note{color:var(--mist-45)}
+
+.fallback{position:absolute;left:30%;top:16%;width:60%;height:46%}
+.no-gl #gl,.no-gl .forces{display:none}
+
+/* ---------- after the hero ---------- */
+.next{position:relative;padding:clamp(88px,16vh,180px) var(--gutter) clamp(72px,12vh,140px);border-top:1px solid var(--mist-15)}
+.next h2{margin:0 0 18px;font-size:clamp(38px,5.4vw,84px);line-height:.95;font-weight:600;font-stretch:110%;letter-spacing:-.038em}
+.next>p{margin:0;max-width:46ch;color:var(--mist-70);font-size:18px}
+.todo{list-style:none;margin:48px 0 0;padding:0;display:flex;flex-direction:column;max-width:760px;border-top:1px solid var(--mist-15)}
+.todo li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:18px 0;border-bottom:1px solid var(--mist-15);font-size:18px;scroll-margin-top:24px}
+.todo li span{color:var(--mist-45);white-space:nowrap}
+
+@media (max-width:759px){
+  .top nav a,.top .name{font-size:14px}
+  .copy,.behind{bottom:calc(env(safe-area-inset-bottom,0px) + 118px)}
+  .kicker{margin-bottom:14px}
+  .readout{left:var(--gutter);right:var(--gutter);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);align-items:flex-start;text-align:left;gap:8px}
+  .r-note{display:none}
+  .force{padding-left:16px}
+  .force::before{width:9px}
+  .force b{font-size:13px}
+  .force i{display:none}
+  .fallback{left:5%;top:14%;width:90%;height:34%}
+}
+@media (max-width:759px) and (max-height:700px){
+  h1{font-size:46px}
+  .kicker{display:none}
+}
+/* With reduced motion the scroll still leads behind, but as a cut instead of a flight. */
+@media (prefers-reduced-motion:reduce){
+  .hero{height:180vh;height:180svh}
+}
+</style>
+</head>
+<body>
+<main>
+  <section class="hero" id="top" aria-labelledby="title">
+    <div class="stage">
+      <canvas id="gl" aria-hidden="true"></canvas>
+      <p class="sr-only">Visual: a translucent surface made of fine lines, with a line chart running across it. Four structures behind it push it into shape. Scrolling carries you through the surface to the other side, where the four become visible: Business Intelligence, AI, Leadership and Entrepreneurship. The data is illustrative.</p>
+
+      <header class="top">
+        <a class="name" href="#top">Wilson Mota</a>
+        <nav aria-label="Primary">
+          <a href="#work">Work</a>
+          <a href="#work">Trajectory</a>
+          <a href="#work">Contact</a>
+        </nav>
+      </header>
+
+      <div class="copy" id="copy">
+        <p class="kicker mono">Business Intelligence · AI · Leadership</p>
+        <h1 id="title"><span>Beyond the</span> <span>dashboards<span class="dot">.</span></span></h1>
+        <div class="under">
+          <p class="lede">What if the charts I build are only the surface?</p>
+          <a class="cta" href="#work">See the work</a>
+        </div>
+      </div>
+
+      <div class="behind" id="behind">
+        <p class="kicker mono">Behind the dashboard</p>
+        <p class="big">I design data platforms, build products with AI, lead a BI team and start things from zero.</p>
+      </div>
+
+      <div class="readout">
+        <p class="r-hint mono" id="hint" aria-hidden="true" hidden>Point at a force</p>
+        <p class="r-note mono" aria-hidden="true">Illustrative data</p>
+      </div>
+
+      <nav class="forces" id="forces" aria-label="What lies behind the dashboard">
+        <a class="force" href="#bi" data-k="0"><span class="n mono">01</span><b>Business Intelligence</b><i>Power BI · Dremio · Databricks · SSIS</i></a>
+        <a class="force" href="#ai" data-k="1"><span class="n mono">02</span><b>AI</b><i>Trading bot · Personal CFO · Property viability</i></a>
+        <a class="force" href="#leadership" data-k="2"><span class="n mono">03</span><b>Leadership</b><i>From analyst to team manager</i></a>
+        <a class="force" href="#entrepreneurship" data-k="3"><span class="n mono">04</span><b>Entrepreneurship</b><i>Ideas tested, some shipped</i></a>
+      </nav>
+    </div>
+  </section>
+
+  <section class="next" id="work" aria-labelledby="next-title">
+    <p class="kicker mono">After the crossing</p>
+    <h2 id="next-title">What lies behind</h2>
+    <p>Each force will open its own section. None of them is built yet.</p>
+    <ul class="todo">
+      <li id="bi">Business Intelligence <span class="mono">Not built</span></li>
+      <li id="ai">AI <span class="mono">Not built</span></li>
+      <li id="leadership">Leadership <span class="mono">Not built</span></li>
+      <li id="entrepreneurship">Entrepreneurship <span class="mono">Not built</span></li>
+    </ul>
+  </section>
+</main>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js';
+
+THREE.ColorManagement.enabled = false;
+
+const hero = document.querySelector('.hero');
+const stage = document.querySelector('.stage');
+const canvas = document.getElementById('gl');
+const copyEl = document.getElementById('copy');
+const behindEl = document.getElementById('behind');
+const hintEl = document.getElementById('hint');
+const labels = [...document.querySelectorAll('.force')];
+const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
+const mqFine = matchMedia('(hover: hover) and (pointer: fine)');
+let reduced = mqReduce.matches;
+
+// Membrane space: x across, y up, z towards the viewer. The chart row runs through y = CHART_Y.
+const W = 12, H = 6.8, CHART_Y = -0.3, CHART_A = 2.3, LAMBDA = 1.7;
+const SPEED = 3.8, RIPPLES = 4;
+
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+
+function rng(seed) {
+  return () => {
+    seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// Illustrative series. Not real data.
+function series(n) {
+  const v = [];
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    v.push(0.42 + 0.30 * t + 0.10 * Math.sin(t * 9.4 + 0.5) + 0.06 * Math.sin(t * 23.1 + 1.7) + 0.035 * Math.sin(t * 57 + 0.3));
+  }
+  const mn = Math.min(...v), mx = Math.max(...v);
+  return v.map(y => (y - mn) / (mx - mn));
+}
+
+// Four forces behind the membrane: x, y, strength, width.
+// 0 BI: broad, stable. 1 AI: fine interference. 2 Leadership: wide lift. 3 Entrepreneurship: drifting fold.
+const FORCE_BASE = [
+  [-3.2, -0.7, 0.85, 1.7],
+  [0.7, 0.95, 0.6, 1.3],
+  [3.5, -0.3, 0.5, 2.3],
+  [-0.9, -2.0, 0.75, 1.1],
+];
+
+// Height of the resting membrane, so the structures can touch it from behind.
+function surfaceZ(x, y) {
+  const f = FORCE_BASE;
+  let z = 0, dx, dy, r;
+  dx = x - f[0][0]; dy = y - f[0][1]; z += f[0][2] * Math.exp(-(dx * dx + dy * dy) / (f[0][3] ** 2));
+  dx = x - f[1][0]; dy = y - f[1][1]; z += 0.8 * f[1][2] * Math.exp(-(dx * dx + dy * dy) / (f[1][3] ** 2));
+  dx = x - f[2][0]; dy = y - f[2][1]; r = (dx * dx + dy * dy) / (f[2][3] ** 2); z += f[2][2] * Math.exp(-r * r);
+  const c = Math.cos(0.7), s = Math.sin(0.7);
+  dx = x - f[3][0]; dy = y - f[3][1];
+  const rx = c * dx - s * dy, ry = s * dx + c * dy;
+  z += f[3][2] * Math.exp(-(rx * rx) / (0.12 * f[3][3] ** 2) - (ry * ry) / (f[3][3] ** 2)) * (rx > 0 ? 1 : 0.55);
+  return z;
+}
+
+let renderer = null;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+} catch (e) {
+  renderer = null;
+}
+if (renderer) init(); else fallback();
+
+function fallback() {
+  document.documentElement.classList.add('no-gl');
+  const v = series(120);
+  const d = v.map((y, i) => `${i ? 'L' : 'M'}${(i / 119 * 1000).toFixed(1)} ${(380 - y * 340).toFixed(1)}`).join(' ');
+  stage.insertAdjacentHTML('afterbegin', `<svg class="fallback" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="#E4ECE9" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`);
+  hintEl.textContent = 'Static view · illustrative data';
+}
+
+function init() {
+  renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+  renderer.setClearColor(0x021C2A, 1);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 200);
+  const D = 16;
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const uniforms = {
+    uTime: { value: 0 },
+    uIntro: { value: reduced ? 2 : 0 },
+    uReduced: { value: reduced ? 1 : 0 },
+    uF: { value: FORCE_BASE.map(f => new THREE.Vector4(...f)) },
+    uROff: { value: FORCE_BASE.map(() => new THREE.Vector2()) },
+    uCursor: { value: new THREE.Vector3(0, 0, 0) },
+    uRip: { value: Array.from({ length: RIPPLES }, () => new THREE.Vector4(0, 0, -99, 0)) },
+    uRipSeed: { value: new Array(RIPPLES).fill(0) },
+    uYield: { value: new THREE.Vector4(0, 0, 99, 0) },
+    uBehind: { value: 0 },
+    uHot: { value: -1 },
+    uHotAmt: { value: 0 },
+    uSpeed: { value: SPEED },
+    uSize: { value: new THREE.Vector3(W, H, 0) },
+    uNearest: { value: -1 },
+    uDpr: { value: 1 },
+    uBlue: { value: new THREE.Color(0x00486F) },
+    uMist: { value: new THREE.Color(0xE4ECE9) },
+    uSignal: { value: new THREE.Color(0xE0952F) },
+    uGlyphs: { value: null },
+    uCell: { value: new THREE.Vector2(0.085, 0.13) },
+  };
+
+  const FIELD = /* glsl */`
+    uniform float uTime, uSpeed, uReduced, uIntro, uBehind, uHot, uHotAmt;
+    uniform vec4 uF[4];
+    uniform vec2 uROff[4];
+    uniform vec3 uCursor;
+    uniform vec4 uRip[${RIPPLES}];
+    uniform float uRipSeed[${RIPPLES}];
+    uniform vec4 uYield;
+    uniform vec3 uSize;
+
+    float gWave, gGlyph;
+    vec2 gOff;
+
+    // z: how far the membrane is pushed towards the viewer. ring: where it is momentarily see-through.
+    // wave: crest energy. glyph: the disturbance band where the code shows. off: in-plane pull.
+    float fields(vec2 p, out float ring, out float wave, out float glyph, out vec2 off) {
+      float z = 0.0;
+      wave = 0.0;
+      glyph = 0.0;
+      off = vec2(0.0);
+      vec2 d = p - uF[0].xy;
+      z += uF[0].z * exp(-dot(d, d) / (uF[0].w * uF[0].w));
+      d = p - uF[1].xy;
+      float e = exp(-dot(d, d) / (uF[1].w * uF[1].w));
+      z += uF[1].z * e * (0.8 + 0.2 * sin(length(d - vec2(0.32, 0.1)) * 10.0 - uTime * 1.3) * sin(length(d + vec2(0.3, -0.12)) * 8.5 - uTime * 0.9));
+      d = p - uF[2].xy;
+      float r = dot(d, d) / (uF[2].w * uF[2].w);
+      z += uF[2].z * exp(-r * r);
+      d = p - uF[3].xy;
+      float a = 0.7 + 0.35 * sin(uTime * 0.11);
+      d = mat2(cos(a), sin(a), -sin(a), cos(a)) * d;
+      z += uF[3].z * exp(-(d.x * d.x) / (0.12 * uF[3].w * uF[3].w) - (d.y * d.y) / (uF[3].w * uF[3].w)) * (d.x > 0.0 ? 1.0 : 0.55);
+
+      float zf = z;
+
+      d = p - uCursor.xy;
+      float press = uCursor.z * exp(-dot(d, d) / 0.55);
+      z -= 0.42 * press;
+      off -= d * 0.3 * press;
+
+      ring = 0.0;
+
+      // The membrane yields around the visitor crossing it, and heals once they have passed.
+      if (uYield.w > 0.001) {
+        vec2 dl = p - uYield.xy;
+        float rl = length(dl);
+        float Rl = 0.5 + 2.4 * uYield.w;
+        float el = exp(-rl * rl / (Rl * Rl));
+        off += dl / (rl + 1e-3) * Rl * 0.9 * el * uYield.w;
+        z -= 0.9 * uYield.w * el;
+        ring += uYield.w * el;
+        float rim = (rl - Rl * 1.15) / (0.3 * Rl);
+        glyph += 0.8 * uYield.w * exp(-rim * rim);
+      }
+
+      for (int i = 0; i < ${RIPPLES}; i++) {
+        vec4 rp = uRip[i];
+        float t = uTime - rp.z;
+        if (rp.w <= 0.0 || t < 0.0 || t > 6.0) continue;
+        vec2 dp = p - rp.xy;
+        float dist = length(dp);
+        if (uReduced > 0.5) {
+          float disc = exp(-t * 1.6) * exp(-dist * dist / 2.5);
+          ring += disc;
+          glyph += 0.6 * disc * smoothstep(0.9, 1.7, dist);
+          continue;
+        }
+        float s = uRipSeed[i];
+        float th = atan(dp.y, dp.x);
+        // An irregular front: a few angular harmonics with phases from this click's seed,
+        // growing as it travels, so no two pulses are alike.
+        float grow = min(1.0, t * 1.2);
+        float wob = 0.16 * sin(2.0 * th + s * 1.3) + 0.11 * sin(3.0 * th + s * 2.7)
+                  + 0.07 * sin(5.0 * th + s * 4.1) + 0.04 * sin(8.0 * th + s * 5.9 + t * 1.5);
+        // The medium is not uniform: where the forces push the membrane, the pulse slows down.
+        float slow = 1.0 - 0.3 * clamp(zf / 0.9, 0.0, 1.0);
+        float f = dist - t * uSpeed * slow * (1.0 + wob * grow);
+        // Some arcs carry the pulse, others almost vanish.
+        float arcs = 0.3 + 0.7 * smoothstep(-0.3, 0.5, sin(3.0 * th + s * 3.3) + 0.6 * sin(5.0 * th + s * 1.9));
+        // A single pulse with a small rebound: the membrane barely moves.
+        float env = rp.w * exp(-t * 0.9) / (1.0 + dist * 0.45);
+        float fr = f + 0.7;
+        float h = env * arcs * (exp(-f * f * 2.5) - 0.3 * exp(-fr * fr * 2.5));
+        z += h;
+        off += normalize(dp + 1e-4) * h * 0.1;
+        float fade = exp(-t * 0.55) * min(1.0, t * 4.0) * arcs;
+        wave += fade * exp(-f * f * 3.5);
+        // The code shows only in the disturbance itself, once the pulse has left the point of contact.
+        float away = smoothstep(1.1, 2.3, dist) * smoothstep(0.3, 0.65, t);
+        glyph += fade * away * (f > 0.0 ? exp(-f * f * 10.0) : exp(-f * f * 6.0));
+        // The see-through band trails just behind the crest.
+        float fb = f + 0.95;
+        ring += exp(-t * 0.75) * exp(-fb * fb * 1.3) * min(1.0, t * 3.0) * (0.5 + 0.5 * arcs);
+      }
+      return z;
+    }
+
+    vec3 surface(vec2 p, out float ring, out vec3 n) {
+      float r1, w1, g1; vec2 o1;
+      float z = fields(p, ring, gWave, gGlyph, gOff);
+      float zx = fields(p + vec2(0.05, 0.0), r1, w1, g1, o1);
+      float zy = fields(p + vec2(0.0, 0.05), r1, w1, g1, o1);
+      n = normalize(vec3(-(zx - z) / 0.05, -(zy - z) / 0.05, 1.0));
+      return vec3(p + gOff, z);
+    }
+
+    float cursorNear(vec2 p, float r) {
+      vec2 d = p - uCursor.xy;
+      return uCursor.z * exp(-dot(d, d) / r);
+    }
+
+    float introAt(float x) {
+      return smoothstep(0.0, 0.35, uIntro * 1.5 - (x / uSize.x + 0.5));
+    }
+
+    // Anything right in front of the camera fades, so the crossing never fills the screen with a smear.
+    float nearCam(vec3 wp) {
+      return smoothstep(0.3, 1.7, distance(wp, cameraPosition));
+    }
+
+    vec2 regOff(float r) {
+      if (r < 0.5) return uROff[0];
+      if (r < 1.5) return uROff[1];
+      if (r < 2.5) return uROff[2];
+      if (r < 3.5) return uROff[3];
+      return vec2(0.0);
+    }
+  `;
+
+  const LIGHT = 'normalize(vec3(-0.45, 0.55, 0.7))';
+  const additive = { transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending };
+
+  // ---------- membrane lines ----------
+  const linesMat = new THREE.ShaderMaterial({
+    uniforms, ...additive,
+    vertexShader: FIELD + /* glsl */`
+      attribute float aRow;
+      uniform vec3 uBlue, uMist;
+      varying float vA;
+      varying vec3 vCol;
+      void main() {
+        float ring; vec3 n;
+        vec3 pos = surface(position.xy, ring, n);
+        vec4 wp = modelMatrix * vec4(pos, 1.0);
+        vec3 N = normalize(mat3(modelMatrix) * n);
+        vec3 V = normalize(cameraPosition - wp.xyz);
+        vec3 L = ${LIGHT};
+        float diff = clamp(dot(N, L), 0.0, 1.0);
+        float spec = pow(max(dot(reflect(-L, N), V), 0.0), 22.0);
+        float edge = smoothstep(0.5, 0.34, abs(position.x) / uSize.x) * smoothstep(0.5, 0.28, abs(position.y - uSize.z) / uSize.y);
+        float energy = pow(0.5 + 0.5 * sin(position.x * 0.9 - uTime * 0.5 + aRow * 7.3), 16.0) * (1.0 - uReduced);
+        float cur = cursorNear(position.xy, 0.9);
+        float crest = clamp(gWave, 0.0, 1.0);
+        vA = edge * (0.14 + 0.2 * diff + 0.75 * spec + 0.12 * energy + 0.3 * crest) * (1.0 - 0.88 * clamp(ring + 0.5 * crest, 0.0, 1.0)) * (1.0 - 0.5 * cur) * introAt(position.x);
+        vA *= nearCam(wp.xyz) * mix(1.0, 0.72, uBehind);
+        vCol = mix(uBlue + vec3(0.06, 0.16, 0.22), uMist, clamp(0.45 * spec + 0.08 * diff + 0.25 * crest, 0.0, 1.0));
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader: /* glsl */`
+      varying float vA;
+      varying vec3 vCol;
+      void main() { gl_FragColor = vec4(vCol, vA); }`,
+  });
+
+  // ---------- translucent fill: catches light where the membrane folds ----------
+  const fillMat = new THREE.ShaderMaterial({
+    uniforms, ...additive, side: THREE.DoubleSide,
+    vertexShader: FIELD + /* glsl */`
+      varying float vF;
+      varying float vEdge;
+      varying float vRing;
+      void main() {
+        float ring; vec3 n;
+        vec3 pos = surface(position.xy, ring, n);
+        vec4 wp = modelMatrix * vec4(pos, 1.0);
+        vec3 N = normalize(mat3(modelMatrix) * n);
+        vec3 V = normalize(cameraPosition - wp.xyz);
+        vF = pow(1.0 - abs(dot(N, V)), 2.0);
+        vEdge = smoothstep(0.5, 0.3, abs(position.x) / uSize.x) * smoothstep(0.5, 0.24, abs(position.y - uSize.z) / uSize.y) * introAt(position.x) * nearCam(wp.xyz) * mix(1.0, 0.3, uBehind);
+        vRing = clamp(ring, 0.0, 1.0);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader: /* glsl */`
+      uniform vec3 uBlue;
+      varying float vF;
+      varying float vEdge;
+      varying float vRing;
+      void main() {
+        float a = (0.035 + 0.5 * vF) * vEdge * (1.0 - 0.9 * vRing);
+        gl_FragColor = vec4(uBlue + vec3(0.02, 0.07, 0.1), a);
+      }`,
+  });
+
+  // ---------- the chart: one row drawn as a ribbon, with its data points ----------
+  const ribbonMat = new THREE.ShaderMaterial({
+    uniforms, ...additive, side: THREE.DoubleSide,
+    vertexShader: FIELD + /* glsl */`
+      attribute vec2 aCenter;
+      varying float vA;
+      void main() {
+        float ring; vec3 n;
+        vec3 c = surface(aCenter, ring, n);
+        // The line keeps a fine stroke even when the camera is right up against it.
+        float wf = clamp(distance((modelMatrix * vec4(c, 1.0)).xyz, cameraPosition) / 9.0, 0.3, 1.0);
+        vec3 pos = vec3(aCenter + (position.xy - aCenter) * wf + gOff, c.z);
+        vec4 wp = modelMatrix * vec4(pos, 1.0);
+        float edge = smoothstep(0.5, 0.42, abs(aCenter.x) / uSize.x);
+        vA = 0.92 * edge * (1.0 - 0.6 * clamp(ring, 0.0, 1.0)) * introAt(aCenter.x) * nearCam(wp.xyz) * mix(1.0, 0.8, uBehind) * (1.0 - 0.75 * uYield.w);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader: /* glsl */`
+      uniform vec3 uMist;
+      varying float vA;
+      void main() { gl_FragColor = vec4(uMist, vA); }`,
+  });
+
+  const dotsMat = new THREE.ShaderMaterial({
+    uniforms, ...additive,
+    vertexShader: FIELD + /* glsl */`
+      attribute float aIdx;
+      uniform float uNearest, uDpr;
+      varying float vNear;
+      varying float vA;
+      void main() {
+        float ring; vec3 n;
+        vec3 pos = surface(position.xy, ring, n);
+        vec4 wp = modelMatrix * vec4(pos, 1.0);
+        float near = cursorNear(position.xy, 0.35);
+        vNear = 1.0 - step(0.5, abs(aIdx - uNearest));
+        float edge = smoothstep(0.5, 0.42, abs(position.x) / uSize.x);
+        vA = edge * mix(0.55, 1.0, max(near, vNear)) * introAt(position.x) * nearCam(wp.xyz);
+        gl_PointSize = mix(2.6, 7.0, max(near, vNear)) * uDpr;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader: /* glsl */`
+      uniform vec3 uMist, uSignal;
+      varying float vNear;
+      varying float vA;
+      void main() {
+        vec2 c = gl_PointCoord - 0.5;
+        float d = length(c);
+        if (d > 0.5) discard;
+        float a = smoothstep(0.5, 0.36, d) * vA;
+        gl_FragColor = vec4(mix(uMist, uSignal, vNear), a);
+      }`,
+  });
+
+  // ---------- what lies behind: four structures, one system ----------
+  // From the front only glimpses get through. After the crossing it is all there.
+  const structMat = new THREE.ShaderMaterial({
+    uniforms, ...additive,
+    vertexShader: FIELD + /* glsl */`
+      attribute float aReg, aT, aFlow, aSeed;
+      attribute vec2 aLink;
+      uniform vec3 uMist, uSignal;
+      varying float vA;
+      varying vec3 vCol;
+      void main() {
+        vec3 p = position;
+        p.xy += mix(regOff(aLink.x), regOff(aLink.y), aT);
+        float ring, w, g; vec2 o;
+        fields(p.xy, ring, w, g, o);
+        float glimpse = (0.03 + 0.85 * clamp(ring, 0.0, 1.0) + 0.22 * cursorNear(p.xy, 1.1)) * smoothstep(1.0, 1.8, uIntro);
+        glimpse *= 1.0 - 0.75 * smoothstep(-1.4, 0.4, p.z);
+        float link = step(3.5, aReg);
+        float base = aReg < 0.5 ? 0.3 : aReg < 1.5 ? 0.16 : aReg < 2.5 ? 0.32 : aReg < 3.5 ? 0.34 : 0.13;
+        float dash = mix(1.0, step(0.5, fract(aT * 28.0)), link);
+        // Signals travel along the structures: data towards the report, information towards one point, support outwards.
+        float flow = aFlow > 0.0 ? pow(fract(aT * 2.0 - uTime * 0.2 * aFlow + aSeed * 7.0), 12.0) * (1.0 - uReduced) : 0.0;
+        float isHot = 1.0 - step(0.5, abs(aReg - uHot));
+        float hot = isHot * uHotAmt;
+        float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
+        float seen = (base * dash + 0.8 * flow) * dim * (1.0 + 0.9 * hot);
+        vec4 wp = modelMatrix * vec4(p, 1.0);
+        vA = mix(glimpse, seen, uBehind) * nearCam(wp.xyz);
+        vCol = mix(uMist, uSignal, hot * uBehind);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader: /* glsl */`
+      varying float vA;
+      varying vec3 vCol;
+      void main() { gl_FragColor = vec4(vCol, vA); }`,
+  });
+
+  const nodeMat = new THREE.ShaderMaterial({
+    uniforms, ...additive,
+    vertexShader: FIELD + /* glsl */`
+      attribute float aReg, aSize, aOpen;
+      uniform float uDpr;
+      uniform vec3 uMist, uSignal;
+      varying float vA, vOpen;
+      varying vec3 vCol;
+      void main() {
+        vec3 p = position;
+        p.xy += regOff(aReg);
+        float ring, w, g; vec2 o;
+        fields(p.xy, ring, w, g, o);
+        float glimpse = (0.02 + 0.7 * clamp(ring, 0.0, 1.0)) * smoothstep(1.0, 1.8, uIntro) * (1.0 - 0.75 * smoothstep(-1.4, 0.4, p.z));
+        float isHot = 1.0 - step(0.5, abs(aReg - uHot));
+        float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
+        vec4 wp = modelMatrix * vec4(p, 1.0);
+        float dc = distance(wp.xyz, cameraPosition);
+        vA = mix(glimpse, 0.85 * dim, uBehind) * nearCam(wp.xyz);
+        vOpen = aOpen;
+        vCol = mix(uMist, uSignal, isHot * uHotAmt * uBehind);
+        gl_PointSize = clamp(aSize * 52.0 / dc, 1.6, 9.0) * uDpr;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader: /* glsl */`
+      varying float vA, vOpen;
+      varying vec3 vCol;
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        if (d > 0.5) discard;
+        float a = smoothstep(0.5, 0.38, d);
+        if (vOpen > 0.5) a *= smoothstep(0.2, 0.3, d);
+        gl_FragColor = vec4(vCol, a * vA);
+      }`,
+  });
+
+  // ---------- the code under the surface: glyphs that show only where the pulse passes ----------
+  const GLYPHS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz0123456789#%&$+=';
+  const atlas = document.createElement('canvas');
+  const TILE = 64, GRID = 8;
+  atlas.width = atlas.height = TILE * GRID;
+  function drawAtlas() {
+    const g = atlas.getContext('2d');
+    g.fillStyle = '#000';
+    g.fillRect(0, 0, atlas.width, atlas.height);
+    g.fillStyle = '#fff';
+    g.font = '500 36px "Martian Mono", ui-monospace, Menlo, monospace';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    for (let i = 0; i < GRID * GRID; i++) g.fillText(GLYPHS[i], (i % GRID) * TILE + TILE / 2, Math.floor(i / GRID) * TILE + TILE / 2 + 2);
+  }
+  drawAtlas();
+  const glyphTex = new THREE.CanvasTexture(atlas);
+  glyphTex.minFilter = THREE.LinearMipmapLinearFilter;
+  glyphTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  uniforms.uGlyphs.value = glyphTex;
+  document.fonts.load('500 36px "Martian Mono"').then(() => { drawAtlas(); glyphTex.needsUpdate = true; kick(); }).catch(() => {});
+
+  const glyphMat = new THREE.ShaderMaterial({
+    uniforms, ...additive, side: THREE.DoubleSide,
+    vertexShader: FIELD + /* glsl */`
+      varying vec2 vP;
+      varying float vMask;
+      varying float vEdge;
+      void main() {
+        float ring; vec3 n;
+        vec3 pos = surface(position.xy, ring, n);
+        vec4 wp = modelMatrix * vec4(pos, 1.0);
+        vP = position.xy;
+        vMask = clamp(gGlyph * 1.3, 0.0, 1.0);
+        vEdge = smoothstep(0.5, 0.36, abs(position.x) / uSize.x) * smoothstep(0.5, 0.3, abs(position.y - uSize.z) / uSize.y) * nearCam(wp.xyz);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader: /* glsl */`
+      uniform sampler2D uGlyphs;
+      uniform vec2 uCell;
+      uniform float uTime, uReduced;
+      uniform vec3 uBlue, uMist;
+      varying vec2 vP;
+      varying float vMask;
+      varying float vEdge;
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      void main() {
+        if (vMask * vEdge < 0.004) discard;
+        vec2 q = vP / uCell;
+        vec2 cell = floor(q);
+        vec2 f = fract(q);
+        float h = hash(cell);
+        // Each cell scrambles at its own pace, so the band reads as code being decoded.
+        float tick = uReduced > 0.5 ? 0.0 : floor(uTime * (5.0 + h * 9.0) + h * 40.0);
+        float gi = floor(hash(cell + tick * 0.137) * 64.0);
+        vec2 uv = (vec2(mod(gi, 8.0), 7.0 - floor(gi / 8.0)) + f) / 8.0;
+        float g = texture2D(uGlyphs, uv).r;
+        // About 28% of cells carry a glyph: sparse, so it stays a hint.
+        float lit = step(0.72, hash(cell + 7.3));
+        float b = min(1.0, vMask * 1.7) * mix(0.35, 1.0, hash(cell + 3.1)) * lit;
+        float hot = smoothstep(0.55, 1.0, vMask) * step(0.75, hash(cell + 9.7));
+        vec3 col = mix(uBlue + vec3(0.1, 0.32, 0.46), uMist, hot);
+        gl_FragColor = vec4(col, g * b * vEdge);
+      }`,
+  });
+
+  // ---------- geometry ----------
+  let built = null, STRUCT = null;
+  const dotPos = [];
+
+  function build(mobile) {
+    if (built) built.forEach(o => { group.remove(o); o.geometry.dispose(); });
+    built = [];
+    dotPos.length = 0;
+    const ROWS = mobile ? 46 : 64, COLS = mobile ? 160 : 240, DOT_STEP = mobile ? 6 : 8;
+    const sp = H / (ROWS - 1), ic = Math.floor(ROWS * 0.47);
+    const midY = CHART_Y + ((ROWS - 1) / 2 - ic) * sp;
+    uniforms.uSize.value.set(W, H, midY);
+    const v = series(COLS);
+    const xs = [], dy = [];
+    for (let j = 0; j < COLS; j++) { xs.push(-W / 2 + j * W / (COLS - 1)); dy.push(CHART_A * (v[j] - 0.5)); }
+
+    // Rows bend around the chart: the closer to it, the more they follow it.
+    const pos = [], row = [], idx = [];
+    for (let i = 0; i < ROWS; i++) {
+      const y0 = CHART_Y + (i - ic) * sp;
+      const g = Math.exp(-Math.pow((y0 - CHART_Y) / LAMBDA, 2));
+      for (let j = 0; j < COLS; j++) {
+        pos.push(xs[j], y0 + dy[j] * g, 0);
+        row.push(i);
+        if (j < COLS - 1) idx.push(i * COLS + j, i * COLS + j + 1);
+      }
+    }
+    const lg = new THREE.BufferGeometry();
+    lg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    lg.setAttribute('aRow', new THREE.Float32BufferAttribute(row, 1));
+    lg.setIndex(idx);
+    const membrane = new THREE.LineSegments(lg, linesMat);
+
+    const fg = new THREE.PlaneGeometry(W, H * 1.04, mobile ? 110 : 160, mobile ? 60 : 84);
+    fg.translate(0, midY, 0);
+    const fill = new THREE.Mesh(fg, fillMat);
+
+    const rp = [], rc = [], ri = [], hw = 0.02;
+    for (let j = 0; j < COLS; j++) {
+      const y = CHART_Y + dy[j];
+      rp.push(xs[j], y - hw, 0, xs[j], y + hw, 0);
+      rc.push(xs[j], y, xs[j], y);
+      if (j < COLS - 1) { const k = j * 2; ri.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+    }
+    const rg = new THREE.BufferGeometry();
+    rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3));
+    rg.setAttribute('aCenter', new THREE.Float32BufferAttribute(rc, 2));
+    rg.setIndex(ri);
+    const ribbon = new THREE.Mesh(rg, ribbonMat);
+
+    const dp = [], di = [];
+    for (let j = DOT_STEP / 2, k = 0; j < COLS; j += DOT_STEP, k++) {
+      dp.push(xs[j], CHART_Y + dy[j], 0);
+      di.push(k);
+      dotPos.push([xs[j], CHART_Y + dy[j]]);
+    }
+    const dg = new THREE.BufferGeometry();
+    dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
+    dg.setAttribute('aIdx', new THREE.Float32BufferAttribute(di, 1));
+    const dots = new THREE.Points(dg, dotsMat);
+
+    STRUCT = buildStructure(mobile);
+    const structLines = new THREE.LineSegments(STRUCT.lines, structMat);
+    const structNodes = new THREE.Points(STRUCT.nodes, nodeMat);
+
+    const gg = new THREE.PlaneGeometry(W, H * 1.04, mobile ? 110 : 160, mobile ? 60 : 84);
+    gg.translate(0, midY, 0);
+    const glyphs = new THREE.Mesh(gg, glyphMat);
+    uniforms.uCell.value.set(mobile ? 0.15 : 0.105, mobile ? 0.22 : 0.16);
+
+    [[fill, 0], [membrane, 1], [glyphs, 2], [ribbon, 3], [dots, 4], [structLines, -1], [structNodes, -1]].forEach(([o, order]) => {
+      o.frustumCulled = false;
+      o.renderOrder = order;
+      group.add(o);
+      built.push(o);
+    });
+  }
+
+  // BI: three data layers, from raw source at the back to the report at the front, with lineage between them.
+  // AI: many inputs converging, through one narrowing path, onto a single point.
+  // Leadership: one point at the back that holds up a wide ring of others, closer to the surface.
+  // Entrepreneurship: a path that bends and branches; most branches stop, one reaches the surface.
+  // A few dashed links make it one system.
+  function buildStructure(mobile) {
+    const R = rng(23);
+    const LP = [], LR = [], LT = [], LF = [], LS = [], LL = [];
+    const NP = [], NR = [], NS = [], NO = [];
+    const picks = [[], [], [], []];
+    const d3 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    const mix3 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+    const line = (a, b, n = 12) => Array.from({ length: n + 1 }, (_, i) => mix3(a, b, i / n));
+    const quad = (a, c, b, n = 24) => Array.from({ length: n + 1 }, (_, i) => {
+      const t = i / n, u = 1 - t;
+      return [0, 1, 2].map(k => u * u * a[k] + 2 * u * t * c[k] + t * t * b[k]);
+    });
+    const cubic = (a, b, c, d, n = 28) => Array.from({ length: n + 1 }, (_, i) => {
+      const t = i / n, u = 1 - t;
+      return [0, 1, 2].map(k => u * u * u * a[k] + 3 * u * u * t * b[k] + 3 * u * t * t * c[k] + t * t * t * d[k]);
+    });
+    const touch = (x, y) => [x, y, surfaceZ(x, y) - 0.05];
+
+    function path(pts, reg, flow = 0, la = reg, lb = reg) {
+      const seed = R(), len = [0];
+      for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + d3(pts[i - 1], pts[i]));
+      const total = len[len.length - 1] || 1;
+      for (let i = 0; i < pts.length - 1; i++) {
+        for (const j of [i, i + 1]) {
+          LP.push(...pts[j]); LR.push(reg); LT.push(len[j] / total); LF.push(flow); LS.push(seed); LL.push(la, lb);
+        }
+      }
+    }
+    function node(p, reg, size = 1, open = 0) {
+      NP.push(...p); NR.push(reg); NS.push(size); NO.push(open);
+      picks[reg].push(p);
+    }
+
+    // ----- BI -----
+    const [bx, by] = FORCE_BASE[0];
+    const PL = [{ z: -1.0, s: 0.8 }, { z: -2.2, s: 1.0 }, { z: -3.4, s: 1.25 }];
+    const GC = 6, GR = 4, GS = 0.34;
+    const at = (pl, c, r) => [bx + (c - (GC - 1) / 2) * GS * pl.s, by + (r - (GR - 1) / 2) * GS * pl.s * 0.92, pl.z];
+    PL.forEach((pl, pi) => {
+      for (let r = 0; r < GR; r++) {
+        if (pi === 2) {
+          // The source layer arrives broken and uneven.
+          const cut = 1 + Math.floor(R() * (GC - 3));
+          path(line(at(pl, 0, r), at(pl, cut, r), 10), 0);
+          path(line(at(pl, cut + 1, r), at(pl, GC - 1, r), 10), 0);
+        } else path(line(at(pl, 0, r), at(pl, GC - 1, r), 16), 0);
+        for (let c = 0; c < GC; c++) if (!(pi === 2 && R() < 0.2)) node(at(pl, c, r), 0, pi === 0 ? 0.9 : 0.7);
+      }
+    });
+    for (let i = 0; i < 7; i++) {
+      const c = Math.floor(R() * GC), r = Math.floor(R() * GR);
+      const c1 = clamp(c + Math.round((R() - 0.5) * 2), 0, GC - 1), r1 = clamp(r + Math.round((R() - 0.5) * 2), 0, GR - 1);
+      const a = at(PL[2], c, r), m = at(PL[1], c1, r1), f = at(PL[0], c1, r1);
+      path(line(a, m, 10).concat(line(m, f, 10).slice(1)), 0, 0.7 + R() * 0.5);
+    }
+    const apexB = touch(bx, by);
+    [[1, 1], [4, 1], [1, 2], [4, 2]].forEach(([c, r]) => {
+      const p = at(PL[0], c, r);
+      path(quad(p, [lerp(p[0], bx, 0.6), lerp(p[1], by, 0.6), -0.45], apexB, 14), 0, 0.9);
+    });
+    node(apexB, 0, 1.2);
+
+    // ----- AI -----
+    const [ax, ay] = FORCE_BASE[1];
+    const apexA = touch(ax, ay);
+    const NC = mobile ? 30 : 44;
+    for (let i = 0; i < NC; i++) {
+      const ang = i * 2.39996, rad = 0.9 + 1.5 * Math.sqrt((i + 0.5) / NC);
+      const s = [ax + Math.cos(ang) * rad, ay + Math.sin(ang) * rad * 0.82, -4.4 - R() * 1.4];
+      const c1 = [ax + Math.cos(ang) * rad * 0.95, ay + Math.sin(ang) * rad * 0.78, -3.0];
+      const c2 = [ax + Math.cos(ang) * 0.2, ay + Math.sin(ang) * 0.17, -1.4];
+      path(cubic(s, c1, c2, apexA, 30), 1, 0.5 + R() * 0.7);
+      node(s, 1, 0.6 + R() * 0.5);
+    }
+    node(apexA, 1, 1.6);
+
+    // ----- Leadership -----
+    const [lx, ly] = FORCE_BASE[2];
+    const B = [lx + 0.1, ly - 0.4, -4.9];
+    const NRING = mobile ? 9 : 11, ring = [];
+    for (let i = 0; i < NRING; i++) {
+      const th = i / NRING * Math.PI * 2 + 0.3;
+      ring.push([lx + Math.cos(th) * 1.75, ly + Math.sin(th) * 1.3, -1.3 + 0.22 * Math.sin(th * 2 + 1)]);
+    }
+    ring.forEach((p, i) => {
+      path(line(B, p, 22), 2, 0.55);
+      const q = ring[(i + 1) % ring.length], mid = mix3(p, q, 0.5);
+      path(quad(p, [mid[0] + (mid[0] - lx) * 0.12, mid[1] + (mid[1] - ly) * 0.12, mid[2]], q, 10), 2);
+      path(line(p, touch(p[0], p[1]), 6), 2);
+      node(p, 2, 0.95);
+    });
+    node(B, 2, 1.7);
+
+    // ----- Entrepreneurship -----
+    const [ex, ey] = FORCE_BASE[3];
+    const apexE = touch(ex, ey);
+    const S0 = [ex - 1.5, ey - 0.45, -5.2];
+    const WP = [S0, [ex - 0.5, ey - 1.05, -4.0], [ex - 1.3, ey + 0.35, -2.8], [ex + 0.25, ey - 0.35, -1.7], apexE];
+    let main = [];
+    for (let i = 0; i < WP.length - 1; i++) {
+      const a = WP[i], b = WP[i + 1], m = mix3(a, b, 0.5);
+      const seg = quad(a, [m[0] + (R() - 0.5) * 0.9, m[1] + (R() - 0.5) * 0.9, m[2]], b, 16);
+      main = main.concat(i ? seg.slice(1) : seg);
+    }
+    path(main, 3, 0.8);
+    WP.slice(0, 4).forEach((w, i) => node(w, 3, i === 0 ? 1.4 : 0.9));
+    node(apexE, 3, 1.3);
+    // Side paths: tried, learnt from, stopped.
+    const branch = (p, depth) => {
+      const ang = R() * Math.PI * 2, len = 0.55 + R() * 0.65;
+      const q = [p[0] + Math.cos(ang) * len, p[1] + Math.sin(ang) * len * 0.85, p[2] + 0.25 + R() * 0.55];
+      const m = mix3(p, q, 0.5);
+      const pts = quad(p, [m[0] + (R() - 0.5) * 0.5, m[1] + (R() - 0.5) * 0.5, m[2]], q, 12);
+      path(pts, 3);
+      if (depth > 0 && R() < 0.5) branch(pts[7], depth - 1);
+      node(q, 3, 0.8, 1);
+    };
+    WP.slice(0, 4).forEach(w => { branch(w, 1); if (R() < 0.6) branch(w, 1); });
+
+    // ----- links -----
+    const link = (a, b, la, lb) => {
+      const m = mix3(a, b, 0.5);
+      path(quad(a, [m[0], m[1] + 0.9, m[2] - 1.5], b, 40), 4, 0, la, lb);
+    };
+    link([bx, by, -2.2], [ax, ay, -4.9], 0, 1);
+    link([ax, ay, -1.4], WP[2], 1, 3);
+    link(B, [bx, by + 0.5, -3.4], 2, 0);
+    link(B, [ax + 0.8, ay, -4.8], 2, 1);
+    link(B, S0, 2, 3);
+
+    const lines = new THREE.BufferGeometry();
+    lines.setAttribute('position', new THREE.Float32BufferAttribute(LP, 3));
+    lines.setAttribute('aReg', new THREE.Float32BufferAttribute(LR, 1));
+    lines.setAttribute('aT', new THREE.Float32BufferAttribute(LT, 1));
+    lines.setAttribute('aFlow', new THREE.Float32BufferAttribute(LF, 1));
+    lines.setAttribute('aSeed', new THREE.Float32BufferAttribute(LS, 1));
+    lines.setAttribute('aLink', new THREE.Float32BufferAttribute(LL, 2));
+    const nodes = new THREE.BufferGeometry();
+    nodes.setAttribute('position', new THREE.Float32BufferAttribute(NP, 3));
+    nodes.setAttribute('aReg', new THREE.Float32BufferAttribute(NR, 1));
+    nodes.setAttribute('aSize', new THREE.Float32BufferAttribute(NS, 1));
+    nodes.setAttribute('aOpen', new THREE.Float32BufferAttribute(NO, 1));
+
+    // Where each label attaches to its structure.
+    const anchors = [
+      [bx - 1.0, by + 0.75, -3.4],
+      [ax - 2.3, ay + 0.3, -5.0],
+      [lx + 1.75, ly + 0.9, -1.2],
+      S0,
+    ];
+    return { lines, nodes, picks, anchors };
+  }
+
+  // ---------- the crossing: a camera path through the membrane, then round to look back at it ----------
+  const C = new THREE.Vector3(0.3, -0.6, -3.0);      // centre of what lies behind
+  const PASS = new THREE.Vector3(1.5, -1.5, -0.9);   // just past the membrane, through a gap between the forces
+  const EYE0 = new THREE.Vector3(0, 0, D), TGT0 = new THREE.Vector3(0, 0, 0);
+  const A_END = 0.5, PHI_END = 0.72 * Math.PI, LIFT_END = 0.24;
+  const camPos = new THREE.Vector3(), camTgt = new THREE.Vector3(), v0 = new THREE.Vector3(), dir = new THREE.Vector3();
+  v0.subVectors(PASS, C);
+  const R0 = v0.length();
+  v0.normalize();
+
+  function rig(u) {
+    if (u <= A_END) {
+      const a = u / A_END;
+      // Quick from far away, slower at the surface: the crossing is the moment.
+      const ea = 0.75 * (1 - (1 - a) ** 2) + 0.25 * a;
+      camPos.lerpVectors(EYE0, PASS, ea);
+      camTgt.lerpVectors(TGT0, C, smooth(0, 1, a));
+    } else {
+      const b = (u - A_END) / (1 - A_END);
+      const rr = 0.7 * smooth(0, 1, b) + 0.3 * b;
+      const ph = PHI_END * smooth(0.06, 1, b);
+      const c = Math.cos(ph), s = Math.sin(ph);
+      dir.set(v0.x * c + v0.z * s, lerp(v0.y, LIFT_END, smooth(0, 1, b)), -v0.x * s + v0.z * c).normalize();
+      camPos.copy(C).addScaledVector(dir, lerp(R0, L.rEnd, rr));
+      camTgt.copy(C);
+    }
+  }
+
+  // ---------- state ----------
+  const S = {
+    time: 0, intro: reduced ? 2 : 0,
+    cursor: { x: 0, y: 0, s: 0 }, cursorT: { x: 0, y: 0, s: 0 },
+    tilt: { x: 0, y: 0, vx: 0, vy: 0 }, tiltT: { x: 0, y: 0 },
+    nextRipple: 0, autoRipple: !reduced, autoAt: 1.7,
+    scrollP: 0, u: 0, uv: 0, forceU: null,
+    hotPointer: -1, hotLabel: -1, hot: -1, hotAmt: 0,
+  };
+  const L = { w: 1, h: 1, mobile: null, cx: 0, cy: 0, ex: 0, ey: 0, fov: 30, fovMid: 50, fovEnd: 40, rEnd: 13 };
+  const BASE_RY = -0.3, BASE_RX = 0.06;
+
+  function layout() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    const mobile = w < 760;
+    L.w = w; L.h = h;
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(w, h, false);
+    uniforms.uDpr.value = dpr;
+    camera.aspect = w / h;
+    const fit = (dist, ww, hh, fw, fh) => 2 * Math.atan(Math.max(hh / fh, ww / fw / camera.aspect) / 2 / dist) * 180 / Math.PI;
+    L.fov = fit(D, W * Math.cos(BASE_RY), H, mobile ? 1.12 : 0.7, mobile ? 0.5 : 0.82);
+    L.rEnd = mobile ? 17 : 13;
+    L.fovEnd = fit(L.rEnd, 11, 7.5, mobile ? 1.4 : 0.66, mobile ? 0.5 : 0.8);
+    L.fovMid = Math.max(L.fov, 52);
+    L.cx = mobile ? 0.5 * w : 0.6 * w;
+    L.cy = mobile ? 0.36 * h : 0.42 * h;
+    L.ex = mobile ? 0.5 * w : 0.6 * w;
+    L.ey = mobile ? 0.37 * h : 0.47 * h;
+    labels.forEach(el => { el._w = 0; });
+    if (L.mobile !== mobile) {
+      L.mobile = mobile;
+      build(mobile);
+      lastSide = null;
+    }
+  }
+
+  function addRipple(x, y, amp = 0.32, seed = Math.random() * 100) {
+    const r = uniforms.uRip.value[S.nextRipple];
+    r.set(x, y, S.time, amp);
+    uniforms.uRipSeed.value[S.nextRipple] = seed;
+    S.nextRipple = (S.nextRipple + 1) % RIPPLES;
+  }
+
+  const camL = new THREE.Vector3(), tmpV = new THREE.Vector3();
+  function project(p, k) {
+    const o = uniforms.uROff.value[k];
+    tmpV.set(p[0] + o.x, p[1] + o.y, p[2]);
+    group.localToWorld(tmpV);
+    tmpV.project(camera);
+    return [(tmpV.x * 0.5 + 0.5) * L.w, (-tmpV.y * 0.5 + 0.5) * L.h, tmpV.z];
+  }
+
+  function step(dt) {
+    S.time += dt;
+    if (S.intro < 2) S.intro = Math.min(2, S.intro + dt);
+    const t = reduced ? 0 : S.time;
+    uniforms.uTime.value = t;
+    uniforms.uIntro.value = S.intro;
+
+    uniforms.uF.value.forEach((f, k) => {
+      const b = FORCE_BASE[k];
+      f.set(b[0] + 0.28 * Math.sin(t * 0.05 + k * 1.7), b[1] + 0.2 * Math.sin(t * 0.037 + k * 2.3), b[2] * (1 + 0.08 * Math.sin(t * 0.21 + k)), b[3]);
+      uniforms.uROff.value[k].set(f.x - b[0], f.y - b[1]);
+    });
+
+    // Crossing progress follows the scroll, with a little inertia.
+    const target = S.forceU !== null ? S.forceU : reduced ? (S.scrollP > 0.45 ? 1 : 0) : clamp(S.scrollP / 0.9, 0, 1);
+    if (reduced || S.forceU !== null) { S.u = target; S.uv = 0; }
+    else {
+      const kk = 30, c = 2 * Math.sqrt(kk);
+      S.uv += (kk * (target - S.u) - c * S.uv) * dt;
+      S.u += S.uv * dt;
+      if (Math.abs(target - S.u) < 1e-4 && Math.abs(S.uv) < 1e-4) { S.u = target; S.uv = 0; }
+    }
+    const u = clamp(S.u, 0, 1);
+    const front = u < 0.04;
+
+    if (S.autoRipple && S.time >= S.autoAt) {
+      S.autoRipple = false;
+      if (front) { const last = dotPos[dotPos.length - 1]; addRipple(last[0], last[1], 0.26); }
+    }
+
+    if (!front) S.cursorT.s = 0;
+    const k = 1 - Math.exp(-dt * 9);
+    S.cursor.x = lerp(S.cursor.x, S.cursorT.x, k);
+    S.cursor.y = lerp(S.cursor.y, S.cursorT.y, k);
+    S.cursor.s = lerp(S.cursor.s, S.cursorT.s, 1 - Math.exp(-dt * 5));
+    uniforms.uCursor.value.set(S.cursor.x, S.cursor.y, reduced ? S.cursor.s * 0.3 : S.cursor.s);
+
+    // Subtle parallax tilt from the pointer, with a soft spring. The membrane turns to face the visitor as they approach.
+    if (!reduced) {
+      const kk = 40, c = 2 * Math.sqrt(kk) * 0.8;
+      S.tilt.vx += (kk * (S.tiltT.x - S.tilt.x) - c * S.tilt.vx) * dt; S.tilt.x += S.tilt.vx * dt;
+      S.tilt.vy += (kk * (S.tiltT.y - S.tilt.y) - c * S.tilt.vy) * dt; S.tilt.y += S.tilt.vy * dt;
+    }
+    const face = smooth(0, 0.3, u);
+    group.rotation.set(lerp(BASE_RX - S.tilt.y * 0.035, 0, face), lerp(BASE_RY + S.tilt.x * 0.06, 0, face), 0);
+    group.updateMatrixWorld();
+
+    rig(u);
+    camera.position.copy(camPos);
+    camera.lookAt(camTgt);
+    camera.fov = u <= A_END ? lerp(L.fov, L.fovMid, smooth(0.15, 0.48, u)) : lerp(L.fovMid, L.fovEnd, smooth(0.5, 0.9, u));
+    const cx = u <= A_END ? lerp(L.cx, L.w / 2, smooth(0, 0.35, u)) : lerp(L.w / 2, L.ex, smooth(0.55, 0.95, u));
+    const cy = u <= A_END ? lerp(L.cy, L.h / 2, smooth(0, 0.35, u)) : lerp(L.h / 2, L.ey, smooth(0.55, 0.95, u));
+    camera.setViewOffset(L.w, L.h, -(cx - L.w / 2), -(cy - L.h / 2), L.w, L.h);
+    camera.updateMatrixWorld();
+
+    camL.copy(camPos);
+    group.worldToLocal(camL);
+    uniforms.uYield.value.set(camL.x, camL.y, camL.z, smooth(4.0, 0.5, Math.abs(camL.z)) * (u > 0.02 ? 1 : 0));
+    uniforms.uBehind.value = smooth(0.36, 0.62, u);
+
+    // Nearest data point to the cursor.
+    let best = -1, bd = 0.36;
+    if (S.cursor.s > 0.2) dotPos.forEach((p, i) => { const d = (p[0] - S.cursor.x) ** 2 + (p[1] - S.cursor.y) ** 2; if (d < bd) { bd = d; best = i; } });
+    uniforms.uNearest.value = best;
+
+    S.hot = u > 0.85 ? (S.hotLabel >= 0 ? S.hotLabel : S.hotPointer) : -1;
+    if (S.hot >= 0) uniforms.uHot.value = S.hot;
+    S.hotAmt = lerp(S.hotAmt, S.hot >= 0 ? 1 : 0, 1 - Math.exp(-dt * 10));
+    uniforms.uHotAmt.value = S.hotAmt;
+
+    updateDom(u);
+    renderer.render(scene, camera);
+  }
+
+  // ---------- DOM synced to the scene ----------
+  let lastSide = null, lastHot = -2;
+  function updateDom(u) {
+    const out = smooth(0, 0.16, u);
+    copyEl.style.opacity = (1 - out).toFixed(3);
+    copyEl.style.visibility = out > 0.99 ? 'hidden' : '';
+    copyEl.style.transform = reduced ? '' : `translate3d(0,${(-28 * out).toFixed(1)}px,0)`;
+    const bo = smooth(0.84, 0.98, u);
+    // Only faded, never hidden: screen readers get this sentence whether or not the visitor has crossed.
+    behindEl.style.opacity = bo.toFixed(3);
+    hintEl.style.opacity = smooth(0.86, 0.96, u).toFixed(3);
+
+    const lo = smooth(0.86, 1, u);
+    if (lo < 0.01) {
+      labels.forEach(el => { if (el._on) { el.style.opacity = '0'; el.style.visibility = 'hidden'; el._on = false; } });
+    } else {
+      // Keep every label inside the frame, clear of the header and the text at the bottom, and clear of each other.
+      const gut = L.mobile ? 16 : 48, top = L.mobile ? 76 : 96, bottom = L.h - (L.mobile ? 300 : 260);
+      const boxes = labels.map((el, k) => {
+        if (!el._w) { el._w = el.offsetWidth; el._h = el.offsetHeight; }
+        const s = project(STRUCT.anchors[k], k);
+        return { el, w: el._w, h: el._h, x: clamp(s[0], gut, L.w - gut - el._w), y: clamp(s[1], top, bottom) };
+      });
+      boxes.slice().sort((a, b) => a.y - b.y).forEach((b, i, arr) => {
+        for (let j = 0; j < i; j++) {
+          const o = arr[j];
+          if (b.x < o.x + o.w + 8 && o.x < b.x + b.w + 8 && b.y < o.y + o.h + 4) b.y = o.y + o.h + 4;
+        }
+      });
+      boxes.forEach(b => {
+        b.el.style.transform = `translate3d(${b.x.toFixed(1)}px,${b.y.toFixed(1)}px,0)`;
+        b.el.style.opacity = lo.toFixed(3);
+        b.el.style.visibility = 'visible';
+        b.el._on = true;
+      });
+    }
+    if (S.hot !== lastHot) {
+      labels.forEach((el, k) => el.classList.toggle('hot', S.hot === k));
+      lastHot = S.hot;
+    }
+
+    const side = u > 0.5;
+    if (side !== lastSide) {
+      lastSide = side;
+      // The front needs no instructions: the surface shows it reacts. Only the far side gets a hint.
+      hintEl.textContent = mqFine.matches ? 'Point at a force' : 'Tap a force';
+      hintEl.hidden = !side;
+    }
+  }
+
+  // Living: it keeps breathing while visible. With reduced motion it renders only on change.
+  let running = false, last = 0, visible = true, lastPoke = 0;
+  function frame(now) {
+    const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000)); last = now;
+    step(dt);
+    if (visible && (!reduced || S.intro < 2 || Math.abs(S.cursor.s - S.cursorT.s) > 0.002 || Math.abs(S.hotAmt - (S.hot >= 0 ? 1 : 0)) > 0.002 || S.time - lastPoke < 2)) requestAnimationFrame(frame);
+    else running = false;
+  }
+  function kick() { lastPoke = S.time; if (!running && visible) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
+
+  // ---------- input ----------
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(), hit = new THREE.Vector3(), nrm = new THREE.Vector3();
+  function toMembrane(cx, cy) {
+    const r = canvas.getBoundingClientRect();
+    ndc.set((cx - r.left) / r.width * 2 - 1, -(cy - r.top) / r.height * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    nrm.set(0, 0, 1).applyQuaternion(group.quaternion);
+    plane.setFromNormalAndCoplanarPoint(nrm, group.position);
+    if (!ray.ray.intersectPlane(plane, hit)) return null;
+    const p = group.worldToLocal(hit.clone());
+    const inside = Math.abs(p.x) < W * 0.48 && Math.abs(p.y - uniforms.uSize.value.z) < H * 0.46;
+    return { x: p.x, y: p.y, inside };
+  }
+  function pickForce(cx, cy) {
+    const r = canvas.getBoundingClientRect(), x = cx - r.left, y = cy - r.top;
+    let best = -1, bd = (L.mobile ? 44 : 60) ** 2;
+    STRUCT.picks.forEach((pts, k) => pts.forEach(p => {
+      const s = project(p, k), d = (s[0] - x) ** 2 + (s[1] - y) ** 2;
+      if (d < bd) { bd = d; best = k; }
+    }));
+    return best;
+  }
+
+  addEventListener('pointermove', e => {
+    if (S.u < 0.04) {
+      if (e.pointerType === 'mouse') {
+        S.tiltT.x = (e.clientX / innerWidth) * 2 - 1;
+        S.tiltT.y = (e.clientY / innerHeight) * 2 - 1;
+      }
+      if (e.pointerType === 'mouse' || dragging) {
+        const p = toMembrane(e.clientX, e.clientY);
+        if (p && p.inside) { S.cursorT.x = p.x; S.cursorT.y = p.y; S.cursorT.s = 1; }
+        else S.cursorT.s = 0;
+      }
+    } else {
+      S.tiltT.x = S.tiltT.y = 0;
+      if (S.u > 0.85 && e.pointerType === 'mouse' && e.target === canvas) {
+        S.hotPointer = pickForce(e.clientX, e.clientY);
+        canvas.style.cursor = S.hotPointer >= 0 ? 'pointer' : 'default';
+      } else if (e.target === canvas) { S.hotPointer = -1; canvas.style.cursor = 'default'; }
+    }
+    kick();
+  }, { passive: true });
+  document.addEventListener('mouseleave', () => { S.cursorT.s = 0; S.tiltT.x = S.tiltT.y = 0; S.hotPointer = -1; kick(); });
+
+  let dragging = false;
+  canvas.addEventListener('pointerdown', e => {
+    if (S.u < 0.04) {
+      const p = toMembrane(e.clientX, e.clientY);
+      if (!p || !p.inside) return;
+      S.autoRipple = false;
+      addRipple(p.x, p.y);
+      if (e.pointerType !== 'mouse') { dragging = true; S.cursorT.x = p.x; S.cursorT.y = p.y; S.cursorT.s = 1; S.cursor.x = p.x; S.cursor.y = p.y; }
+    } else if (S.u > 0.85) {
+      const k = pickForce(e.clientX, e.clientY);
+      if (k >= 0) labels[k].click();
+    }
+    kick();
+  });
+  const release = () => { if (dragging) { dragging = false; S.cursorT.s = 0; kick(); } };
+  addEventListener('pointerup', release);
+  addEventListener('pointercancel', release);
+
+  labels.forEach((el, k) => {
+    el.addEventListener('mouseenter', () => { S.hotLabel = k; kick(); });
+    el.addEventListener('mouseleave', () => { S.hotLabel = -1; kick(); });
+    el.addEventListener('focus', () => { S.hotLabel = k; kick(); });
+    el.addEventListener('blur', () => { S.hotLabel = -1; kick(); });
+  });
+
+  // ---------- guided journeys: a calm, scripted scroll that the visitor can interrupt at any moment ----------
+  let journey = null;
+  const sine = t => 0.5 - 0.5 * Math.cos(Math.PI * t);
+  const cubicInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const heroTop = () => hero.getBoundingClientRect().top + scrollY;
+  const behindY = () => heroTop() + (hero.offsetHeight - innerHeight) * 0.94;
+  const workY = () => document.getElementById('work').getBoundingClientRect().top + scrollY;
+
+  function stopJourney() {
+    if (!journey) return;
+    cancelAnimationFrame(journey.raf);
+    clearTimeout(journey.timer);
+    journey = null;
+  }
+  function travel(legs) {
+    stopJourney();
+    const j = { legs: legs.slice(), raf: 0, timer: 0 };
+    journey = j;
+    const next = () => {
+      if (journey !== j) return;
+      const leg = j.legs.shift();
+      if (!leg) { journey = null; return; }
+      if (leg.pause) { j.timer = setTimeout(next, leg.pause); return; }
+      const from = scrollY, to = leg.to(), t0 = performance.now();
+      const ms = leg.ms(Math.abs(to - from));
+      const tick = now => {
+        if (journey !== j) return;
+        const t = Math.min(1, (now - t0) / ms);
+        scrollTo(0, from + (to - from) * leg.ease(t));
+        if (t < 1) j.raf = requestAnimationFrame(tick); else next();
+      };
+      j.raf = requestAnimationFrame(tick);
+    };
+    next();
+  }
+  // Any input of their own hands control back to the visitor.
+  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(type => addEventListener(type, stopJourney, { passive: true, capture: true }));
+
+  // The crossing takes its time: about five seconds from the front to the far side.
+  const toBehind = { to: behindY, ms: d => clamp(d / (hero.offsetHeight - innerHeight) * 5400, 1200, 5400), ease: sine };
+
+  document.querySelector('.cta').addEventListener('click', e => {
+    e.preventDefault();
+    if (reduced) { scrollTo(0, workY()); return; }
+    // Through the wall, a moment on the other side, then down to the work.
+    travel([toBehind, { pause: 1700 }, { to: workY, ms: () => 1500, ease: cubicInOut }]);
+  });
+
+  function onScroll() {
+    const range = hero.offsetHeight - innerHeight;
+    S.scrollP = range > 0 ? clamp(-hero.getBoundingClientRect().top / range, 0, 1) : 0;
+    kick();
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+
+  new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible) kick(); }).observe(stage);
+  new ResizeObserver(() => { layout(); onScroll(); }).observe(stage);
+  mqReduce.addEventListener('change', e => {
+    reduced = e.matches;
+    uniforms.uReduced.value = reduced ? 1 : 0;
+    if (reduced) S.intro = 2;
+    onScroll();
+  });
+  canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); running = false; });
+  canvas.addEventListener('webglcontextrestored', () => kick());
+
+  // Prototype only: hooks for screenshots and tests.
+  window.__mem = {
+    S, uniforms,
+    advance(seconds, fps = 60) { for (let t = 0; t < seconds; t += 1 / fps) step(1 / fps); },
+    ripple(x, y) { addRipple(x, y); kick(); },
+    cursor(x, y) { S.cursorT.x = S.cursor.x = x; S.cursorT.y = S.cursor.y = y; S.cursorT.s = 1; kick(); },
+    setU(u) { S.forceU = u; kick(); },
+    time(frames = 120) {
+      const gl = renderer.getContext(), px = new Uint8Array(4), t0 = performance.now();
+      for (let i = 0; i < frames; i++) { step(1 / 60); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); }
+      return (performance.now() - t0) / frames;
+    },
+  };
+
+  layout();
+  onScroll();
+  const q = new URLSearchParams(location.search);
+  if (q.has('noauto')) S.autoRipple = false;
+  if (q.has('u')) S.forceU = +q.get('u');
+  if (q.has('hot')) S.hotPointer = +q.get('hot');
+  if (q.has('settle')) window.__mem.advance(+q.get('settle') || 3);
+  if (q.has('cursor')) { const [x, y] = q.get('cursor').split(',').map(Number); window.__mem.cursor(x, y); window.__mem.advance(0.8); }
+  if (q.has('ripple')) {
+    const [x, y] = q.get('ripple').split(',').map(Number);
+    addRipple(x, y, 0.32, q.has('seed') ? +q.get('seed') : undefined);
+    window.__mem.advance(+q.get('rt') || 0.9);
+  }
+  kick();
+}
+</script>
+</body>
+</html>
