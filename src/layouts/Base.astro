@@ -1,0 +1,33 @@
+---
+import '../styles/site.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Keeps search engines out until launch. */
+  noindex?: boolean;
+}
+
+const {
+  title = 'Beyond the Dashboards',
+  description = 'Wilson Mota. Business Intelligence, AI, leadership and the things I build beyond the dashboard.',
+  noindex = true,
+} = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{title}</title>
+<meta name="description" content={description}>
+{noindex && <meta name="robots" content="noindex">}
+<meta name="theme-color" content="#021C2A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,200..900&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap">
+</head>
+<body>
+<slot />
+</body>
+</html>

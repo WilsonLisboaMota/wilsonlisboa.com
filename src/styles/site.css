@@ -1,0 +1,97 @@
+:root{
+  --deep:#021C2A;
+  --ink:#0D1B24;
+  --blue:#00486F;
+  --mist:#E4ECE9;
+  --signal:#E0952F;
+  --mist-70:rgba(228,236,233,.72);
+  --mist-45:rgba(228,236,233,.48);
+  --mist-15:rgba(228,236,233,.16);
+  --sans:'Mona Sans','Helvetica Neue',Arial,sans-serif;
+  --mono:'Martian Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --gutter:clamp(16px,3.4vw,48px);
+  --base:clamp(28px,7vh,72px);
+  --ease:cubic-bezier(.2,.7,.2,1);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--deep)}
+body{color:var(--mist);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--signal);outline-offset:4px;border-radius:2px}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.mono{font-family:var(--mono);font-size:11px;line-height:1.4;font-weight:450;letter-spacing:.09em;text-transform:uppercase}
+
+/* ---------- hero: the stage stays put while the scroll carries the visitor through the membrane ---------- */
+.hero{position:relative;height:260vh;height:260svh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;isolation:isolate}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;-webkit-tap-highlight-color:transparent;cursor:crosshair}
+
+.top{position:absolute;inset:0 0 auto 0;z-index:4;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:calc(env(safe-area-inset-top,0px) + 18px) var(--gutter) 0;pointer-events:none}
+.top a{pointer-events:auto}
+.top .name{font-weight:600;font-size:15px;letter-spacing:-.005em;text-decoration:none;padding:10px 0}
+.top nav{display:flex;gap:clamp(16px,2.4vw,34px)}
+.top nav a{font-size:15px;text-decoration:none;color:var(--mist-70);padding:10px 0;background:linear-gradient(currentColor,currentColor) 0 calc(100% - 7px)/0 1px no-repeat;transition:color .2s var(--ease),background-size .4s var(--ease)}
+.top nav a:hover{color:var(--mist);background-size:100% 1px}
+
+.copy{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:1040px;pointer-events:none;will-change:opacity,transform}
+.copy a{pointer-events:auto}
+.kicker{margin:0 0 18px;color:var(--mist-45)}
+h1{margin:0;font-size:clamp(52px,9.4vw,164px);line-height:.86;font-weight:620;font-stretch:112%;letter-spacing:-.042em;text-shadow:0 0 42px rgba(2,28,42,.7)}
+h1 span{display:block}
+h1 .dot{display:inline;color:var(--signal)}
+.under{display:flex;flex-wrap:wrap;align-items:center;gap:18px 36px;margin-top:clamp(20px,3.2vh,34px)}
+.lede{margin:0;font-size:clamp(17px,1.45vw,21px);line-height:1.35;color:var(--mist-70);max-width:24ch;text-shadow:0 0 24px rgba(2,28,42,.9)}
+.cta{display:inline-flex;align-items:center;gap:12px;height:48px;padding:0 20px 0 22px;background:var(--mist);color:var(--deep);text-decoration:none;font-weight:600;font-size:15px;border-radius:3px;transition:background-color .25s var(--ease)}
+.cta:hover{background:#fff}
+
+.behind{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:620px;opacity:0;pointer-events:none}
+.behind .big{margin:0;font-size:clamp(25px,2.6vw,40px);line-height:1.12;font-weight:480;font-stretch:104%;letter-spacing:-.022em;max-width:24ch;text-shadow:0 0 30px rgba(2,28,42,.9)}
+
+/* Labels sit on the structure; their position is set from the 3D scene every frame. */
+.forces{position:absolute;inset:0;z-index:3;pointer-events:none}
+.force{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:3px;padding:2px 0 6px 20px;margin-top:-9px;text-decoration:none;color:var(--mist);opacity:0;visibility:hidden;pointer-events:auto;white-space:nowrap;will-change:transform,opacity}
+.force::before{content:"";position:absolute;left:0;top:12px;width:12px;height:1px;background:var(--mist-45);transition:background-color .2s var(--ease),width .3s var(--ease)}
+.force b{font-weight:600;font-size:15px;letter-spacing:-.005em;transition:color .2s var(--ease);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}
+.force i{font-style:normal;font-size:13px;line-height:1.3;color:var(--mist-70);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}
+.force.hot b,.force:focus-visible b{color:var(--signal)}
+.force.hot::before,.force:focus-visible::before{background:var(--signal);width:16px}
+.force:focus-visible{outline-offset:2px}
+
+.readout{position:absolute;z-index:4;right:var(--gutter);bottom:var(--base);display:flex;flex-direction:column;align-items:flex-end;gap:12px;text-align:right;pointer-events:none}
+.readout p{margin:0}
+.r-hint{color:var(--mist-70)}
+.r-note{color:var(--mist-45)}
+
+.fallback{position:absolute;left:30%;top:16%;width:60%;height:46%}
+.no-gl #gl,.no-gl .forces{display:none}
+
+/* ---------- after the hero ---------- */
+.next{position:relative;padding:clamp(88px,16vh,180px) var(--gutter) clamp(72px,12vh,140px);border-top:1px solid var(--mist-15)}
+.next h2{margin:0 0 18px;font-size:clamp(38px,5.4vw,84px);line-height:.95;font-weight:600;font-stretch:110%;letter-spacing:-.038em}
+.next>p{margin:0;max-width:46ch;color:var(--mist-70);font-size:18px}
+.todo{list-style:none;margin:48px 0 0;padding:0;display:flex;flex-direction:column;max-width:760px;border-top:1px solid var(--mist-15)}
+.todo li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:18px 0;border-bottom:1px solid var(--mist-15);font-size:18px;scroll-margin-top:24px}
+.todo li span{color:var(--mist-45);white-space:nowrap}
+
+@media (max-width:759px){
+  .top nav a,.top .name{font-size:14px}
+  .copy,.behind{bottom:calc(env(safe-area-inset-bottom,0px) + 118px)}
+  .kicker{margin-bottom:14px}
+  .readout{left:var(--gutter);right:var(--gutter);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);align-items:flex-start;text-align:left;gap:8px}
+  .r-note{display:none}
+  .force{padding-left:16px}
+  .force::before{width:9px}
+  .force b{font-size:13px}
+  .force i{display:none}
+  .force.hot i{display:block}
+  .fallback{left:5%;top:14%;width:90%;height:34%}
+}
+@media (max-width:759px) and (max-height:700px){
+  h1{font-size:46px}
+  .kicker{display:none}
+}
+/* With reduced motion the scroll still leads behind, but as a cut instead of a flight. */
+@media (prefers-reduced-motion:reduce){
+  .hero{height:180vh;height:180svh}
+}

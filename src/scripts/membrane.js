@@ -1,174 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Beyond the Dashboards</title>
-<meta name="description" content="Wilson Mota. Business Intelligence, AI, leadership and the things I build beyond the dashboard.">
-<meta name="robots" content="noindex">
-<meta name="theme-color" content="#021C2A">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,200..900&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap">
-<style>
-:root{
-  --deep:#021C2A;
-  --ink:#0D1B24;
-  --blue:#00486F;
-  --mist:#E4ECE9;
-  --signal:#E0952F;
-  --mist-70:rgba(228,236,233,.72);
-  --mist-45:rgba(228,236,233,.48);
-  --mist-15:rgba(228,236,233,.16);
-  --sans:'Mona Sans','Helvetica Neue',Arial,sans-serif;
-  --mono:'Martian Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
-  --gutter:clamp(16px,3.4vw,48px);
-  --base:clamp(28px,7vh,72px);
-  --ease:cubic-bezier(.2,.7,.2,1);
-  color-scheme:dark;
-}
-*,*::before,*::after{box-sizing:border-box}
-html,body{margin:0;background:var(--deep)}
-body{color:var(--mist);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-a{color:inherit}
-:focus-visible{outline:2px solid var(--signal);outline-offset:4px;border-radius:2px}
-.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-.mono{font-family:var(--mono);font-size:11px;line-height:1.4;font-weight:450;letter-spacing:.09em;text-transform:uppercase}
-
-/* ---------- hero: the stage stays put while the scroll carries the visitor through the membrane ---------- */
-.hero{position:relative;height:260vh;height:260svh}
-.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;isolation:isolate}
-#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;-webkit-tap-highlight-color:transparent;cursor:crosshair}
-
-.top{position:absolute;inset:0 0 auto 0;z-index:4;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:calc(env(safe-area-inset-top,0px) + 18px) var(--gutter) 0;pointer-events:none}
-.top a{pointer-events:auto}
-.top .name{font-weight:600;font-size:15px;letter-spacing:-.005em;text-decoration:none;padding:10px 0}
-.top nav{display:flex;gap:clamp(16px,2.4vw,34px)}
-.top nav a{font-size:15px;text-decoration:none;color:var(--mist-70);padding:10px 0;background:linear-gradient(currentColor,currentColor) 0 calc(100% - 7px)/0 1px no-repeat;transition:color .2s var(--ease),background-size .4s var(--ease)}
-.top nav a:hover{color:var(--mist);background-size:100% 1px}
-
-.copy{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:1040px;pointer-events:none;will-change:opacity,transform}
-.copy a{pointer-events:auto}
-.kicker{margin:0 0 18px;color:var(--mist-45)}
-h1{margin:0;font-size:clamp(52px,9.4vw,164px);line-height:.86;font-weight:620;font-stretch:112%;letter-spacing:-.042em;text-shadow:0 0 42px rgba(2,28,42,.7)}
-h1 span{display:block}
-h1 .dot{display:inline;color:var(--signal)}
-.under{display:flex;flex-wrap:wrap;align-items:center;gap:18px 36px;margin-top:clamp(20px,3.2vh,34px)}
-.lede{margin:0;font-size:clamp(17px,1.45vw,21px);line-height:1.35;color:var(--mist-70);max-width:24ch;text-shadow:0 0 24px rgba(2,28,42,.9)}
-.cta{display:inline-flex;align-items:center;gap:12px;height:48px;padding:0 20px 0 22px;background:var(--mist);color:var(--deep);text-decoration:none;font-weight:600;font-size:15px;border-radius:3px;transition:background-color .25s var(--ease)}
-.cta:hover{background:#fff}
-
-.behind{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:620px;opacity:0;pointer-events:none}
-.behind .big{margin:0;font-size:clamp(25px,2.6vw,40px);line-height:1.12;font-weight:480;font-stretch:104%;letter-spacing:-.022em;max-width:24ch;text-shadow:0 0 30px rgba(2,28,42,.9)}
-
-/* Labels sit on the structure; their position is set from the 3D scene every frame. */
-.forces{position:absolute;inset:0;z-index:3;pointer-events:none}
-.force{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:3px;padding:2px 0 6px 20px;margin-top:-9px;text-decoration:none;color:var(--mist);opacity:0;visibility:hidden;pointer-events:auto;white-space:nowrap;will-change:transform,opacity}
-.force::before{content:"";position:absolute;left:0;top:12px;width:12px;height:1px;background:var(--mist-45);transition:background-color .2s var(--ease),width .3s var(--ease)}
-.force b{font-weight:600;font-size:15px;letter-spacing:-.005em;transition:color .2s var(--ease);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}
-.force i{font-style:normal;font-size:13px;line-height:1.3;color:var(--mist-70);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}
-.force.hot b,.force:focus-visible b{color:var(--signal)}
-.force.hot::before,.force:focus-visible::before{background:var(--signal);width:16px}
-.force:focus-visible{outline-offset:2px}
-
-.readout{position:absolute;z-index:4;right:var(--gutter);bottom:var(--base);display:flex;flex-direction:column;align-items:flex-end;gap:12px;text-align:right;pointer-events:none}
-.readout p{margin:0}
-.r-hint{color:var(--mist-70)}
-.r-note{color:var(--mist-45)}
-
-.fallback{position:absolute;left:30%;top:16%;width:60%;height:46%}
-.no-gl #gl,.no-gl .forces{display:none}
-
-/* ---------- after the hero ---------- */
-.next{position:relative;padding:clamp(88px,16vh,180px) var(--gutter) clamp(72px,12vh,140px);border-top:1px solid var(--mist-15)}
-.next h2{margin:0 0 18px;font-size:clamp(38px,5.4vw,84px);line-height:.95;font-weight:600;font-stretch:110%;letter-spacing:-.038em}
-.next>p{margin:0;max-width:46ch;color:var(--mist-70);font-size:18px}
-.todo{list-style:none;margin:48px 0 0;padding:0;display:flex;flex-direction:column;max-width:760px;border-top:1px solid var(--mist-15)}
-.todo li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:18px 0;border-bottom:1px solid var(--mist-15);font-size:18px;scroll-margin-top:24px}
-.todo li span{color:var(--mist-45);white-space:nowrap}
-
-@media (max-width:759px){
-  .top nav a,.top .name{font-size:14px}
-  .copy,.behind{bottom:calc(env(safe-area-inset-bottom,0px) + 118px)}
-  .kicker{margin-bottom:14px}
-  .readout{left:var(--gutter);right:var(--gutter);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);align-items:flex-start;text-align:left;gap:8px}
-  .r-note{display:none}
-  .force{padding-left:16px}
-  .force::before{width:9px}
-  .force b{font-size:13px}
-  .force i{display:none}
-  .force.hot i{display:block}
-  .fallback{left:5%;top:14%;width:90%;height:34%}
-}
-@media (max-width:759px) and (max-height:700px){
-  h1{font-size:46px}
-  .kicker{display:none}
-}
-/* With reduced motion the scroll still leads behind, but as a cut instead of a flight. */
-@media (prefers-reduced-motion:reduce){
-  .hero{height:180vh;height:180svh}
-}
-</style>
-</head>
-<body>
-<main>
-  <section class="hero" id="top" aria-labelledby="title">
-    <div class="stage">
-      <canvas id="gl" aria-hidden="true"></canvas>
-      <p class="sr-only">Visual: a translucent surface made of fine lines, with a line chart running across it. Four structures behind it push it into shape. Scrolling carries you through the surface to the other side, where the four become visible: Business Intelligence, Artificial Intelligence, Leadership and Entrepreneurship. The data is illustrative.</p>
-
-      <header class="top">
-        <a class="name" href="#top">Wilson Mota</a>
-        <nav aria-label="Primary">
-          <a href="#work">Work</a>
-          <a href="#work">Trajectory</a>
-          <a href="#work">Contact</a>
-        </nav>
-      </header>
-
-      <div class="copy" id="copy">
-        <p class="kicker mono">Business Intelligence Manager</p>
-        <h1 id="title"><span>Beyond the</span> <span>dashboards<span class="dot">.</span></span></h1>
-        <div class="under">
-          <p class="lede">What if the charts I build are only the surface?</p>
-          <a class="cta" href="#work">See the work</a>
-        </div>
-      </div>
-
-      <div class="behind" id="behind">
-        <p class="kicker mono">Behind the dashboard</p>
-        <p class="big">I design data platforms, build with AI, lead a BI team and start things from zero.</p>
-      </div>
-
-      <div class="readout">
-        <p class="r-hint mono" id="hint" aria-hidden="true" hidden>Point at a force</p>
-        <p class="r-note mono" aria-hidden="true">Illustrative data</p>
-      </div>
-
-      <nav class="forces" id="forces" aria-label="What lies behind the dashboard">
-        <a class="force" href="#bi" data-k="0"><b>Business Intelligence</b><i>Power BI · Dremio · Databricks · SSIS</i></a>
-        <a class="force" href="#ai" data-k="1"><b>Artificial Intelligence</b><i>Trading bot · Personal CFO · Property viability</i></a>
-        <a class="force" href="#leadership" data-k="2"><b>Leadership</b><i>From analyst to team manager</i></a>
-        <a class="force" href="#entrepreneurship" data-k="3"><b>Entrepreneurship</b><i>Ideas tested, some shipped</i></a>
-      </nav>
-    </div>
-  </section>
-
-  <section class="next" id="work" aria-labelledby="next-title">
-    <p class="kicker mono">After the crossing</p>
-    <h2 id="next-title">What lies behind</h2>
-    <p>Each force will open its own section. None of them is built yet.</p>
-    <ul class="todo">
-      <li id="bi">Business Intelligence <span class="mono">Not built</span></li>
-      <li id="ai">Artificial Intelligence <span class="mono">Not built</span></li>
-      <li id="leadership">Leadership <span class="mono">Not built</span></li>
-      <li id="entrepreneurship">Entrepreneurship <span class="mono">Not built</span></li>
-    </ul>
-  </section>
-</main>
-
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js';
+import * as THREE from 'three';
 
 THREE.ColorManagement.enabled = false;
 
@@ -940,7 +770,7 @@ function init() {
     cursor: { x: 0, y: 0, s: 0 }, cursorT: { x: 0, y: 0, s: 0 },
     tilt: { x: 0, y: 0, vx: 0, vy: 0 }, tiltT: { x: 0, y: 0 },
     nextRipple: 0, autoRipple: !reduced, autoAt: 1.7,
-    scrollP: 0, u: 0, uv: 0, forceU: null,
+    scrollP: 0, u: 0, uv: 0,
     hotPointer: -1, hotLabel: -1, hotTouch: -1, hot: -1, hotAmt: 0,
   };
   const L = { w: 1, h: 1, mobile: null, cx: 0, cy: 0, ex: 0, ey: 0, fov: 30, fovMid: 50, fovEnd: 40, rEnd: 13 };
@@ -1006,8 +836,8 @@ function init() {
 
     // Crossing progress follows the scroll, with a little inertia.
     // The crossing spans the whole pinned scroll, so the far side settles exactly as the hero releases: no dead scroll.
-    const target = S.forceU !== null ? S.forceU : reduced ? (S.scrollP > 0.45 ? 1 : 0) : clamp(S.scrollP, 0, 1);
-    if (reduced || S.forceU !== null) { S.u = target; S.uv = 0; }
+    const target = reduced ? (S.scrollP > 0.45 ? 1 : 0) : clamp(S.scrollP, 0, 1);
+    if (reduced) { S.u = target; S.uv = 0; }
     else {
       const kk = 30, c = 2 * Math.sqrt(kk);
       S.uv += (kk * (target - S.u) - c * S.uv) * dt;
@@ -1302,36 +1132,7 @@ function init() {
   canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); running = false; });
   canvas.addEventListener('webglcontextrestored', () => kick());
 
-  // Prototype only: hooks for screenshots and tests.
-  window.__mem = {
-    S, uniforms,
-    advance(seconds, fps = 60) { for (let t = 0; t < seconds; t += 1 / fps) step(1 / fps); },
-    ripple(x, y) { addRipple(x, y); kick(); },
-    cursor(x, y) { S.cursorT.x = S.cursor.x = x; S.cursorT.y = S.cursor.y = y; S.cursorT.s = 1; kick(); },
-    setU(u) { S.forceU = u; kick(); },
-    get journeyTarget() { return journey && journey.legs ? 'running' : null; },
-    time(frames = 120) {
-      const gl = renderer.getContext(), px = new Uint8Array(4), t0 = performance.now();
-      for (let i = 0; i < frames; i++) { step(1 / 60); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); }
-      return (performance.now() - t0) / frames;
-    },
-  };
-
   layout();
   onScroll();
-  const q = new URLSearchParams(location.search);
-  if (q.has('noauto')) S.autoRipple = false;
-  if (q.has('u')) S.forceU = +q.get('u');
-  if (q.has('hot')) S.hotPointer = +q.get('hot');
-  if (q.has('settle')) window.__mem.advance(+q.get('settle') || 3);
-  if (q.has('cursor')) { const [x, y] = q.get('cursor').split(',').map(Number); window.__mem.cursor(x, y); window.__mem.advance(0.8); }
-  if (q.has('ripple')) {
-    const [x, y] = q.get('ripple').split(',').map(Number);
-    addRipple(x, y, 0.32, q.has('seed') ? +q.get('seed') : undefined);
-    window.__mem.advance(+q.get('rt') || 0.9);
-  }
   kick();
 }
-</script>
-</body>
-</html>

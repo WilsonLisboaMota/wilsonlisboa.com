@@ -1,0 +1,14 @@
+{
+  "name": "wilsonlisboa.com",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^7.4.0",
+    "three": "0.170.0"
+  }
+}
