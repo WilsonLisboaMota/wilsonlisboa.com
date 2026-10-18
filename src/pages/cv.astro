@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wilson Lisboa Mota · CV</title>
+<meta name="description" content="CV of Wilson Lisboa Mota, Business Intelligence Manager in Switzerland: Power BI, Databricks, data governance and AI.">
+<meta property="og:title" content="Wilson Lisboa Mota · CV">
+<meta property="og:description" content="Business Intelligence Manager in Switzerland. The interactive CV, with a PDF to download.">
+<meta property="og:type" content="profile">
+<meta property="og:url" content="https://wilsonlisboa.com/cv/">
+<link rel="canonical" href="https://wilsonlisboa.com/cv/">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#021C2A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito&family=Montserrat:wght@400;700&family=Mona+Sans:wdth,wght@75..125,200..900&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap">
+<style is:inline>
+@property --p{syntax:'<number>';inherits:false;initial-value:0}
+:root{--deep:#021C2A;--mist:#E4ECE9;--signal:#E0952F;--gutter:clamp(8px,3.4vw,48px);--ease:cubic-bezier(.2,.7,.2,1);color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--deep)}
+body{color:var(--mist);font-family:'Mona Sans','Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:2px}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;max-width:960px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 22px) var(--gutter) 22px}
+.top{align-items:center}
+.top .home{font-weight:600;font-size:15px;color:inherit;text-decoration:none}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.act{display:inline-block;padding:9px 16px;border-radius:999px;font-size:14px;line-height:1.2;color:var(--mist);text-decoration:none;
+  box-shadow:inset 0 0 0 1px rgba(228,236,233,.28);transition:box-shadow .3s var(--ease),background-color .3s var(--ease)}
+.act:hover{box-shadow:inset 0 0 0 1px rgba(150,205,255,.9),0 0 16px rgba(26,154,228,.35);background:rgba(26,154,228,.1)}
+.act-pdf{background:var(--mist);color:var(--deep);box-shadow:none}
+.act-pdf:hover{background:#fff;box-shadow:0 0 18px rgba(150,205,255,.55)}
+
+
+.stage{padding:0 var(--gutter) 140px}
+
+/* ---------- the sheet: the PDF page, measured in PDF points so it scales like the PDF ---------- */
+.sheet{position:relative;width:min(960px,100%);margin:0 auto;aspect-ratio:595.32/841.92;container-type:inline-size;overflow:hidden;
+  background:linear-gradient(110deg,#1F3763 0%,#233E6F 38%,#2A4B86 60%,#3864B2 89%,#4472C4 103%);
+  box-shadow:0 40px 90px rgba(0,0,0,.5),0 0 0 1px rgba(47,82,143,.7);color:#404040;font-family:Helvetica,Arial,'Liberation Sans',sans-serif}
+.pg{position:absolute;inset:0;--pt:calc(100cqw / 595.32)}
+:where(.pg) ul{list-style:none;margin:0;padding:0}
+:where(.pg) :is(p,h1,h2,h3){margin:0;font-weight:400}
+.box{position:absolute;left:calc(var(--x) * var(--pt));top:calc(var(--y) * var(--pt));width:calc(var(--w) * var(--pt));height:calc(var(--h) * var(--pt))}
+/* Text sits on its PDF baseline. */
+.t{position:absolute;left:calc(var(--x) * var(--pt));top:calc((var(--b) - var(--s) * .86) * var(--pt));font-size:calc(var(--s) * var(--pt));line-height:1;white-space:nowrap}
+
+/* Sidebar */
+.side-panel{--x:8.6;--y:8.05;--w:221.04;--h:827.65;background:rgba(255,255,255,.25);border-radius:calc(2.9 * var(--pt))}
+.paper-panel{--x:233.2;--y:7.5;--w:352.95;--h:828.25;background:#fff;border-radius:calc(2.9 * var(--pt))}
+.side{color:#fff;--e-main:190,226,255;--e-hot:255,255,255;--e-blend:lighter}
+.nm{--s:27.96}
+.gv{--s:36;font-weight:700}
+.sub{--s:9.96;font-family:Montserrat,sans-serif}
+.sec{--s:12;font-family:Montserrat,sans-serif;font-weight:700}
+.photo{--x:77.5;--y:128.5;--w:84;--h:84;border-radius:50%;background:url(/cv/photo.jpg) 50% 28%/122% no-repeat;
+  box-shadow:0 0 0 calc(2.6 * var(--pt)) #fff,0 calc(2 * var(--pt)) calc(7 * var(--pt)) rgba(0,0,0,.35)}
+.sumbox{--x:15;--y:175.8;--w:209.5;--h:200.3;background:rgba(255,255,255,.25);border:calc(.9 * var(--pt)) solid rgba(255,255,255,.5);border-radius:calc(2.5 * var(--pt))}
+.photo{z-index:1}
+.sum{position:absolute;left:calc(19.8 * var(--pt));top:calc(241 * var(--pt));width:calc(201.5 * var(--pt));margin:0;font-family:Calibri,Carlito,'Segoe UI',sans-serif;
+  font-size:calc(11.04 * var(--pt));line-height:calc(14.48 * var(--pt));text-align:justify;color:#F2F2F2}
+.pill-c{--x:21.35;--w:195.15;--h:25.2;top:calc((var(--b) - 17.5) * var(--pt));background:rgba(255,255,255,.25);border-radius:calc(12.6 * var(--pt))}
+.ico{position:absolute;left:calc(27.2 * var(--pt));top:calc((var(--b) - 10.6) * var(--pt));width:calc(11.5 * var(--pt));height:calc(11.5 * var(--pt))}
+.ct{--s:9.96;--x:57}
+.ct a{color:inherit;text-decoration:none}
+.sk{--s:9.96;--x:20.6}
+.lg{--s:9.96;--x:21;font-family:Montserrat,sans-serif}
+.lgn{--s:6;--x:20.9;font-family:Montserrat,sans-serif}
+
+/* Soft-skill dots: a ring, filled from left to right, so a row reads like one continuous charge. */
+.dot{position:absolute;width:calc(11.7 * var(--pt));height:calc(11.7 * var(--pt));left:calc((var(--cx) - 5.85) * var(--pt));top:calc((var(--b) - 10.75) * var(--pt));
+  border-radius:50%;box-shadow:inset 0 0 0 calc(.9 * var(--pt)) #fff,0 calc(.6 * var(--pt)) calc(1.4 * var(--pt)) rgba(0,0,0,.28);--f:1}
+.dot::before{content:"";position:absolute;inset:calc(.9 * var(--pt));border-radius:50%;--p:var(--f);background:linear-gradient(90deg,#fff calc(var(--p) * 100%),transparent 0)}
+.dot::after{content:"";position:absolute;inset:calc(-4 * var(--pt));border-radius:50%;background:radial-gradient(closest-side,rgba(220,238,255,.75),rgba(150,205,255,0));opacity:0;pointer-events:none}
+.dot:nth-child(2){--cx:160.6}.dot:nth-child(3){--cx:179.9}.dot:nth-child(4){--cx:197.9}.dot:nth-child(5){--cx:217;--f:var(--last,1)}
+.dot:nth-child(1){--cx:142.3}
+
+/* Language bars */
+.bar{position:absolute;left:calc(61 * var(--pt));width:calc(158 * var(--pt));top:calc((var(--b) - 6.9) * var(--pt));height:calc(7 * var(--pt));background:rgba(255,255,255,.32)}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;width:calc(var(--bp, var(--v)) * 100%);background:#fff;overflow:hidden}
+.bar .flow{position:absolute;top:0;bottom:0;left:0;width:40%;background:linear-gradient(90deg,rgba(120,190,255,0),rgba(96,176,255,.85) 60%,rgba(120,190,255,0));transform:translateX(-110%)}
+.bar .head{position:absolute;top:-80%;bottom:-80%;left:calc(var(--bp, var(--v)) * 100%);width:calc(9 * var(--pt));margin-left:calc(-4.5 * var(--pt));
+  background:radial-gradient(closest-side,rgba(255,255,255,.95),rgba(170,215,255,0));opacity:0;transition:opacity .5s var(--ease)}
+.bar.charging .head{opacity:1}
+
+/* Row hit areas for the tooltips */
+.hit{position:absolute;left:calc(14 * var(--pt));width:calc(212 * var(--pt));top:calc((var(--b) - 12) * var(--pt));height:calc(16.5 * var(--pt));
+  padding:0;margin:0;border:0;background:none;cursor:help;-webkit-tap-highlight-color:transparent;border-radius:calc(2 * var(--pt));font-size:0;color:transparent}
+.hit:hover,.hit.e-tipped{background:rgba(255,255,255,.08)}
+/* Name and photo: who Wilson is beyond the CV, and a pulse through the whole sheet. */
+.hit-name{position:absolute;left:calc(12 * var(--pt));top:calc(18 * var(--pt));width:calc(212 * var(--pt));height:calc(70 * var(--pt));padding:0;margin:0;border:0;background:none;
+  cursor:help;font-size:0;color:transparent;border-radius:calc(3 * var(--pt));-webkit-tap-highlight-color:transparent;transition:background-color .3s}
+.hit-name:hover,.hit-name.e-tipped{background:rgba(255,255,255,.06)}
+.hit-photo{position:absolute;z-index:2;left:calc(77.5 * var(--pt));top:calc(128.5 * var(--pt));width:calc(84 * var(--pt));height:calc(84 * var(--pt));padding:0;margin:0;border:0;
+  border-radius:50%;background:none;cursor:help;font-size:0;color:transparent;-webkit-tap-highlight-color:transparent;transition:box-shadow .35s var(--ease)}
+.hit-photo:hover,.hit-photo.e-tipped{box-shadow:0 0 0 calc(2.6 * var(--pt)) #fff,0 0 calc(10 * var(--pt)) calc(2 * var(--pt)) rgba(170,215,255,.75)}
+/* Contact pills answer the pointer: a sheen runs across, the icon lights and code sparks around. */
+.pill-c::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.6) 50%,transparent 65%) no-repeat;
+  background-size:250% 100%;background-position:130% 0;opacity:0}
+.ct-li .pill-c{transition:background-color .35s var(--ease)}
+.ct-li.zap .pill-c{background:rgba(255,255,255,.34)}
+.ct-li .ico{transition:filter .35s var(--ease)}
+.ct-li.zap .ico{filter:drop-shadow(0 0 calc(2.2 * var(--pt)) rgba(205,232,255,.95))}
+.ct-li.sweep .pill-c::after{animation:sheen .85s cubic-bezier(.3,.1,.3,1)}
+@keyframes sheen{0%{opacity:1;background-position:130% 0}100%{opacity:1;background-position:-30% 0}}
+
+/* Main column */
+.paper{color:#404040;--e-main:47,84,150;--e-hot:224,149,47;--e-blend:source-over;--e-gain:.95}
+.pill{position:absolute;left:calc(234 * var(--pt));width:calc(110 * var(--pt));height:calc(18 * var(--pt));top:calc((var(--b) - 12.9) * var(--pt));
+  border-radius:calc(9 * var(--pt));background:linear-gradient(90deg,#1F3B70 0%,#2A4B86 48%,#5577B4 80%,#8FAADC 100%);
+  color:#fff;font-size:calc(11.04 * var(--pt));line-height:calc(18 * var(--pt));padding-left:calc(17.2 * var(--pt));letter-spacing:.01em}
+/* Section rules carry a permanent, quiet current; now and then a brighter pulse, and a few glyphs rise from them. */
+.rule{position:absolute;left:calc(344 * var(--pt));width:calc(194 * var(--pt));top:calc((var(--b) - 4.1) * var(--pt));height:max(1px,calc(.8 * var(--pt)));background:#1F4E79;overflow:hidden;
+  box-shadow:0 0 calc(2.2 * var(--pt)) rgba(96,176,255,.4)}
+.rule::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(150,210,255,0) 0,rgba(150,210,255,0) 30%,rgba(165,218,255,.95) 42%,rgba(150,210,255,0) 54%,rgba(150,210,255,0) 100%);
+  background-size:50% 100%;opacity:.5}
+.rule::after{content:"";position:absolute;top:-1px;bottom:-1px;left:0;width:22%;background:linear-gradient(90deg,rgba(96,176,255,0),rgba(140,200,255,1),rgba(96,176,255,0));transform:translateX(-110%)}
+.rule.run::after{animation:rule 2.2s cubic-bezier(.4,.1,.3,1)}
+@keyframes rule{to{transform:translateX(480%)}}
+
+.ck{position:absolute;left:calc(var(--x) * var(--pt));top:calc((var(--b) - 9.6) * var(--pt));display:flex;align-items:center;gap:calc(6.6 * var(--pt));
+  padding:calc(1.4 * var(--pt)) calc(2 * var(--pt)) calc(1.4 * var(--pt)) 0;margin:0;border:0;background:none;cursor:default;
+  font:inherit;font-size:calc(9 * var(--pt));line-height:1;color:#404040;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.tk{width:calc(7.5 * var(--pt));height:calc(7.5 * var(--pt));overflow:visible;flex:none}
+.tk path{fill:none;stroke:#2F5496;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .25s}
+.ck.e-on{color:#14305E;text-shadow:0 0 .6em rgba(47,84,150,.35)}
+.ck.e-on .tk path{stroke:#E0952F}
+
+.ti{--s:12;font-weight:700;color:#000}
+.dt{font-size:calc(9 * var(--pt));font-weight:400;color:#595959}
+.co{--s:9.96;color:#1F4E79}
+.co a{color:inherit;text-decoration:none;transition:text-shadow .3s var(--ease)}
+.co a:hover{text-decoration:underline;text-underline-offset:.18em}
+.co a.e-surge{animation:surge 1.3s cubic-bezier(.2,.7,.2,1)}
+a.mag{cursor:pointer}
+a.mag:hover{color:#1F4E79}
+/* Role titles: pointing at one charges its lines and lights the tools that role used. */
+.ti[data-role]{cursor:default;transition:text-shadow .35s var(--ease)}
+.ti.e-on{text-shadow:0 0 .5em rgba(47,84,150,.35)}
+.ck.e-link{color:#14305E;text-shadow:0 0 .6em rgba(47,84,150,.35)}
+.ck.e-link .tk path{stroke:#E0952F}
+.bl{--s:9;color:#404040}
+.bl::before{content:"•";position:absolute;left:calc(-11.1 * var(--pt))}
+.cti{--s:11.04;font-weight:700;color:#000}
+.lnk{color:#0563C1;font-size:calc(9 * var(--pt))}
+.mag{display:inline-block;width:calc(8 * var(--pt));height:calc(8 * var(--pt));margin-left:calc(3 * var(--pt));vertical-align:calc(-.4 * var(--pt));padding:0;border:0;background:none;color:#8C8C8C}
+.mag svg{display:block;width:100%;height:100%}
+button.mag{cursor:help}
+.live-w{display:inline-block}
+
+/* Charged lines: a surge of energy, then a steady glow while the skill is held. The rest steps back. */
+.paper [data-line]{transition:opacity .35s var(--ease),color .35s var(--ease)}
+html.e-dim .paper [data-line]:not(.e-held){opacity:.34}
+.paper .e-held{color:#1F3F73;text-shadow:0 0 .55em rgba(47,84,150,.3)}
+.paper .e-held .w{color:#0B2E66;text-shadow:0 0 .55em rgba(224,149,47,.8),0 0 .14em rgba(224,149,47,.55)}
+.paper .e-surge{animation:surge 1.3s cubic-bezier(.2,.7,.2,1)}
+@keyframes surge{0%{text-shadow:0 0 0 rgba(47,84,150,0)}14%{color:#2F5496;text-shadow:0 0 1em rgba(47,84,150,.85),0 0 .2em rgba(47,84,150,.9)}100%{text-shadow:0 0 .55em rgba(47,84,150,.3)}}
+
+/* ---------- motion ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .js .tk path{stroke-dasharray:1.05;stroke-dashoffset:1.05;transition:stroke-dashoffset .45s var(--ease),stroke .25s}
+  .js .ck.on .tk path{stroke-dashoffset:0}
+  .js .ck.glint .tk path{stroke:#6E9BE6;filter:drop-shadow(0 0 2px rgba(80,140,230,.8))}
+  .js .dot::before{--p:0;transition:--p var(--fd,.2s) linear var(--fdl,0s)}
+  .js .dot.on::before{--p:var(--f)}
+  .js .dot.snap::before{transition:none}
+  .js .dot.on::after{animation:flash .8s ease-out calc(var(--fdl,0s) + var(--fd,.2s))}
+  .rule::before{animation:current 5.5s linear infinite}
+  .js .dot.live::after{animation:halo var(--hd,3.4s) ease-in-out var(--hdl,0s) infinite alternate}
+  .js .dot.live.flick::after{animation:flash .7s ease-out}
+  .js .bar.live .fill{animation:breathe var(--bd,3.8s) ease-in-out infinite alternate}
+  .js .bar.run .flow{animation:flow 1.6s cubic-bezier(.4,.1,.3,1)}
+  .live-w{animation:present 3.6s ease-in-out infinite}
+}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+@keyframes halo{from{opacity:0}to{opacity:.32}}
+@keyframes breathe{from{box-shadow:0 0 0 rgba(200,230,255,0)}to{box-shadow:0 0 calc(5 * var(--pt)) rgba(200,230,255,.6)}}
+@keyframes flow{to{transform:translateX(270%)}}
+@keyframes current{from{background-position:0 0}to{background-position:100% 0}}
+@keyframes present{0%,100%{text-shadow:none}50%{text-shadow:0 0 .6em rgba(47,84,150,.45)}}
+.holo-pending .sheet{opacity:0}
+/* ---------- print: the sheet alone, on one A4 page, in its final state ---------- */
+@page{size:A4;margin:0}
+@media print{
+  html,body{background:#fff;height:297mm;overflow:hidden}
+  .top,canvas,.e-tip,.e-ctl,.hit,.hit-name,.hit-photo{display:none!important}
+  .stage{padding:0}
+  .sheet{width:210mm;max-width:none;margin:0;box-shadow:none;opacity:1!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .tk path{stroke-dashoffset:0!important}
+  .dot::before{--p:var(--f)!important}
+  .bar .fill{width:calc(var(--v) * 100%)!important}
+  .bar .flow,.bar .head,.dot::after{display:none!important}
+  html.e-dim .paper [data-line]{opacity:1!important}
+}
+</style>
+<script is:inline>try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!sessionStorage.getItem('cv-holo-a'))document.documentElement.classList.add('holo-pending')}catch(e){}</script>
+</head>
+<body>
+<header class="top">
+  <a class="home" href="/">Wilson Mota</a>
+  <nav class="acts" aria-label="CV actions">
+    <a class="act" href="/">Visit the website</a>
+    <a class="act act-pdf" href="/cv/wilson-lisboa-mota-cv.pdf" download>Download PDF</a>
+  </nav>
+</header>
+
+<main class="stage">
+<article class="sheet" aria-label="Curriculum vitae of Wilson Lisboa Mota">
+ <div class="pg">
+  <div class="box side-panel" aria-hidden="true"></div>
+  <div class="box paper-panel" aria-hidden="true"></div>
+
+  <!-- ===== Sidebar ===== -->
+  <div class="side">
+    <h1 class="t nm" style="--x:16.8;--b:47">LISBOA MOTA,</h1>
+    <p class="t gv" style="--x:16.8;--b:82">WILSON</p>
+    <p class="t sub" style="--x:19;--b:102.8">Business Intelligence Manager</p>
+    <div class="box sumbox" aria-hidden="true"></div>
+    <div class="box photo" role="img" aria-label="Photo of Wilson"></div>
+    <button class="hit-name" type="button" data-tip="tip-about" data-tip-place="right">About Wilson, beyond the CV</button>
+    <button class="hit-photo" type="button" data-tip="tip-about" data-tip-place="right">About Wilson, beyond the CV</button>
+    <h2 class="t sec" style="--x:23;--b:229.9">Summary</h2>
+    <p class="sum">Business Intelligence Manager with 7 years in Business Intelligence. Deep experience running data operations in highly regulated environments, establishing data governance frameworks and ensuring audit compliance. With a background in finance, I treat data integrity as the foundation of operational safety and of strategic decisions.</p>
+
+    <ul aria-label="Contact">
+      <li class="ct-li"><span class="box pill-c" style="--b:433.9" aria-hidden="true"></span>
+        <svg class="ico" style="--b:433.9" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="#fff" stroke-width="1.6" d="M3 6h18v12H3z M3 6l9 7 9-7"/></svg>
+        <span class="t ct" style="--b:433.9"><a href="mailto:wilson.lisboa@wilsonlisboa.com">wilson.lisboa@wilsonlisboa.com</a></span></li>
+      <li class="ct-li"><span class="box pill-c" style="--b:465.2" aria-hidden="true"></span>
+        <svg class="ico" style="--b:465.2" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+        <span class="t ct" style="--b:465.2">Switzerland</span></li>
+      <li class="ct-li"><span class="box pill-c" style="--b:496.5" aria-hidden="true"></span>
+        <svg class="ico" style="--b:496.5" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M3 3h18v18H3z"/><path fill="#5574A8" d="M7 10h2.4v7H7zm1.2-3.6a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6zM11 10h2.3v1c.4-.7 1.2-1.2 2.4-1.2 2.2 0 2.6 1.4 2.6 3.3V17h-2.4v-3.4c0-.9 0-1.9-1.2-1.9s-1.3.9-1.3 1.8V17H11z"/></svg>
+        <span class="t ct" style="--b:496.5"><a href="https://www.linkedin.com/in/wilson-lisboa-mota/" target="_blank" rel="noopener">linkedin.com/in/wilson-lisboa-mota</a></span></li>
+      <li class="ct-li"><span class="box pill-c" style="--b:527.8" aria-hidden="true"></span>
+        <img class="ico" style="--b:527.8;object-fit:contain" src="/cv/logo-white-mark.png" alt="">
+        <span class="t ct" style="--b:527.8"><a href="https://wilsonlisboa.com">www.wilsonlisboa.com</a></span></li>
+    </ul>
+
+    <h2 class="t sec" style="--x:15;--b:590.1">SOFT SKILLS</h2>
+    <ul class="softs" aria-label="Soft skills, self-assessed">
+      <li class="srow" style="--b:608.1"><span class="t sk" aria-hidden="true">TEAMWORK</span><span aria-hidden="true"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+        <button class="hit" type="button" data-tip="tip-teamwork">Teamwork, self-assessed 5 out of 5</button></li>
+      <li class="srow" style="--b:626.9;--last:.5"><span class="t sk" aria-hidden="true">COMMUNICATION</span><span aria-hidden="true"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+        <button class="hit" type="button" data-tip="tip-communication">Communication, self-assessed 4.5 out of 5</button></li>
+      <li class="srow" style="--b:645.9;--last:.65"><span class="t sk" aria-hidden="true">ATTENTION TO DETAIL</span><span aria-hidden="true"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+        <button class="hit" type="button" data-tip="tip-detail">Attention to detail, self-assessed 4.65 out of 5</button></li>
+      <li class="srow" style="--b:664.7"><span class="t sk" aria-hidden="true">MOTIVATION</span><span aria-hidden="true"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+        <button class="hit" type="button" data-tip="tip-motivation">Motivation, self-assessed 5 out of 5</button></li>
+      <li class="srow" style="--b:683.9;--last:.75"><span class="t sk" aria-hidden="true">LEADERSHIP</span><span aria-hidden="true"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+        <button class="hit" type="button" data-tip="tip-leadership">Leadership, self-assessed 4.75 out of 5</button></li>
+      <li class="srow" style="--b:702.4;--last:.65"><span class="t sk" aria-hidden="true">CRITICAL THINKING</span><span aria-hidden="true"><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+        <button class="hit" type="button" data-tip="tip-critical">Critical thinking, self-assessed 4.65 out of 5</button></li>
+    </ul>
+
+    <h2 class="t sec" style="--x:15.8;--b:737.8">LANGUAGES</h2>
+    <ul class="langs" aria-label="Languages, self-assessed">
+      <li><span class="t lg" style="--b:754.9" aria-hidden="true">ENG</span><span class="bar" style="--b:754.9;--v:.927" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
+        <button class="hit" type="button" style="--b:754.9" data-tip="tip-en">English, C1</button></li>
+      <li><span class="t lg" style="--b:774.3" aria-hidden="true">POR</span><span class="bar" style="--b:774.3;--v:1" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
+        <button class="hit" type="button" style="--b:774.3" data-tip="tip-pt">Portuguese, C2, native</button></li>
+      <li><span class="t lg" style="--b:792.8" aria-hidden="true">GER</span><span class="bar" style="--b:792.8;--v:.04" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
+        <button class="hit" type="button" style="--b:792.8" data-tip="tip-de">German, A1</button></li>
+      <li><span class="t lg" style="--b:811.8" aria-hidden="true">FRA</span><span class="t lgn" style="--b:819.8" aria-hidden="true">(learning)</span><span class="bar" style="--b:811.8;--v:.295" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
+        <button class="hit" type="button" style="--b:811.8" data-tip="tip-fr">French, A2, learning</button></li>
+    </ul>
+  </div>
+
+  <!-- ===== Main column ===== -->
+  <div class="paper">
+    <h2 class="pill" style="--b:32.4">SKILLS</h2><i class="rule" style="--b:32.4" aria-hidden="true"></i>
+    <ul class="checks" aria-label="Skills">
+      <li><button class="ck" type="button" style="--x:239.6;--b:52.2" data-skill="ssms"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>SSMS</button></li>
+      <li><button class="ck" type="button" style="--x:239.6;--b:64" data-skill="ssis"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>SSIS</button></li>
+      <li><button class="ck" type="button" style="--x:239.6;--b:76" data-skill="alteryx"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Alteryx</button></li>
+      <li><button class="ck" type="button" style="--x:239.6;--b:87.9" data-skill="mage"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Mage.ai</button></li>
+      <li><button class="ck" type="button" style="--x:332.2;--b:52.2" data-skill="powerbi"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Power BI (Service, SSRS)</button></li>
+      <li><button class="ck" type="button" style="--x:332.2;--b:64" data-skill="excel"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Excel (Power Query\Pivot)</button></li>
+      <li><button class="ck" type="button" style="--x:332.2;--b:76" data-skill="tableau"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Tableau</button></li>
+      <li><button class="ck" type="button" style="--x:332.2;--b:87.9" data-skill="databricks"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Databricks</button></li>
+      <li><button class="ck" type="button" style="--x:462.9;--b:52.2" data-skill="dremio"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Dremio Enterprise</button></li>
+      <li><button class="ck" type="button" style="--x:462.9;--b:64" data-skill="bc"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Business Central</button></li>
+      <li><button class="ck" type="button" style="--x:462.9;--b:76" data-skill="copilot"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Copilot</button></li>
+      <li><button class="ck" type="button" style="--x:462.9;--b:87.9" data-skill="claude"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Claude (Code\Cowork)</button></li>
+    </ul>
+
+    <h2 class="pill" style="--b:116.1">EXPERIENCE</h2><i class="rule" style="--b:116.1" aria-hidden="true"></i>
+
+    <h3 class="t ti" style="--x:245.1;--b:141.3" data-role="corient" tabindex="0">Manager – Business Intelligence Analyst <span class="dt">(01/2025 – <span class="live-w">Present</span>)</span></h3>
+    <p class="t co" style="--x:245.1;--b:153.2"><a href="http://www.stonehagefleming.com/" target="_blank" rel="noopener">Corient</a><a class="mag" href="http://www.stonehagefleming.com/" target="_blank" rel="noopener" aria-label="Corient website"><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></a></p>
+    <ul>
+      <li class="t bl" style="--x:261.9;--b:169.7" data-line data-r="corient">Lead a team of 6 BI developers to deliver analytical solutions to the whole group.</li>
+      <li class="t bl" style="--x:261.9;--b:182.1" data-line data-r="corient" data-uses="powerbi">Own the <span class="w">Power BI</span> platform, ensuring governance, security, and scalability.</li>
+      <li class="t bl" style="--x:261.9;--b:194.6" data-line data-r="corient">Drive automation and AI adoption to increase business performance.</li>
+      <li class="t bl" style="--x:261.9;--b:207.1" data-line data-r="corient">Partner with leadership to shape reporting strategy and ensure compliance.</li>
+    </ul>
+
+    <h3 class="t ti" style="--x:243.9;--b:239.7" data-role="sf" tabindex="0">Senior Business Intelligence Analyst <span class="dt">(12/2021 – 12/2024)</span></h3>
+    <p class="t co" style="--x:243.9;--b:251.6"><a href="http://www.stonehagefleming.com/" target="_blank" rel="noopener">Stonehage Fleming</a><a class="mag" href="http://www.stonehagefleming.com/" target="_blank" rel="noopener" aria-label="Stonehage Fleming website"><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></a></p>
+    <ul>
+      <li class="t bl" style="--x:260.7;--b:268.1" data-line data-r="sf" data-uses="powerbi">Lead the implementation and configuration of <span class="w">Power BI</span> Service in the Company.</li>
+      <li class="t bl" style="--x:260.7;--b:280.6" data-line data-r="sf" data-uses="dremio">Responsible for <span class="w">Dremio</span> DBT architecture, security and governance.</li>
+      <li class="t bl" style="--x:260.7;--b:293" data-line data-r="sf" data-uses="alteryx">Developed several <span class="w">Alteryx</span> processes that support business operations.</li>
+      <li class="t bl" style="--x:260.7;--b:305.6" data-line data-r="sf" data-uses="ssis mage">Developed products using tools such as <span class="w">SSIS</span>, Visual Studio, MDM, <span class="w">Mage.ai</span>, etc.</li>
+    </ul>
+
+    <h3 class="t ti" style="--x:244.8;--b:339.4" data-role="fl" tabindex="0">Business Intelligence Consultant <span class="dt">(03/2021 – 11/2021)</span></h3>
+    <p class="t co" style="--x:244.8;--b:351.2">Freelancer<span class="mag" aria-hidden="true"><svg viewBox="0 0 10 10"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></span></p>
+    <ul>
+      <li class="t bl" style="--x:261.6;--b:367.3" data-line data-r="fl" data-uses="powerbi">Developing <span class="w">Power BI</span> reports has led to solid management gains to the clients.</li>
+      <li class="t bl" style="--x:261.6;--b:379.8" data-line data-r="fl" data-uses="powerbi">Focus on the <span class="w">Power BI</span> User Experience, which provided positive feedback.</li>
+      <li class="t bl" style="--x:261.6;--b:392.3" data-line data-r="fl" data-uses="ssis">Managed a SQL database and several <span class="w">SSIS</span> ETL processes.</li>
+    </ul>
+
+    <h3 class="t ti" style="--x:245.1;--b:424.2" data-role="sl" tabindex="0">Business Intelligence Analyst <span class="dt">(09/2019 – 03/2021)</span></h3>
+    <p class="t co" style="--x:245.1;--b:436.1"><a href="https://scoresandlevels.com/" target="_blank" rel="noopener">Scores &amp; Levels</a><a class="mag" href="https://scoresandlevels.com/" target="_blank" rel="noopener" aria-label="Scores &amp; Levels website"><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></a></p>
+    <ul>
+      <li class="t bl" style="--x:261.8;--b:452.4" data-line data-r="sl" data-uses="powerbi">Developed and maintained 10+ advanced <span class="w">Power BI</span> reports.</li>
+      <li class="t bl" style="--x:261.8;--b:464.9" data-line data-r="sl">Developed the on-premises [small-scaled] Data Warehouse.</li>
+    </ul>
+
+    <h3 class="t ti" style="--x:245.1;--b:496.5" data-role="wv" tabindex="0">Co-Founder <span class="dt">(11/2019 – 01/2021)</span></h3>
+    <p class="t co" style="--x:245.1;--b:508.4">WeValue – Consulting</p>
+    <ul>
+      <li class="t bl" style="--x:261.9;--b:526.2" data-line data-r="wv">Management and client advisory: 9 of the 10 projects I submitted were approved.</li>
+      <li class="t bl" style="--x:261.9;--b:539.8" data-line data-r="wv">Responsible for Public Contracts deals.</li>
+    </ul>
+
+    <h2 class="pill" style="--b:570.6">CERTIFICATES</h2><i class="rule" style="--b:570.6" aria-hidden="true"></i>
+    <h3 class="t cti" style="--x:256.2;--b:594.1" data-line data-uses="databricks"><span class="w">Databricks</span> Data Analyst Certificate <span class="dt">(2026)</span></h3>
+    <p class="t co" style="--x:256.2;--b:605.9">Databricks – <a class="lnk" href="https://credentials.databricks.com/c63b7e6e-c357-4cc9-9085-9081abb1aeb8#acc.pgCm5w0a" target="_blank" rel="noopener">Verification link</a></p>
+    <h3 class="t cti" style="--x:256;--b:630.1" data-line>Data Analyst Associate – Microsoft Certificate <span class="dt">(2021)</span></h3>
+    <p class="t co" style="--x:256;--b:641.7">Microsoft – <span class="dt">Expired</span></p>
+    <h3 class="t cti" style="--x:256.2;--b:665.1" data-line data-uses="excel">Advanced <span class="w">Excel</span> applied to management <span class="dt">(2016)</span></h3>
+    <p class="t co" style="--x:256.2;--b:678.8">APEU</p>
+
+    <h2 class="pill" style="--b:709.3">EDUCATION</h2><i class="rule" style="--b:709.3" aria-hidden="true"></i>
+    <h3 class="t cti" style="--x:256.2;--b:734.9">MSc in Management &amp; Business <span class="dt">(2019)</span></h3>
+    <p class="t co" style="--x:256.2;--b:746.6">Atlantico Business School</p>
+    <h3 class="t cti" style="--x:256.2;--b:770">MBA in Business and Management <span class="dt">(2018)</span></h3>
+    <p class="t co" style="--x:256.2;--b:781.6">Atlantico Business School</p>
+    <h3 class="t cti" style="--x:256.2;--b:803.2">Degree in Economics <span class="dt">(2016)</span></h3>
+    <p class="t co" style="--x:256.2;--b:816.8">Lisbon School of Economics &amp; Management (ISEG)</p>
+  </div>
+ </div>
+</article>
+</main>
+
+<!-- Tooltips: the other perspective behind each indicator. Evidence only from the approved recommendation or a project. -->
+<template id="tip-teamwork"><span class="e-tip-h">Teamwork · self-assessed 5 / 5</span><p><q>…always willing to help the team.</q></p><p class="src">José Matos, Program Manager / Operations Manager at Scores &amp; Levels. LinkedIn recommendation, 2021.</p></template>
+<template id="tip-communication"><span class="e-tip-h">Communication · self-assessed 4.5 / 5</span><p><q>He was able to understand the business needs and helped us gain clarity of strategic objectives…</q></p><p class="src">José Matos, Program Manager / Operations Manager at Scores &amp; Levels. LinkedIn recommendation, 2021.</p></template>
+<template id="tip-detail"><span class="e-tip-h">Attention to detail · self-assessed 4.65 / 5</span><p>Every number can be traced back to a transaction ID.</p><p class="src">From my Personal CFO project: a working pipeline, the product is not built.</p></template>
+<template id="tip-motivation"><span class="e-tip-h">Motivation · self-assessed 5 / 5</span><p><q>Wilson is a hard-working, honest and intelligent person…</q></p><p class="src">José Matos, Program Manager / Operations Manager at Scores &amp; Levels. LinkedIn recommendation, 2021.</p></template>
+<template id="tip-leadership"><span class="e-tip-h">Leadership · self-assessed 4.75 / 5</span><p>Lead a team of 6 BI developers at Corient.</p><p class="src">From the experience on this CV.</p></template>
+<template id="tip-critical"><span class="e-tip-h">Critical thinking · self-assessed 4.65 / 5</span><p>The instruction was: try to prove the strategy wrong before trying to prove it works.</p><p class="src">From my AI Trading Bot project: research complete, live on paper trading, no real money.</p></template>
+<template id="tip-en"><span class="e-tip-h">English · CEFR C1</span><p>Advanced. Self-assessed, not a test score.</p></template>
+<template id="tip-pt"><span class="e-tip-h">Portuguese · CEFR C2</span><p>Native.</p></template>
+<template id="tip-de"><span class="e-tip-h">German · CEFR A1</span><p>Beginner. Self-assessed, not a test score.</p></template>
+<template id="tip-fr"><span class="e-tip-h">French · CEFR A2</span><p>Elementary, and learning. Self-assessed, not a test score.</p></template>
+<template id="tip-about"><span class="e-tip-h">Wilson, beyond the CV</span><p>Father of two daughters.</p><p>Leading a team of 6 BI developers.</p><p>AI enthusiast, and I build with it.</p></template>
+
+<script is:inline src="/cv/energy.js"></script>
+<script is:inline>
+(() => {
+  const E = window.Energy;
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rnd = E.rnd;
+  document.documentElement.classList.add('js');
+
+  const sheet = document.querySelector('.sheet');
+  // The text is split into words once, so the energy can act on the words themselves.
+  const words = E.wordify(sheet);
+  const ticks = $$('.ck'), rows = $$('.srow'), dots = $$('.dot'), bars = $$('.bar'), rules = $$('.rule'), contacts = $$('.ct-li');
+  const restart = (el, cls, ms) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); if (ms) setTimeout(() => el.classList.remove(cls), ms); };
+  const tickSpark = (b, o = {}) => { const s = b.querySelector('.tk').getBoundingClientRect(), r = b.getBoundingClientRect(); E.spark(b, s.right - r.left, s.top - r.top - 1, { size: 7, life: 620, ...o }); };
+
+  /* ---- the indicators' small reactions, reused by the entry, the ambient life and the pulse ---- */
+  function flick(d) {
+    if (!d.classList.contains('live')) return;
+    restart(d, 'flick', 750);
+    E.spark(d, d.offsetWidth / 2 + rnd(-7, 7), rnd(-6, -2), { size: 6.5, life: 600, gain: 0.8 });
+  }
+  function glint(b) {
+    if (!b.classList.contains('on') || b.classList.contains('e-on') || b.classList.contains('e-link')) return;
+    restart(b, 'glint', 700);
+    tickSpark(b, { gain: 0.8 });
+  }
+  // A soft current runs along a language bar, and its head gives off a few glyphs.
+  function flow(bar) {
+    restart(bar, 'run');
+    setTimeout(() => {
+      const p = +bar.style.getPropertyValue('--bp') || +getComputedStyle(bar).getPropertyValue('--v');
+      for (let k = 0; k < 2; k++) E.spark(bar, p * bar.offsetWidth + rnd(-2, 4), rnd(-6, bar.offsetHeight + 6), { size: 7, life: 600 });
+    }, 1250);
+  }
+  function run(rule) { restart(rule, 'run'); }
+  function zap(li, burst = true) {
+    li.classList.add('zap');
+    restart(li, 'sweep', 900);
+    if (burst) E.burst(li.querySelector('.pill-c'), { reach: 15, gain: 0.85 });
+  }
+
+  // Which roles used which tool: Wilson's own table (18 Oct 2026), never inferred from the CV text.
+  const ROLE_TOOLS = {
+    corient: ['ssms', 'mage', 'powerbi', 'tableau', 'databricks', 'copilot', 'claude'],
+    sf: ['ssms', 'ssis', 'alteryx', 'mage', 'powerbi', 'excel', 'dremio', 'bc', 'copilot'],
+    fl: ['ssms', 'ssis', 'powerbi', 'excel'],
+    sl: ['ssms', 'ssis', 'powerbi', 'excel'],
+    wv: ['excel'],
+  };
+  const titlesUsing = k => $$('.ti[data-role]').filter(ti => (ROLE_TOOLS[ti.dataset.role] || []).includes(k));
+
+  /* ---- skills: a skill charges every line where it was applied, and the title of every role that used it ---- */
+  E.bind({
+    targets: k => [...$$(`.paper [data-uses~="${k}"]`), ...titlesUsing(k)],
+    onSkill: (btn, on) => { if (on) E.burst(btn, { reach: 16, gain: 0.7 }); }
+  });
+
+  /* ---- roles: pointing at a title charges its lines and lights the tools that role used ---- */
+  let roleOn = null;
+  function setRole(ti, on) {
+    const lines = $$(`.paper [data-r="${ti.dataset.role}"]`);
+    const used = new Set(ROLE_TOOLS[ti.dataset.role] || []);
+    ti.classList.toggle('e-on', on);
+    document.documentElement.classList.toggle('e-dim', on);
+    clearTimeout(ti._t);
+    if (on) {
+      E.burst(ti, { reach: 18, gain: 0.8 });
+      // The charge runs down through the role, line after line.
+      lines.forEach((l, i) => setTimeout(() => { if (ti.classList.contains('e-on')) E.charge(l, true, { reach: 14 }); }, E.reduced ? 0 : 120 + i * 110));
+      ticks.filter(b => used.has(b.dataset.skill)).forEach((b, i) => setTimeout(() => {
+        if (!ti.classList.contains('e-on')) return;
+        b.classList.add('e-link');
+        tickSpark(b);
+      }, E.reduced ? 0 : 200 + i * 90));
+    } else {
+      lines.forEach(l => E.charge(l, false));
+      ticks.forEach(b => b.classList.remove('e-link'));
+    }
+  }
+  const roleActivate = ti => { if (roleOn === ti) return; if (roleOn) setRole(roleOn, false); roleOn = ti; setRole(ti, true); };
+  const roleRelease = ti => { if (roleOn !== ti) return; setRole(ti, false); roleOn = null; };
+  $$('.ti[data-role]').forEach(ti => {
+    if (E.fine) {
+      ti.addEventListener('pointerenter', () => roleActivate(ti));
+      ti.addEventListener('pointerleave', () => roleRelease(ti));
+    } else {
+      ti.addEventListener('click', () => (roleOn === ti ? roleRelease(ti) : roleActivate(ti)));
+    }
+    ti.addEventListener('focus', () => { if (ti.matches(':focus-visible')) roleActivate(ti); });
+    ti.addEventListener('blur', () => roleRelease(ti));
+  });
+
+  /* ---- contacts and company names answer the pointer ---- */
+  contacts.forEach(li => {
+    li.addEventListener('pointerenter', () => zap(li));
+    li.addEventListener('pointerleave', () => li.classList.remove('zap'));
+    const a = li.querySelector('a');
+    if (a) { a.addEventListener('focus', () => zap(li)); a.addEventListener('blur', () => li.classList.remove('zap')); }
+  });
+  $$('.co a:not(.mag)').forEach(a => a.addEventListener('pointerenter', () => { restart(a, 'e-surge'); E.burst(a, { reach: 14, gain: 0.8 }); }));
+
+  /* ---- the hologram: the photo projects the CV; the name and the photo can reinforce it ---- */
+  const photo = document.querySelector('.photo');
+  function geometry() {
+    const s = sheet.getBoundingClientRect(), f = photo.getBoundingClientRect();
+    const paperX = document.querySelector('.paper-panel').getBoundingClientRect().left - s.left;
+    const side = E.palette(document.querySelector('.side')), paper = E.palette(document.querySelector('.paper'));
+    return { s, ox: f.left + f.width / 2 - s.left, oy: f.top + f.height / 2 - s.top, colorAt: x => (x > paperX ? paper : side), cell: Math.max(7, Math.min(12, s.width / 85)) };
+  }
+  // The boxes whose edges light up as the wave crosses them.
+  const edges = () => [sheet, ...$$('.side-panel, .paper-panel, .sumbox, .pill-c, .pill, .photo')];
+  function projectSheet() {
+    const g = geometry();
+    return E.project(sheet, g.ox, g.oy, { colorAt: g.colorAt, cell: g.cell, dur: 1400, edges: edges() });
+  }
+  let lastPulse = 0;
+  function sheetPulse() {
+    const now = performance.now();
+    if (now - lastPulse < 1600) return;
+    lastPulse = now;
+    const { s, ox, oy, colorAt, cell } = geometry();
+    const speed = E.pulse(sheet, ox, oy, { colorAt, cell, density: 0.34, gain: 1.3, edges: edges() });
+    if (!speed) return;
+    const at = el => { const r = el.getBoundingClientRect(); return Math.hypot(r.left + r.width / 2 - s.left - ox, r.top + r.height / 2 - s.top - oy) / speed * 1000; };
+    // As the front passes, the CV's own indicators answer it...
+    dots.forEach(d => setTimeout(() => flick(d), at(d)));
+    ticks.forEach(b => setTimeout(() => glint(b), at(b)));
+    bars.forEach(b => setTimeout(() => flow(b), at(b)));
+    rules.forEach(r => setTimeout(() => run(r), at(r)));
+    contacts.forEach(li => { const p = li.querySelector('.pill-c'); setTimeout(() => { zap(li, false); setTimeout(() => li.classList.remove('zap'), 500); }, at(p)); });
+    // ...and some lines of text give off a little of it.
+    $$('.paper .t, .side .t').forEach(el => {
+      if (Math.random() > 0.55) return;
+      setTimeout(() => E.spark(el, rnd(0, el.offsetWidth), rnd(-6, el.offsetHeight + 6), { size: 7, life: 700 }), at(el) + rnd(0, 120));
+    });
+  }
+  // Only the photo sends the pulse across the sheet (Wilson, 18 Oct 2026); the name keeps its "about" tooltip.
+  $$('.hit-photo').forEach(b => b.addEventListener('tipshow', sheetPulse));
+
+  /* ---- the membrane: invisible; a touch where there is nothing to touch makes the energy dip ---- */
+  E.membrane(sheet, { words, extras: [...dots, ...bars, ...$$('.tk'), ...rules, ...$$('.pill-c'), ...$$('.pill')] });
+  // The name: the letters under the pointer turn into code while it rests on them.
+  E.unsettle(document.querySelector('.hit-name'), [document.querySelector('h1.nm'), document.querySelector('.gv')]);
+
+  // First visit: the photo projects the CV. The indicators charge once it is lit.
+  const ready = document.documentElement.classList.contains('holo-pending') && E.firstVisit('cv-holo-a') ? projectSheet() : Promise.resolve();
+  document.documentElement.classList.remove('holo-pending');
+
+  /* ---- entry: the CV charges up as it comes into view ---- */
+  function entryTicks() {
+    ticks.forEach((b, i) => setTimeout(() => { b.classList.add('on'); tickSpark(b, { life: 600 }); }, E.reduced ? 0 : 120 + i * 70));
+  }
+  function live(d) {
+    d.style.setProperty('--hd', rnd(2.6, 4.6).toFixed(2) + 's');
+    d.style.setProperty('--hdl', (-rnd(0, 4)).toFixed(2) + 's');
+    d.classList.add('live');
+  }
+  // Each row fills from left to right, dot after dot, like one continuous charge.
+  function fillRow(row, start, step) {
+    $$('.dot', row).forEach((d, k) => {
+      d.classList.add('snap');
+      d.classList.remove('on');
+      void d.offsetWidth;
+      d.classList.remove('snap');
+      d.style.setProperty('--fd', step + 's');
+      d.style.setProperty('--fdl', (start + k * step).toFixed(2) + 's');
+      d.classList.add('on');
+      if (!E.reduced) setTimeout(() => {
+        E.spark(d, d.offsetWidth * rnd(0.6, 1.1), rnd(-6, -2), { size: 7, life: 600 });
+        if (!d.classList.contains('live')) setTimeout(() => live(d), 800);
+      }, (start + (k + 1) * step) * 1000);
+      else live(d);
+    });
+  }
+  function entryDots() { rows.forEach((row, r) => fillRow(row, 0.15 + r * 0.15, 0.2)); }
+  function chargeBar(bar, delay) {
+    const v = +getComputedStyle(bar).getPropertyValue('--v');
+    setTimeout(() => {
+      bar.classList.add('charging');
+      let last = 0;
+      E.tween(1350, t => {
+        const e = 1 - Math.pow(1 - t, 3);
+        // Energy comes in with small stutters, not as a smooth slide.
+        const p = v * Math.min(1, e + 0.018 * Math.sin(t * 40) * (1 - t));
+        bar.style.setProperty('--bp', p.toFixed(4));
+        const now = performance.now();
+        if (now - last > 70 && t < 1) { last = now; E.spark(bar, p * bar.offsetWidth, rnd(-7, bar.offsetHeight + 7), { size: 7, life: 520 }); }
+      }, () => {
+        bar.classList.remove('charging');
+        bar.style.setProperty('--bd', rnd(3, 4.8).toFixed(2) + 's');
+        bar.classList.add('live');
+      });
+    }, E.reduced ? 0 : delay);
+  }
+  function entryBars() { bars.forEach((b, i) => chargeBar(b, 200 + i * 170)); }
+
+  function reset() {
+    ticks.forEach(b => b.classList.remove('on'));
+    dots.forEach(d => d.classList.remove('on', 'live', 'flick'));
+    bars.forEach(b => { b.classList.remove('live', 'charging'); if (!E.reduced) b.style.setProperty('--bp', 0); });
+  }
+  reset();
+  E.onEnter(ticks[0], () => ready.then(entryTicks), '-8%');
+  E.onEnter(dots[0], () => ready.then(entryDots));
+  E.onEnter(bars[0], () => ready.then(entryBars), '-4%');
+
+  /* ---- ambient life: never static, always subtle ---- */
+  bars.forEach(b => E.every(b, () => { if (b.classList.contains('live')) flow(b); }, 2800, 6800));
+  E.every(dots[0], () => flick(dots[(Math.random() * dots.length) | 0]), 1500, 3800);
+  E.every(ticks[0], () => glint(ticks[(Math.random() * ticks.length) | 0]), 2600, 6000);
+  // The section rules: a permanent quiet current (CSS), a brighter pulse now and then, and glyphs rising from them.
+  rules.forEach(r => {
+    E.every(r, () => run(r), 4500, 9000);
+    E.every(r, () => E.spark(r, rnd(0.05, 0.95) * r.offsetWidth, -2, { size: 6.5, life: rnd(700, 1100), gain: 0.75, rise: 7 }), 700, 1900);
+  });
+
+  /* ---- tooltips also wake their indicator ---- */
+  rows.forEach(row => row.querySelector('.hit').addEventListener('tipshow', () => {
+    fillRow(row, 0, 0.16);
+    E.burst($$('.dot', row)[4], { cell: 7, reach: 16, gain: 0.8 });
+  }));
+  $$('.langs li').forEach(li => li.querySelector('.hit').addEventListener('tipshow', () => flow(li.querySelector('.bar'))));
+
+
+})();
+</script>
+</body>
+</html>
