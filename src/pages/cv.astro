@@ -93,7 +93,7 @@ body{color:var(--mist);font-family:'Mona Sans','Helvetica Neue',Arial,sans-serif
 /* Name and photo: who Wilson is beyond the CV, and a pulse through the whole sheet. */
 .hit-name{position:absolute;left:calc(12 * var(--pt));top:calc(18 * var(--pt));width:calc(212 * var(--pt));height:calc(70 * var(--pt));padding:0;margin:0;border:0;background:none;
   cursor:help;font-size:0;color:transparent;border-radius:calc(3 * var(--pt));-webkit-tap-highlight-color:transparent;transition:background-color .3s}
-.hit-name:hover,.hit-name.e-tipped{background:rgba(255,255,255,.06)}
+/* No box behind the name on hover (Wilson, 18 Oct 2026): the code effect on the letters is enough. */
 .hit-photo{position:absolute;z-index:2;left:calc(77.5 * var(--pt));top:calc(128.5 * var(--pt));width:calc(84 * var(--pt));height:calc(84 * var(--pt));padding:0;margin:0;border:0;
   border-radius:50%;background:none;cursor:help;font-size:0;color:transparent;-webkit-tap-highlight-color:transparent;transition:box-shadow .35s var(--ease)}
 .hit-photo:hover,.hit-photo.e-tipped{box-shadow:0 0 0 calc(2.6 * var(--pt)) #fff,0 0 calc(10 * var(--pt)) calc(2 * var(--pt)) rgba(170,215,255,.75)}
