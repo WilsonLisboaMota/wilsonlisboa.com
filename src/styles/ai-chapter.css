@@ -17,8 +17,9 @@
 @media (max-width:979px){.ch .sig{order:-1;justify-self:start;max-width:220px}}
 /* Desktop: the signature rises level with the title and no longer sets the height of the first row,
    so the opening sentence follows the title closely (Wilson, 19 Oct 2026). It scales with the viewport, like the title. */
-/* Sized so the longer second line of the title never reaches it. */
-@media (min-width:980px){.ch .open .sig{align-self:start;max-width:min(260px,17vw);margin-top:max(-2.2vw,-36px);margin-bottom:-4vw}}
+/* Sized so the longer second line of the title never reaches it, and centred on the title: the negative margins keep
+   it a little shorter than the title in the layout, so it never pushes the opening sentence down. */
+@media (min-width:980px){.ch .open .sig{align-self:center;max-width:min(260px,17vw);margin:-12px 0}}
 .ch .sig path{fill:none;stroke:rgba(26,154,228,.55);stroke-width:1}
 .ch .sig circle{fill:var(--mist)}
 .ch .ch-lede{grid-column:1/-1;font-size:clamp(19px,1.6vw,23px);line-height:1.5;color:var(--t2);max-width:56ch}
