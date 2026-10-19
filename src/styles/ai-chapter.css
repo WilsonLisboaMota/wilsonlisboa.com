@@ -9,13 +9,18 @@
 @media (min-width:980px){.ch .open{grid-template-columns:minmax(180px,2.2fr) minmax(0,6fr) minmax(0,3.8fr)}}
 .ch .open .kick{padding-bottom:.6em}
 .ch .open h2{font-size:clamp(38px,4.6vw,70px);line-height:1.03;font-weight:640;font-stretch:104%;letter-spacing:-.03em;max-width:20ch}
-.ch .open h2 em{font-style:normal;color:var(--t3)}
+/* Two sentences, two lines: the second always starts its own line. */
+.ch .open h2 em{display:block;font-style:normal;color:var(--t3)}
+/* On a wide screen each sentence stays whole; at the largest size the second may reach into the gap before the signature. */
+@media (min-width:1200px){.ch .open h2{white-space:nowrap}}
 .ch .sig{width:100%;max-width:320px;height:auto;justify-self:end;overflow:visible}
 @media (max-width:979px){.ch .sig{order:-1;justify-self:start;max-width:220px}}
 .ch .sig path{fill:none;stroke:rgba(26,154,228,.55);stroke-width:1}
 .ch .sig circle{fill:var(--mist)}
 .ch .ch-lede{grid-column:1/-1;font-size:clamp(19px,1.6vw,23px);line-height:1.5;color:var(--t2);max-width:56ch}
-@media (min-width:980px){.ch .ch-lede{grid-column:2/3}}
+/* One line on a wide screen: it may run under the signature, in the empty third column. */
+@media (min-width:980px){.ch .ch-lede{grid-column:2/-1}}
+@media (min-width:1100px){.ch .ch-lede{white-space:nowrap}}
 
 /* ---------- the four rules ---------- */
 .ch .rules{display:grid;grid-template-columns:minmax(0,1fr);gap:0 56px;margin-top:clamp(48px,8vh,88px)}
