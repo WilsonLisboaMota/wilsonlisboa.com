@@ -1,0 +1,141 @@
+---
+import Page from '../../../layouts/Page.astro';
+import pilot from '../../../data/pilot.json';
+
+// Returns against the 5,000 USD each paper account started with, written the way the page reads them.
+const pct = (equity: number) => {
+  const r = (equity / 5000 - 1) * 100;
+  return (r > 0 ? '+' : r < 0 ? '−' : '') + Math.abs(r).toFixed(2) + '%';
+};
+const orders = (n: number) => `${n} ${n === 1 ? 'order' : 'orders'}`;
+const { A, C, D } = pilot.bots;
+---
+<Page
+  title="AI Trading Bot · Wilson Mota"
+  description="AI builds a trading bot in minutes. The hard part is tuning it to behave the way I would. A pilot on paper, with the research behind it."
+  back={{ href: '/#ai', label: 'Artificial Intelligence' }}
+>
+  <section class="sec hd" aria-labelledby="t">
+    <div class="lab"><p class="meta kick">Case study · AI</p></div>
+    <div>
+      <h1 id="t">AI builds a trading bot in minutes. <em>The hard part is tuning it to behave the way I would.</em></h1>
+      <p class="facts"><span class="live">Live on paper trading</span><span>US stocks</span><span>No real money</span><span>Since October 2026</span></p>
+    </div>
+    <!-- What exists today, as facts: it runs, it costs almost nothing, and the safety is in the code. -->
+    <div class="proof" role="list">
+      <div role="listitem"><p class="v">{pilot.runsOk} of {pilot.tradingDays}</p><p class="l">Daily runs completed, with no errors logged.</p></div>
+      <div role="listitem"><p class="v">USD {pilot.jev.costUsd.toFixed(2)}</p><p class="l">For the AI to read {pilot.jev.headlines} news headlines.</p></div>
+      <div role="listitem"><p class="v">Stop loss</p><p class="l">A bot that falls 15% from its peak stops itself.</p></div>
+      <div role="listitem"><p class="v">10% rule</p><p class="l">At most 10% goes into one stock.</p></div>
+      <div role="listitem"><p class="v">Diversification</p><p class="l">Up to five stocks at a time.</p></div>
+    </div>
+    <p class="proof-sum">Cheap to run, and stable so far. <span>Whether it makes money is another question.</span></p>
+  </section>
+
+  <section class="sec" aria-labelledby="s-w" id="who">
+    <div class="lab"><h2 class="meta" id="s-w">Who did what</h2></div>
+    <div class="voices">
+      <div class="me">
+        <h3>What I decided and did</h3>
+        <ul>
+          <li>Chose the tools: Alpaca as the broker, because it gives each bot its own account; Jev, through OpenRouter, to read the news; and Laya, a free model that runs on my own PC.</li>
+          <li>Did the groundwork: the first research, the sign-ups and the deposits.</li>
+          <li>Set the rule for the AI: try to prove each idea wrong first, with the pass mark written down before any test.</li>
+          <li>Chose a two-month pilot on paper, with the review fixed for 11 December, and no real money until then.</li>
+        </ul>
+      </div>
+      <div class="ai">
+        <h3>What the AI did <i>Claude</i></h3>
+        <ul>
+          <li>Turned the question into ideas that can be tested, and wrote the pass marks down before testing.</li>
+          <li>Wrote the test engine and ran about 140 tests on 98 years of US stock prices.</li>
+          <li>Had a second AI agent redo the calculations on its own, and check the bot's code before launch.</li>
+          <li>Built the bot, its safety limits and the daily report.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-r" id="research">
+    <div class="lab"><h2 class="meta" id="s-r">The research</h2></div>
+    <div>
+      <h2 class="h">Three well-known ideas, tested on 98 years of US stocks.</h2>
+      <div class="read"><p>US stock prices from 1928 to 2025, costs included. <strong>The pass mark was set before the first test: at least 95% certainty that the advantage is real.</strong></p></div>
+      <ul class="ideas">
+        <li><div><b>Follow the trend</b><span class="how">Hold stocks only while prices are above their average of the last 10 months. Otherwise, hold cash.</span></div><p class="res">It cut the worst fall in half, −51% instead of −84%, but it didn't earn more. In the 2010s it cost about 7 points a year.</p></li>
+        <li><div><b>Step back when the market is nervous</b><span class="how">Hold fewer stocks when prices swing a lot, and more when they are calm.</span></div><p class="res">The closest to a real advantage, but a small one, and it came mostly from a few crises, such as 1929 and 2008.</p></li>
+        <li><div><b>Buy the dip</b><span class="how">Buy after a sharp short fall, and sell after the bounce.</span></div><p class="res">It only worked before costs. It traded so often that the costs ate everything.</p></li>
+      </ul>
+
+      <figure class="sure" id="sure">
+        <h3>How sure can we be that the advantage is real?</h3>
+        <div class="rows" role="list">
+          <div class="goal" aria-hidden="true"><span>The bar: 95%</span></div>
+          <div class="row" role="listitem"><p class="n"><span>Follow the trend</span><b>62%</b></p><div class="track"><div class="fill" data-v="62"></div></div></div>
+          <div class="row" role="listitem"><p class="n"><span>Step back when the market is nervous</span><b>91%</b></p><div class="track"><div class="fill" data-v="91"></div></div></div>
+          <div class="row" role="listitem"><p class="n"><span>Buy the dip</span><b>almost 0%</b></p><div class="track"><div class="fill" data-v="0.6"></div></div></div>
+        </div>
+      </figure>
+      <p class="verdict">None of them reached the bar. <span>The closest, stepping back when the market is nervous, became the pilot's base bot, not a proven edge yet.</span></p>
+      <p class="note">And over the 98 years, simply holding the whole market still ended with the most money.</p>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-p" id="pilot">
+    <div class="lab"><h2 class="meta" id="s-p">The pilot</h2></div>
+    <div>
+      <h2 class="h">Since 12 October, three bots trade US stocks on paper.</h2>
+      <div class="read"><p>Each bot has its own paper account with 5,000 USD. The AI reads the news; fixed rules decide what to buy and when to sell.</p></div>
+      <ul class="bots">
+        <li><p><b>A · The base</b></p><p class="d">The nervous-market rule, on the S&amp;P 500.</p><p class="r">{pct(A.equity)}<small>{orders(A.ordersFilled)}</small></p></li>
+        <li><p><b>C · News read by AI</b></p><p class="d">Jev reads each headline about 15 large US companies. Clearly good news: buy. Bad news, or three days later: sell.</p><p class="r">{pct(C.equity)}<small>{orders(C.ordersFilled)}</small></p></li>
+        <li><p><b>D · News read by a word list</b><span class="meta tag">control</span></p><p class="d">The same rules, but a fixed list of words decides instead of the AI.</p><p class="r">{pct(D.equity)}<small>{orders(D.ordersFilled)}</small></p></li>
+        <li class="off"><p><b>B · News read by Laya</b></p><p class="d">Waiting: Laya runs on my PC and needs more disk space.</p><p class="r">–<small>not started</small></p></li>
+      </ul>
+      <p class="asof">Returns as of {pilot.asOf}, after {pilot.tradingDays} trading days.</p>
+      <p class="q">Does the AI read the news better than a list of words? It is only useful if it does.</p>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-a">
+    <div class="lab"><h2 class="meta" id="s-a">Also studied</h2></div>
+    <div class="also">
+      <div>
+        <h3>Bitcoin: safer, not better.</h3>
+        <p>Before the pilot, we checked whether Bitcoin would be a better market. The best idea lost far less in the crashes but ended with much less money, and the certainty stopped at 72%. Bitcoin stayed out of the pilot.</p>
+      </div>
+      <a class="btn" href="/work/ai-trading-bot/bitcoin-study/">See the Bitcoin study <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-l" id="limits">
+    <div class="lab"><h2 class="meta" id="s-l">Limitations</h2></div>
+    <ul class="lim">
+      <li><b>Not a blind test</b><span>These ideas were found by other researchers in the same data. The only new evidence is what the pilot produces from now on.</span></li>
+      <li><b>One market</b><span>Only US stocks, the best stock market of the century. The result may not hold elsewhere.</span></li>
+      <li><b>A short pilot</b><span>A few weeks can't tell skill from luck. The pilot mainly tests the machinery.</span></li>
+      <li><b>The AI can't be tested on the past</b><span>A model like Jev already knows what happened, so it can only be judged going forward.</span></li>
+      <li><b>A home PC</b><span>The bot needs my PC on at 16:00. Hibernation once almost cost a day.</span></li>
+      <li><b>Human error</b><span>An API key was visible in a screenshot and had to be revoked.</span></li>
+      <li><b>Not a product</b><span>This is not financial advice. Selling something like it would need regulatory approval.</span></li>
+    </ul>
+  </section>
+
+  <section class="sec" aria-labelledby="s-n">
+    <div class="lab"><h2 class="meta" id="s-n">Next</h2></div>
+    <div class="read">
+      <p>Let the pilot run to its review on 11 December, then continue, adjust or stop, as written in advance.</p>
+      <p>A first test with real money would only come after a clean pilot, with the loss capped at 200 CHF. It is proposed, not agreed.</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Sources: the pre-registrations (2 and 8 October 2026), the research log, the research report of 3 October and the pilot's own records.</p>
+    <p>A negative result is a valid result. That is the point of the project.</p>
+  </footer>
+</Page>
+
+<script>
+  import { certainty } from '../../../scripts/charts.js';
+  certainty(document.getElementById('sure')!);
+</script>

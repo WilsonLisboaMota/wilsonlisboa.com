@@ -1,0 +1,22 @@
+---
+// Content pages: the shared head from Base, a quiet header with the way back, and the case-study styles.
+import Base from './Base.astro';
+import '../styles/work.css';
+
+interface Props {
+  title: string;
+  description: string;
+  back: { href: string; label: string };
+}
+
+const { title, description, back } = Astro.props;
+---
+<Base title={title} description={description} bodyClass="work">
+  <header class="top">
+    <a class="home" href="/">Wilson Mota</a>
+    <a class="back" href={back.href}><span aria-hidden="true">←</span> {back.label}</a>
+  </header>
+  <main class="wrap">
+    <slot />
+  </main>
+</Base>

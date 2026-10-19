@@ -1,0 +1,77 @@
+---
+// The Artificial Intelligence chapter of the home page: how I work with AI, then the three projects as evidence.
+import '../styles/ai-chapter.css';
+
+const bot = '/work/ai-trading-bot/';
+---
+<section class="ch" id="ai" aria-labelledby="ai-t">
+  <div class="open">
+    <p class="meta kick">Artificial Intelligence</p>
+    <h2 id="ai-t">AI writes the code in minutes. <em>I spend my time trying to prove it wrong.</em></h2>
+    <svg class="sig" id="sig" viewBox="0 0 320 200" aria-hidden="true"></svg>
+    <p class="ch-lede">Three projects built with AI. The same way of working runs through all of them.</p>
+  </div>
+
+  <div class="rules">
+    <div class="rule">
+      <h3>I choose the tools. The AI builds.</h3>
+      <p>In the trading bot, I picked the broker and the AI models that read the news. Claude wrote the code and the tests.</p>
+      <a href={`${bot}#who`}>Who did what</a>
+    </div>
+    <div class="rule">
+      <h3>The bar is set before the results.</h3>
+      <p>The pass marks were written down before the first test. No idea reached them, and the page says so.</p>
+      <a href={`${bot}#research`}>The research</a>
+    </div>
+    <div class="rule">
+      <h3>Results are checked twice.</h3>
+      <p>A second AI agent redid the trading bot's calculations on its own. The Bitcoin figures on this site were recomputed from the raw prices.</p>
+      <a href={`${bot}bitcoin-study/`}>The Bitcoin study</a>
+    </div>
+    <div class="rule">
+      <h3>What fails stays on the page.</h3>
+      <p>Every case study ends with its limits, down to a leaked API key that had to be revoked.</p>
+      <a href={`${bot}#limits`}>The trading bot's limits</a>
+    </div>
+  </div>
+
+  <div class="ev">
+    <p class="meta">The evidence</p>
+    <a class="proj" href={bot}>
+      <p class="meta st live">Live on paper trading</p>
+      <div><h3>AI Trading Bot</h3><p class="hl">AI builds a trading bot in minutes. The hard part is tuning it to behave the way I would.</p></div>
+      <p class="fact">Three bots trade US stocks on paper. The question: does AI reading the news beat a simple list of words?<span class="go">Read the case study</span></p>
+    </a>
+    <div class="proj" id="cfo">
+      <p class="meta st idle">Working pipeline · product not built</p>
+      <div><h3>Personal CFO</h3><p class="hl">A finance analyst that explains your money, where the AI never does the maths.</p></div>
+      <p class="fact">About 2,400 real transactions, every description interpreted.<span>Case study to follow</span></p>
+    </div>
+    <div class="proj" id="radar">
+      <p class="meta st idle">In alpha · first alerts not sent yet</p>
+      <div><h3>Property Deal Radar</h3><p class="hl">Finds the property deals that make economic sense, and sends an alert when a hot one appears.</p></div>
+      <p class="fact">It keeps its shortlist in SharePoint, so the same property never comes back twice.<span>Case study to follow</span></p>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.documentElement.classList.add('js');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The AI signature: about 44 curves that start scattered and converge on one point,
+  // "a lot of information turned into knowledge", as in the hero.
+  const svg = document.getElementById('sig')!, fx = 268, fy = 112;
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  let html = '';
+  for (let i = 0; i < 44; i++) {
+    const sx = rnd() * 150, sy = 10 + rnd() * 180;
+    const c1x = sx + 60 + rnd() * 60, c1y = sy + (rnd() - .5) * 60, c2x = fx - 70 - rnd() * 40, c2y = fy + (sy - fy) * (0.25 + rnd() * 0.3);
+    html += `<path d="M${sx.toFixed(1)} ${sy.toFixed(1)}C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${fx} ${fy}" style="--dl:${(rnd() * 0.5).toFixed(2)}s"/>`;
+  }
+  html += `<circle cx="${fx}" cy="${fy}" r="3.5"/>`;
+  svg.innerHTML = html;
+  svg.querySelectorAll('path').forEach(p => p.style.setProperty('--len', String(Math.ceil(p.getTotalLength()))));
+  if (reduced) svg.classList.add('drawn');
+  else new IntersectionObserver((es, io) => es.forEach(e => { if (e.isIntersecting) { requestAnimationFrame(() => svg.classList.add('drawn')); io.disconnect(); } }), { threshold: 0.3 }).observe(svg);
+</script>

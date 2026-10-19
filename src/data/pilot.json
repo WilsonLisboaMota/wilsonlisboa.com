@@ -1,0 +1,13 @@
+{
+  "_source": "Read-only from the bot's ledger (TradingBot_Engine/data/ledger.sqlite). Paper accounts start at 5,000 USD.",
+  "asOf": "19 October 2026",
+  "tradingDays": 6,
+  "runsOk": 6,
+  "errorsLogged": 0,
+  "jev": { "headlines": 490, "costUsd": 0.01221 },
+  "bots": {
+    "A": { "equity": 4922.95, "ordersFilled": 1 },
+    "C": { "equity": 4979.40, "ordersFilled": 15 },
+    "D": { "equity": 4975.30, "ordersFilled": 15 }
+  }
+}

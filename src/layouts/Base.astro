@@ -1,17 +1,20 @@
 ---
-import '../styles/site.css';
+import '../styles/base.css';
 
 interface Props {
   title?: string;
   description?: string;
   /** Keeps search engines out until launch. */
   noindex?: boolean;
+  /** Lets a page family raise its own body styles above the shared ones without relying on stylesheet order. */
+  bodyClass?: string;
 }
 
 const {
   title = 'Beyond the Dashboards',
   description = 'Wilson Mota. Business Intelligence, AI, leadership and the things I build beyond the dashboard.',
   noindex = true,
+  bodyClass,
 } = Astro.props;
 ---
 <!doctype html>
@@ -27,7 +30,7 @@ const {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,200..900&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap">
 </head>
-<body>
+<body class={bodyClass}>
 <slot />
 </body>
 </html>

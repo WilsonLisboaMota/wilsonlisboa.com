@@ -1,21 +1,25 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import AiChapter from '../components/AiChapter.astro';
 ---
 <Base>
   <main>
     <Hero />
 
-    <section class="next" id="work" aria-labelledby="next-title">
-      <p class="kicker mono">After the crossing</p>
-      <h2 id="next-title">What lies behind</h2>
-      <p>Each force will open its own section. None of them is built yet.</p>
-      <ul class="todo">
-        <li id="bi">Business Intelligence <span class="mono">Not built</span></li>
-        <li id="ai">Artificial Intelligence <span class="mono">Not built</span></li>
-        <li id="leadership">Leadership <span class="mono">Not built</span></li>
-        <li id="entrepreneurship">Entrepreneurship <span class="mono">Not built</span></li>
-      </ul>
-    </section>
+    <div id="work">
+      <AiChapter />
+
+      <section class="next" aria-labelledby="next-title">
+        <p class="meta">Still being built</p>
+        <h2 id="next-title">The other forces</h2>
+        <p>Each force opens its own section. Artificial Intelligence is the first one built.</p>
+        <ul class="todo">
+          <li id="bi">Business Intelligence <span class="mono">Not built</span></li>
+          <li id="leadership">Leadership <span class="mono">Not built</span></li>
+          <li id="entrepreneurship">Entrepreneurship <span class="mono">Not built</span></li>
+        </ul>
+      </section>
+    </div>
   </main>
 </Base>

@@ -1,0 +1,151 @@
+/* Case-study pages (AI Trading Bot, Bitcoin study). Ported from the approved stage-4-ai sketches. */
+body.work{color:var(--t1);font:400 18px/1.6 var(--sans)}
+h1,h2,h3,p,ul,ol,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:calc(env(safe-area-inset-top,0px) + 22px) var(--gutter) 0;max-width:1320px;margin:0 auto}
+.top a{text-decoration:none}
+.top .home{font-weight:600;font-size:15px}
+.top .back{font-size:14px;color:var(--t2)}
+.top .back:hover{color:var(--t1)}
+
+/* Layout: a narrow label column and a reading column, offset from the left. */
+.wrap{max-width:1320px;margin:0 auto;padding:0 var(--gutter)}
+.sec{display:grid;grid-template-columns:minmax(0,1fr);gap:14px 48px;padding:clamp(56px,10vh,104px) 0 0}
+@media (min-width:980px){.sec{grid-template-columns:minmax(180px,2.2fr) minmax(0,8fr) minmax(0,1.8fr)}}
+.sec > .lab{padding-top:.45em}
+.read{max-width:66ch}
+.read p + p{margin-top:1em}
+.read p{color:var(--t2)}
+.read strong{color:var(--t1);font-weight:600}
+h2.h{font-size:clamp(24px,2vw,30px);line-height:1.2;font-weight:640;letter-spacing:-.015em;margin-bottom:14px}
+/* Section titles on one line on a wide screen; they may run into the empty right column. */
+@media (min-width:1200px){h2.h{white-space:nowrap}}
+
+/* Header */
+.hd{padding-top:clamp(40px,9vh,110px)}
+.hd .kick{margin-bottom:22px}
+.hd h1{font-size:clamp(36px,4.6vw,66px);line-height:1.04;font-weight:640;font-stretch:104%;letter-spacing:-.028em;max-width:21ch}
+.hd h1 em{font-style:normal;color:var(--t3)}
+.facts{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:30px;font-size:15px;color:var(--t2)}
+.facts span{display:inline-flex;align-items:center;gap:8px}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--signal);animation:live 2.6s ease-in-out infinite}
+@keyframes live{0%,100%{box-shadow:0 0 0 0 rgba(224,149,47,.55)}50%{box-shadow:0 0 0 6px rgba(224,149,47,0)}}
+.lede{margin-top:30px;font-size:clamp(19px,1.6vw,23px);line-height:1.5;color:var(--t2);max-width:58ch}
+
+/* Proof strip: what exists today, as facts, right under the title */
+/* Six facts in a row on a wide screen, full width, two lines of explanation at most (Wilson, 19 Oct 2026). */
+.proof{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 24px;margin-top:clamp(28px,4vh,40px);padding-top:24px;border-top:1px solid var(--line)}
+@media (min-width:760px){.proof{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:980px){.hd .proof{grid-column:1/-1}.hd .proof-sum{grid-column:2/-1}}
+/* Five in a row where each explanation still fits in two lines; below that, rows of three. */
+@media (min-width:1100px){.proof{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.proof .v{font-size:clamp(20px,1.45vw,24px);line-height:1.15;font-weight:620;letter-spacing:-.01em;white-space:nowrap}
+.proof .l{margin-top:8px;font-size:15px;line-height:1.45;color:var(--t2)}
+.proof-sum{margin-top:26px;font-size:clamp(18px,1.35vw,21px);line-height:1.45;font-weight:520}
+@media (min-width:1200px){.proof-sum{white-space:nowrap}}
+.proof-sum span{font-weight:400;color:var(--t3)}
+
+/* Two voices */
+.voices{display:grid;grid-template-columns:minmax(0,1fr);gap:32px 48px}
+@media (min-width:760px){.voices{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.voices h3{font-size:19px;font-weight:620;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.voices h3 i{font-style:normal;font-weight:400;color:var(--t3);margin-left:6px}
+.voices li{position:relative;padding:0 0 13px 18px;font-size:17px;line-height:1.5;color:var(--t2)}
+.voices li::before{content:"";position:absolute;left:0;top:.74em;width:8px;height:2px;border-radius:1px}
+.voices .me li::before{background:var(--signal)}
+.voices .ai li::before{background:var(--cyan)}
+
+/* Ideas: name, how it works, what happened */
+.ideas{margin-top:26px}
+.ideas li{display:grid;grid-template-columns:minmax(0,1fr);gap:4px 32px;padding:20px 0;border-top:1px solid var(--line2)}
+@media (min-width:760px){.ideas li{grid-template-columns:minmax(0,5fr) minmax(0,6fr)}}
+.ideas b{display:block;font-size:20px;font-weight:620;line-height:1.3}
+.ideas .how{display:block;margin-top:4px;font-size:16px;color:var(--t3)}
+.ideas .res{font-size:17px;line-height:1.5;color:var(--t2)}
+
+/* Certainty bars: one series, one colour, values written on the bars; the bar we set is a line. */
+.sure{position:relative;margin-top:30px;max-width:760px}
+.sure h3{font-size:19px;font-weight:620;margin-bottom:4px}
+.sure > p{font-size:15.5px;color:var(--t3);margin-bottom:22px}
+.sure .rows{position:relative;padding-top:30px}
+.sure .row{margin-bottom:20px}
+.sure .row .n{display:flex;justify-content:space-between;gap:16px;max-width:calc(95% - 14px);font-size:16px;color:var(--t2)}
+.sure .row .n b{font-weight:600;color:var(--t1)}
+.sure .track{position:relative;height:12px;margin-top:8px;background:linear-gradient(90deg,var(--line2),var(--line2)) 0 50%/100% 1px no-repeat}
+.sure .fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:0 4px 4px 0;background:var(--cyan);transition:width 1.2s var(--ease)}
+.sure .v{position:absolute;top:50%;transform:translate(8px,-50%);font-size:15px;font-weight:600;white-space:nowrap}
+.sure .goal{position:absolute;top:0;bottom:10px;left:95%;width:0;border-left:1.5px solid var(--mist)}
+.sure .goal span{position:absolute;top:0;right:8px;white-space:nowrap;font-size:13.5px;color:var(--t1)}
+.verdict{margin-top:8px;font-size:clamp(18px,1.4vw,21px);line-height:1.5;max-width:60ch}
+.verdict span{color:var(--t3)}
+.note{margin-top:14px;font-size:15.5px;color:var(--t3);max-width:66ch}
+
+/* Trade-off tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px 40px;margin-top:26px}
+.tile .l{font-size:15px;color:var(--t2)}
+.tile .v{margin-top:6px;font-size:clamp(36px,3.4vw,50px);line-height:1;font-weight:600;letter-spacing:-.02em}
+.tile .b{margin-top:8px;font-size:16px;color:var(--t2)}
+.tile .b i{display:inline-block;width:14px;height:2px;margin-right:8px;vertical-align:middle;background:var(--bench)}
+.tile .c{margin-top:6px;font-size:15px;color:var(--t3)}
+
+/* Growth chart */
+.legend{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:15px;color:var(--t2);margin:26px 0 8px}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{width:18px;height:2px;border-radius:1px}
+.chart-k{margin:0 0 10px;font-size:14px;color:var(--t3)}
+.chart{position:relative;width:100%;touch-action:pan-y}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .ax{font:400 12px var(--sans);fill:var(--t3)}
+.chart .band-l{font:450 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;fill:var(--t3)}
+.chart .end{font:600 13px var(--sans);fill:var(--t1)}
+.chart .end2{font:400 12px var(--sans);fill:var(--t3)}
+.tip{position:absolute;pointer-events:none;min-width:190px;padding:10px 12px;border-radius:8px;background:rgba(13,27,36,.96);box-shadow:0 0 0 1px var(--line),0 10px 30px rgba(0,0,0,.4);font-size:13.5px;line-height:1.45;color:var(--t2);opacity:0;transition:opacity .15s}
+.tip.on{opacity:1}
+.tip b{color:var(--t1);font-weight:600}
+.tip .row{display:flex;justify-content:space-between;gap:14px}
+.tip .k{display:inline-flex;align-items:center;gap:6px}
+.tip .k i{width:10px;height:2px}
+.cap{margin-top:14px;font-size:14.5px;color:var(--t3);max-width:78ch}
+details.tv{margin-top:14px}
+details.tv summary{cursor:pointer;font-size:15px;color:var(--t2);width:max-content}
+.yt{margin-top:12px;border-collapse:collapse;font-size:14.5px}
+.yt th,.yt td{padding:6px 16px 6px 0;text-align:right;border-bottom:1px solid var(--line2)}
+.yt th:first-child,.yt td:first-child{text-align:left}
+
+/* Pilot bots */
+.bots{margin-top:24px}
+.bots li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 24px;padding:16px 0;border-top:1px solid var(--line2)}
+.bots b{font-weight:620;font-size:18px}
+.bots .tag{margin-left:8px}
+.bots .d{grid-column:1;grid-row:2;font-size:16px;color:var(--t2);line-height:1.5}
+.bots .r{grid-column:2;grid-row:1 / span 2;font-size:17px;font-weight:600;text-align:right}
+.bots .r small{display:block;font-size:13px;font-weight:400;color:var(--t3)}
+.bots li.off{opacity:.62}
+.asof{margin-top:6px;font-size:14px;color:var(--t3)}
+.q{margin-top:28px;padding-left:18px;border-left:2px solid var(--signal);font-size:clamp(19px,1.5vw,22px);line-height:1.5;color:var(--t1);max-width:58ch}
+.q span{display:block;margin-top:6px;font-size:15.5px;color:var(--t3)}
+.mach{display:flex;flex-wrap:wrap;gap:10px 30px;margin-top:20px;font-size:15.5px;color:var(--t2)}
+
+/* Also studied: a quiet bridge to another page */
+.also{display:grid;grid-template-columns:minmax(0,1fr);gap:18px 40px;padding:30px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);align-items:center}
+@media (min-width:760px){.also{grid-template-columns:minmax(0,1fr) auto}}
+.also h3{font-size:clamp(24px,2.2vw,30px);font-weight:640;letter-spacing:-.015em}
+.also p{margin-top:8px;color:var(--t2);max-width:60ch}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:999px;font-size:15.5px;text-decoration:none;color:var(--deep);background:var(--mist);transition:background-color .25s,box-shadow .25s;white-space:nowrap}
+.btn:hover{background:#fff;box-shadow:0 0 22px rgba(150,205,255,.5)}
+
+/* Limits */
+.lim li{display:grid;grid-template-columns:minmax(0,1fr);gap:2px 22px;padding:14px 0;border-top:1px solid var(--line2)}
+@media (min-width:760px){.lim li{grid-template-columns:220px minmax(0,1fr)}}
+.lim b{font-weight:600}
+.lim span{color:var(--t2);font-size:16.5px}
+
+.foot{margin-top:clamp(64px,12vh,120px);padding:28px 0 120px;border-top:1px solid var(--line);color:var(--t3);font-size:14.5px}
+.foot p + p{margin-top:6px}
+
+@media (prefers-reduced-motion:no-preference){
+  .js .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+  .js .drawn .draw{transition:stroke-dashoffset 2.4s cubic-bezier(.3,.1,.2,1);stroke-dashoffset:0}
+}
+@media (prefers-reduced-motion:reduce){.live::before{animation:none}.sure .fill{transition:none}}

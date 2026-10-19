@@ -1,0 +1,99 @@
+---
+import Page from '../../../layouts/Page.astro';
+import btc from '../../../data/btc-chart.json';
+
+// The yearly table is written into the page, so the numbers are there without JavaScript.
+const signed = (v: number) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v) + '%';
+const years = (btc.yearly as [string, number, number][]).map(([y, bh, h6]) => ({ y: y === '2026' ? '2026 (to 7 Oct)' : y, bh: signed(bh), h6: signed(h6) }));
+---
+<Page
+  title="Bitcoin market study · Wilson Mota"
+  description="Before the trading bot's pilot, three ideas were tested on Bitcoin. The best one was safer, not better."
+  back={{ href: '/work/ai-trading-bot/', label: 'AI Trading Bot' }}
+>
+  <section class="sec hd" aria-labelledby="t">
+    <div class="lab"><p class="meta kick">Market study · AI Trading Bot</p></div>
+    <div>
+      <h1 id="t">Bitcoin: <em>safer, not better.</em></h1>
+      <p class="facts"><span>Backtest only</span><span>No real money</span><span>Daily prices, 2013–2026</span></p>
+      <p class="lede">Before the pilot, we asked whether Bitcoin would be a better market for the bot than stocks. We tested three ideas on Bitcoin prices from 2013 to 2026, with the pass marks written down before the prices were even downloaded.</p>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-i">
+    <div class="lab"><h2 class="meta" id="s-i">The ideas</h2></div>
+    <div>
+      <ul class="ideas" style="margin-top:0">
+        <li><div><b>Follow the trend</b><span class="how">Hold Bitcoin only while its price is above its average of the last 10 months. Otherwise, hold cash.</span></div><p class="res">It avoided the worst of the crashes, but it fell behind in the 2019–2021 boom.</p></li>
+        <li><div><b>Step back when the market is nervous</b><span class="how">Hold less Bitcoin when its price swings wildly.</span></div><p class="res">On its own, it didn't protect much: in 2022 it still lost 54%.</p></li>
+        <li><div><b>Both together</b><span class="how">Follow the trend, and within it, hold less when the price swings wildly.</span></div><p class="res">The best result of all the research, and the one shown below.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-r">
+    <div class="lab"><h2 class="meta" id="s-r">The result</h2></div>
+    <div>
+      <h2 class="h">Both together, against simply holding Bitcoin.</h2>
+      <div class="tiles" role="list">
+        <div class="tile" role="listitem"><p class="l">Worst fall</p><p class="v">−54%</p><p class="b"><i></i>Holding Bitcoin: −85%</p><p class="c">Much safer</p></div>
+        <div class="tile" role="listitem"><p class="l">In 2022</p><p class="v">+2%</p><p class="b"><i></i>Holding Bitcoin: −64%</p><p class="c">Mostly out of the market</p></div>
+        <div class="tile" role="listitem"><p class="l">Money at the end</p><p class="v">×1,900</p><p class="b"><i></i>Holding Bitcoin: ×6,300</p><p class="c">Far less</p></div>
+      </div>
+
+      <figure style="position:relative;margin-top:10px">
+        <p class="legend" aria-hidden="true"><span><i style="background:var(--cyan)"></i>Both together</span><span><i style="background:var(--bench)"></i>Holding Bitcoin</span></p>
+        <p class="chart-k">Top: what $1 became, on a log scale. Bottom: how far it was below its previous high.</p>
+        <div class="chart" id="chart" role="img" aria-label="Growth of 1 dollar from 2013 to 2026, and the fall from the previous high. Holding Bitcoin ends near 6,300 times and falls up to 85%. Both together ends near 1,900 times and falls up to 54%."></div>
+        <div class="tip" id="tip" aria-hidden="true"></div>
+        <figcaption class="cap">The rules were built on 2013–2018, checked on 2019–2021, and given a final test on 2022–2026. Recomputed for this page from Bitstamp daily prices, with trading costs and next-day execution. It matches the research report.</figcaption>
+        <details class="tv">
+          <summary>Show the yearly returns as a table</summary>
+          <table class="yt">
+            <thead><tr><th scope="col">Year</th><th scope="col">Holding Bitcoin</th><th scope="col">Both together</th></tr></thead>
+            <tbody>{years.map(r => <tr><td>{r.y}</td><td>{r.bh}</td><td>{r.h6}</td></tr>)}</tbody>
+          </table>
+        </details>
+      </figure>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-s">
+    <div class="lab"><h2 class="meta" id="s-s">The decision</h2></div>
+    <div>
+      <figure class="sure" id="sure" style="margin-top:0">
+        <h3>How sure can we be that the advantage is real?</h3>
+        <div class="rows" role="list">
+          <div class="goal" aria-hidden="true"><span>The bar: 95%</span></div>
+          <div class="row" role="listitem"><p class="n"><span>Follow the trend</span><b>49%</b></p><div class="track"><div class="fill" data-v="49"></div></div></div>
+          <div class="row" role="listitem"><p class="n"><span>Step back when the market is nervous</span><b>18%</b></p><div class="track"><div class="fill" data-v="18"></div></div></div>
+          <div class="row" role="listitem"><p class="n"><span>Both together</span><b>72%</b></p><div class="track"><div class="fill" data-v="72"></div></div></div>
+        </div>
+      </figure>
+      <p class="verdict">Bitcoin stayed out of the pilot. <span>Both together held up against random luck, higher costs and delays. But in the 2019–2021 boom it did slightly worse than simply holding, and it never reached the bar of certainty.</span></p>
+      <div class="read" style="margin-top:22px">
+        <p><strong>What it is good for.</strong> If I ever hold Bitcoin, a simple trend rule greatly reduces the risk of losing 75–85%, in exchange for gaining less in the big rallies. That is risk management, not an edge, and not financial advice.</p>
+        <p>Almost all of its advantage came from three crashes, in 2014, 2018 and 2022. Three is a very small number to build on.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-n">
+    <div class="lab"><h2 class="meta" id="s-n">Next</h2></div>
+    <div class="read">
+      <p>A possible later step, not decided: test "both together" forward on paper, as a safety rule rather than a way to make more money. The stock pilot comes first.</p>
+      <p style="margin-top:22px"><a class="btn" href="/work/ai-trading-bot/"><span aria-hidden="true">←</span> Back to the trading bot</a></p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Sources: the pre-registration of 8 October 2026 and the Bitcoin research report. The chart was recomputed from Bitstamp's daily prices.</p>
+  </footer>
+</Page>
+
+<script>
+  import { certainty, growth } from '../../../scripts/charts.js';
+  import btc from '../../../data/btc-chart.json';
+  growth(document.getElementById('chart')!, document.getElementById('tip')!, btc, { h6: 'Both together', bh: 'Holding Bitcoin' });
+  certainty(document.getElementById('sure')!);
+</script>
