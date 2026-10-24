@@ -1,0 +1,102 @@
+---
+import Page from '../layouts/Page.astro';
+import { execSync } from 'node:child_process';
+
+let commits = 0;
+try { commits = +execSync('git rev-list --count HEAD', { cwd: new URL('../../', import.meta.url) }).toString().trim(); } catch {}
+---
+<Page
+  title="How this site was built · Wilson Mota"
+  description="The build log of wilsonlisboa.com: what Claude did, what Wilson decided, what was rejected, and the rules that kept the numbers honest."
+  back={{ href: '/#built', label: 'Home' }}
+>
+  <section class="sec hd" aria-labelledby="t">
+    <div class="lab"><p class="meta kick">Build log</p></div>
+    <div>
+      <h1 id="t">Built with AI, <em>and every decision written down.</em></h1>
+      <p class="facts"><span>Astro · three.js</span><span>Claude Code</span><span>GitHub Pages</span><span>Since 15 October 2026</span></p>
+    </div>
+    <div class="proof" role="list">
+      <div role="listitem"><p class="v">{commits || '—'} commits</p><p class="l">On the public repository, each one a change you can read.</p></div>
+      <div role="listitem"><p class="v">1 log</p><p class="l">A decision file, kept in Portuguese, that records every choice and every rejection.</p></div>
+      <div role="listitem"><p class="v">3 dropped</p><p class="l">Directions tried and rejected, kept on record instead of deleted.</p></div>
+      <div role="listitem"><p class="v">0 trackers</p><p class="l">No cookies, no analytics, no third-party scripts beyond the fonts.</p></div>
+      <div role="listitem"><p class="v">0 invented</p><p class="l">Numbers. Each one traces to a record, a file or a price series.</p></div>
+    </div>
+    <p class="proof-sum">The AI built fast. <span>The site is what survived the review.</span></p>
+  </section>
+
+  <section class="sec" aria-labelledby="s-w" id="who">
+    <div class="lab"><h2 class="meta" id="s-w">Who did what</h2></div>
+    <div class="voices">
+      <div class="me">
+        <h3>What I decided and did</h3>
+        <ul>
+          <li>Set the brief: breadth, not BI depth. Four themes, one honesty rule: nothing invented, every status real.</li>
+          <li>Described the hero I wanted, a living data membrane with something on the other side, and rejected two versions of its energy until it read right.</li>
+          <li>Chose the structure, the domain, the hosting and the colours; registered the domain and the accounts myself.</li>
+          <li>Reviewed every sketch, asked for shorter text, plain words and equal lines, and approved each chapter before it went live.</li>
+        </ul>
+      </div>
+      <div class="ai">
+        <h3>What the AI did <i>Claude</i></h3>
+        <ul>
+          <li>Wrote the code: the WebGL hero, the Astro site, the charts, the CV with motion, the screenshot tools.</li>
+          <li>Drafted every text from the CV, the project notes and the records, and rewrote it on feedback.</li>
+          <li>Recomputed the Bitcoin figures from raw prices and read the trading bot's ledger, read-only, before publishing numbers.</li>
+          <li>Kept the decision log and checked each change with headless screenshots at desktop and phone sizes.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-t">
+    <div class="lab"><h2 class="meta" id="s-t">The path</h2></div>
+    <div>
+      <h2 class="h">Ten days, in order.</h2>
+      <ol class="log">
+        <li><b>15 Oct</b><span>Research and direction. A first concept, an exploded 3D view, is dropped the same day for leaning on an old prototype. The second, the membrane, is approved and built.</span></li>
+        <li><b>15 Oct</b><span>The crossing: scrolling carries the visitor through the wall to the four structures behind it. The hero is closed.</span></li>
+        <li><b>16 Oct</b><span>Content gathered from the CV and the project notes. Domain registered, GitHub Pages and the email set up. First publication.</span></li>
+        <li><b>16 Oct</b><span>Two attempts to make the AI force's ripples less like water. Both rejected; the original stays.</span></li>
+        <li><b>17 Oct</b><span>The site's structure approved: map and territory. A live connection between Claude and Power BI set up and tested.</span></li>
+        <li><b>18 Oct</b><span>Migration to Astro with no visible change. The CV page, with a generated PDF.</span></li>
+        <li><b>19 Oct</b><span>The AI chapter and the trading bot case study: a first version rejected for jargon, a second approved and published the same day.</span></li>
+        <li><b>24 Oct</b><span>The rest of the site, in one pass: the chapters, the depth behind the wall, the light surface, the footer, this page.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="s-r">
+    <div class="lab"><h2 class="meta" id="s-r">The rules</h2></div>
+    <ul class="lim">
+      <li><b>Nothing invented</b><span>No metric, feature or skill that a record does not support. When the record said "8 bugs" and nothing backed it, the number came out.</span></li>
+      <li><b>Status, not spin</b><span>"Live on paper trading", "product not built", "in alpha". The words on the page are the state of the work.</span></li>
+      <li><b>Private stays private</b><span>The repository is public, so unapproved recommendations, private notes and personal details never enter it.</span></li>
+      <li><b>Checked twice</b><span>Figures recomputed from the source before they go on a page; layouts checked with screenshots at two sizes.</span></li>
+      <li><b>Plain words</b><span>For readers outside the field. No bootstrap, no basis points, no Sharpe.</span></li>
+    </ul>
+  </section>
+
+  <section class="sec" aria-labelledby="s-s">
+    <div class="lab"><h2 class="meta" id="s-s">The stack</h2></div>
+    <ul class="lim">
+      <li><b>Astro 7</b><span>Static pages, built on every push by GitHub Actions and served by GitHub Pages.</span></li>
+      <li><b>three.js</b><span>The hero's membrane and the structures behind it, in WebGL, with a static fallback.</span></li>
+      <li><b>Claude Code</b><span>The AI, working in this project's folder, with read access to the trading bot and its ledger and no permission to change them.</span></li>
+      <li><b>Cloudflare</b><span>The domain, the DNS and the email forwarding.</span></li>
+      <li><b>Headless Chrome</b><span>Screenshots and measurements through the DevTools protocol, so each change is seen before it ships.</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    <p>Source: the site's decision log and its Git history. The repository is public on GitHub.</p>
+  </footer>
+</Page>
+
+<style>
+  .log{margin-top:20px}
+  .log li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:4px 16px;padding:14px 0;border-top:1px solid var(--line2)}
+  .log b{font:450 13px/1.9 var(--mono);color:var(--t3)}
+  .log span{color:var(--t2);font-size:16.5px;line-height:1.5}
+</style>

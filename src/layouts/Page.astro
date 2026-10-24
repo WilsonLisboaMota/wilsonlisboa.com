@@ -1,6 +1,7 @@
 ---
-// Content pages: the shared head from Base, a quiet header with the way back, and the case-study styles.
+// Content pages: the shared head from Base, a quiet header with the way back, the case-study styles and the site footer.
 import Base from './Base.astro';
+import Footer from '../components/Footer.astro';
 import '../styles/work.css';
 
 interface Props {
@@ -19,4 +20,5 @@ const { title, description, back } = Astro.props;
   <main class="wrap">
     <slot />
   </main>
+  <Footer />
 </Base>

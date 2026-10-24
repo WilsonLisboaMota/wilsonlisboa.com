@@ -1,0 +1,65 @@
+---
+// Business Intelligence: the platform under the dashboards, and an AI with governed access to it.
+import '../styles/chapter.css';
+---
+<section class="ch" id="bi" aria-labelledby="bi-t">
+  <div class="open">
+    <p class="meta kick">Business Intelligence</p>
+    <h2 id="bi-t">Above: the chart. <em>Below: the platform.</em></h2>
+    <svg class="sig" data-sig="bi" viewBox="0 0 320 200" aria-hidden="true"></svg>
+    <p class="ch-lede">Data platforms in regulated environments, where every number has to survive an audit.</p>
+  </div>
+
+  <div class="row4">
+    <p class="meta">What I run</p>
+    <ul class="rules">
+      <li class="rule">
+        <h3>Power BI, end to end</h3>
+        <p>I led its implementation at Stonehage Fleming and now own the platform at Corient: governance, security and scalability.</p>
+      </li>
+      <li class="rule">
+        <h3>The architecture under it</h3>
+        <p>Responsible for the Dremio and dbt architecture, with its security and governance, and a Databricks certification in 2026.</p>
+      </li>
+      <li class="rule">
+        <h3>The pipelines</h3>
+        <p>Alteryx, SSIS, Mage.ai and MDM processes that support the business every day.</p>
+      </li>
+      <li class="rule">
+        <h3>Regulated by default</h3>
+        <p>Data governance frameworks and audit compliance. Data integrity is the foundation of operational safety.</p>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ev">
+    <p class="meta">The evidence</p>
+    <a class="proj" href="/work/power-bi-mcp/">
+      <p class="meta st done">Live · queried by Claude</p>
+      <div><h3>An AI with governed access to Power BI</h3><p class="hl">Read-only, by design: Claude reads a semantic model through Microsoft's own endpoint, and nothing else.</p></div>
+      <p class="fact">A tenant built from scratch on this domain. Claude's first queries found a broken measure.<span class="go">Read the case study</span></p>
+    </a>
+    <div class="proj" id="crm">
+      <p class="meta st idle">In progress · recording pending</p>
+      <div><h3>One report, three versions</h3><p class="hl">The same CRM report: the original, my repair, and Claude's improvement, side by side.</p></div>
+      <p class="fact">A masked CRM dataset, 12 tables and 100 measures.<span>Case study to follow</span></p>
+    </div>
+  </div>
+
+  <div class="close creds">
+    <p class="meta">Credentials</p>
+    <ul>
+      <li><b>Databricks Data Analyst</b> · 2026 · <a class="ul" href="https://credentials.databricks.com/c63b7e6e-c357-4cc9-9085-9081abb1aeb8#acc.pgCm5w0a" rel="noopener">Verify</a></li>
+      <li><b>Microsoft Data Analyst Associate</b> · 2021 · expired</li>
+      <li><b>MSc in Management &amp; Business</b> · Atlantico Business School · 2019</li>
+      <li><b>Degree in Economics</b> · ISEG, Lisbon · 2016</li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .creds > .meta{margin-bottom:14px}
+  .creds ul{display:grid;grid-template-columns:minmax(0,1fr);gap:8px 40px;font-size:16px;color:var(--t2)}
+  @media (min-width:760px){.creds ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .creds b{font-weight:600;color:var(--t1)}
+</style>

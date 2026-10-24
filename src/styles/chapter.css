@@ -1,0 +1,87 @@
+/* The home-page chapters. Everything sits under .ch, so the hero's global rules (h1, .top, .lede, .kicker) never meet it.
+   Colours come from the surface tokens in base.css, so a chapter reads the same on the dark and on the light band. */
+.ch{position:relative;max-width:1320px;margin:0 auto;padding:0 var(--gutter);color:var(--t1);font-size:18px;line-height:1.6}
+.ch :is(h2,h3,p,ul,ol,figure,blockquote){margin:0}
+.ch :is(ul,ol){padding:0;list-style:none}
+.ch a{text-decoration:none}
+/* A quiet underline for the links inside text. */
+.ch .ul{color:var(--t1);border-bottom:1px solid var(--link);padding-bottom:1px;transition:border-color .25s}
+.ch .ul:hover{border-color:var(--cyan)}
+
+/* ---------- chapter opening: kicker, title in two sentences, the chapter's signature, one line of lede ---------- */
+.ch .open{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:28px 48px;padding-top:clamp(72px,14vh,160px);align-items:start}
+@media (min-width:980px){.ch .open{grid-template-columns:minmax(180px,2.2fr) minmax(0,6fr) minmax(0,3.8fr)}}
+.ch .open .kick{padding-bottom:.6em}
+.ch .open h2{font-size:clamp(38px,4.6vw,70px);line-height:1.03;font-weight:640;font-stretch:104%;letter-spacing:-.03em;max-width:20ch}
+/* Two sentences, two lines: the second always starts its own line. */
+.ch .open h2 em{display:block;font-style:normal;color:var(--t3)}
+@media (min-width:1100px){.ch .open h2{white-space:nowrap}}
+.ch .sig{width:100%;max-width:220px;height:auto;justify-self:start;overflow:visible}
+@media (max-width:979px){.ch .sig{order:-1}}
+/* Desktop: centred on the title, and a little shorter than it in the layout, so it never pushes the lede down. */
+@media (min-width:980px){.ch .open .sig{align-self:center;justify-self:end;max-width:min(260px,17vw);margin:-12px 0}}
+.ch .sig path{fill:none;stroke:rgba(26,154,228,.6);stroke-width:1}
+[data-surface="light"] .ch .sig path{stroke:rgba(0,72,111,.7);stroke-width:1.2}
+.ch .sig .faint{stroke:var(--line)}
+.ch .sig circle{fill:var(--dot)}
+.ch .sig circle.o{fill:none;stroke:var(--dot);stroke-width:1.2}
+.ch .sig circle.c{fill:var(--cyan)}
+.ch .ch-lede{grid-column:1/-1;font-size:clamp(19px,1.6vw,23px);line-height:1.5;color:var(--t2);max-width:56ch}
+@media (min-width:980px){.ch .ch-lede{grid-column:2/-1}}
+@media (min-width:1100px){.ch .ch-lede{white-space:nowrap}}
+
+/* ---------- a row of four: rules, responsibilities, facts ---------- */
+.ch .row4{margin-top:clamp(48px,8vh,88px)}
+@media (min-width:980px){.ch .row4{margin-left:calc((100% - 96px) * 2.2 / 12 + 48px)}}
+.ch .row4 > .meta{margin-bottom:14px}
+.ch .rules{display:grid;grid-template-columns:minmax(0,1fr);gap:0 56px}
+@media (min-width:760px){.ch .rules{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ch .rule{padding:24px 0 30px;border-top:1px solid var(--line)}
+.ch .rule h3{font-size:clamp(22px,1.9vw,27px);line-height:1.2;font-weight:620;letter-spacing:-.01em}
+.ch .rule p{margin-top:10px;color:var(--t2);font-size:17px;line-height:1.55;max-width:46ch}
+.ch .rule a{display:inline-block;margin-top:12px;font-size:15px;color:var(--t1);border-bottom:1px solid var(--link);padding-bottom:1px;transition:border-color .25s}
+.ch .rule a:hover{border-color:var(--cyan)}
+@media (min-width:1100px){
+  .ch .rules{grid-template-columns:repeat(4,minmax(0,1fr));gap:0 32px}
+  .ch .rule h3{font-size:clamp(20px,1.55vw,24px)}
+  .ch .rule p{font-size:16px}
+}
+
+/* ---------- the evidence: one row per project ---------- */
+.ch .ev{margin-top:clamp(64px,11vh,120px)}
+.ch .ev > .meta{margin-bottom:18px}
+.ch .proj{display:grid;grid-template-columns:minmax(0,1fr);gap:10px 48px;padding:30px 0 34px;border-top:1px solid var(--line);position:relative}
+@media (min-width:980px){.ch .proj{grid-template-columns:minmax(180px,2.2fr) minmax(0,6fr) minmax(0,3.8fr);align-items:baseline}}
+/* Status in sans, not mono caps: some are long and must read as a sentence. */
+.ch .proj .st{display:inline-flex;align-items:baseline;gap:9px;font:500 14.5px/1.4 var(--sans);letter-spacing:0;text-transform:none;color:var(--t2)}
+.ch .proj .st::before{flex:none;transform:translateY(-1px)}
+.ch .proj .st.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--signal);animation:ch-live 2.6s ease-in-out infinite}
+@keyframes ch-live{0%,100%{box-shadow:0 0 0 0 rgba(224,149,47,.55)}50%{box-shadow:0 0 0 6px rgba(224,149,47,0)}}
+.ch .proj .st.idle::before{content:"";width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--t3)}
+.ch .proj .st.done::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cyan)}
+.ch .proj h3{font-size:clamp(26px,2.5vw,36px);line-height:1.1;font-weight:640;letter-spacing:-.02em}
+.ch .proj .hl{margin-top:8px;color:var(--t2);font-size:17.5px;line-height:1.5;max-width:52ch}
+.ch .proj .fact{font-size:17px;line-height:1.45;color:var(--t1)}
+.ch .proj .fact span{display:block;margin-top:10px;font-size:15px;color:var(--t3)}
+.ch a.proj:hover h3{color:var(--cyan)}
+.ch a.proj .go{display:block;width:max-content;margin-top:12px;font-size:15px;color:var(--t1);border-bottom:1px solid var(--link)}
+.ch a.proj:hover .go{border-color:var(--cyan)}
+
+/* ---------- the chapter's last line, and the space before the next ---------- */
+.ch .close{padding:clamp(40px,8vh,80px) 0 clamp(56px,10vh,120px)}
+.ch .close p:not(.meta){font-size:clamp(18px,1.4vw,21px);line-height:1.5;color:var(--t2);max-width:60ch}
+@media (min-width:980px){.ch .close{margin-left:calc((100% - 96px) * 2.2 / 12 + 48px)}}
+
+/* ---------- buttons ---------- */
+.ch .btn{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:999px;font-size:15.5px;font-weight:500;color:var(--surface);background:var(--t1);transition:box-shadow .25s,transform .25s var(--ease);white-space:nowrap}
+.ch .btn:hover{box-shadow:0 0 22px rgba(26,154,228,.45);transform:translateY(-1px)}
+.ch .btn.ghost{color:var(--t1);background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+.ch .btn.ghost:hover{box-shadow:inset 0 0 0 1px var(--cyan),0 0 16px rgba(26,154,228,.3)}
+
+@media (prefers-reduced-motion:no-preference){
+  .js .ch .sig path{stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+  .js .ch .sig circle{opacity:0;transition:opacity .6s 1.4s}
+  .js .ch .sig.drawn path{transition:stroke-dashoffset 1.8s cubic-bezier(.3,.1,.2,1) var(--dl,0s);stroke-dashoffset:0}
+  .js .ch .sig.drawn circle{opacity:1}
+}
+@media (prefers-reduced-motion:reduce){.ch .proj .st.live::before{animation:none}}

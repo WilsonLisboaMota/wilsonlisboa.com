@@ -1,0 +1,26 @@
+---
+// Contact: one address, one profile, one document. No form.
+import '../styles/chapter.css';
+---
+<section class="ch contact" id="contact" aria-labelledby="ct-t">
+  <div class="open">
+    <p class="meta kick">Contact</p>
+    <h2 id="ct-t">Say hello. <em>I read every message.</em></h2>
+    <p class="ch-lede">For work, a conversation about data, or a question about anything on this site.</p>
+  </div>
+  <ul class="ways">
+    <li><span class="meta">Email</span><a class="big" href="mailto:wilson.lisboa@wilsonlisboa.com">wilson.lisboa@wilsonlisboa.com</a></li>
+    <li><span class="meta">LinkedIn</span><a class="big" href="https://www.linkedin.com/in/wilson-lisboa-mota/" rel="noopener">linkedin.com/in/wilson-lisboa-mota</a></li>
+    <li><span class="meta">CV</span><a class="big" href="/cv/wilson-lisboa-mota-cv.pdf" download>Download the PDF</a></li>
+  </ul>
+  <div class="close"><p>Fribourg, Switzerland. Portuguese, English, and French in progress.</p></div>
+</section>
+
+<style>
+  .ways{margin-top:clamp(40px,7vh,72px);border-top:1px solid var(--line)}
+  @media (min-width:980px){.ways{margin-left:calc((100% - 96px) * 2.2 / 12 + 48px)}}
+  .ways li{display:grid;grid-template-columns:minmax(0,1fr);gap:4px 48px;padding:18px 0;border-bottom:1px solid var(--line2)}
+  @media (min-width:760px){.ways li{grid-template-columns:120px minmax(0,1fr);align-items:baseline}}
+  .ways .big{font-size:clamp(20px,2vw,28px);font-weight:560;letter-spacing:-.01em;color:var(--t1);border-bottom:1px solid transparent;transition:border-color .25s;width:max-content;max-width:100%;overflow-wrap:anywhere}
+  .ways .big:hover{border-color:var(--cyan)}
+</style>

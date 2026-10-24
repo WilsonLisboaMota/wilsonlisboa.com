@@ -1,0 +1,11 @@
+---
+// The depth layer: a fixed canvas under the chapters. See scripts/depth.js.
+---
+<canvas class="depth" id="depth" aria-hidden="true"></canvas>
+
+<script>
+  import { depth } from '../scripts/depth.js';
+  import { signatures } from '../scripts/signatures.js';
+  depth(document.getElementById('depth') as HTMLCanvasElement);
+  signatures();
+</script>

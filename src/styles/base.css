@@ -1,9 +1,10 @@
-/* Shared by every page: tokens, reset and the small type helpers. */
+/* Shared by every page: tokens, reset, the two surfaces and the small type helpers. */
 :root{
   --deep:#021C2A;
   --ink:#0D1B24;
   --blue:#00486F;
   --mist:#E4ECE9;
+  --paper:#F5F7F6;
   --signal:#E0952F;
   --mist-70:rgba(228,236,233,.72);
   --mist-45:rgba(228,236,233,.48);
@@ -13,15 +14,31 @@
   --gutter:clamp(16px,3.4vw,48px);
   --base:clamp(28px,7vh,72px);
   --ease:cubic-bezier(.2,.7,.2,1);
-  /* Content pages: text steps, hairlines and the two chart series (strategy in the accent, benchmark recessive). */
+  /* Content: text steps, hairlines, the dot colour of the signatures, and the two chart series (strategy in the accent, benchmark recessive). */
   --t1:#E4ECE9;
   --t2:rgba(228,236,233,.76);
   --t3:rgba(228,236,233,.6);
   --line:rgba(228,236,233,.14);
   --line2:rgba(228,236,233,.07);
+  --dot:#E4ECE9;
+  --link:rgba(26,154,228,.6);
   --cyan:#1A9AE4;
   --bench:#5F6F75;
+  --surface:var(--deep);
   color-scheme:dark;
+}
+/* The light surface: the same chapters, by daylight. Text in ink, links in the logo blue, the accent unchanged. */
+[data-surface="light"]{
+  --t1:#0D1B24;
+  --t2:rgba(13,27,36,.74);
+  --t3:rgba(13,27,36,.58);
+  --line:rgba(13,27,36,.16);
+  --line2:rgba(13,27,36,.08);
+  --dot:#0D1B24;
+  --link:rgba(0,72,111,.55);
+  --bench:#7A8A90;
+  --surface:var(--paper);
+  color-scheme:light;
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;background:var(--deep)}
@@ -29,6 +46,15 @@ body{color:var(--mist);font-family:var(--sans);font-size:16px;line-height:1.5;-w
 a{color:inherit}
 :focus-visible{outline:2px solid var(--signal);outline-offset:4px;border-radius:2px}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-.mono{font-family:var(--mono);font-size:11px;line-height:1.4;font-weight:450;letter-spacing:.09em;text-transform:uppercase}
+.mono{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
 /* Mono caps only for short labels, never for sentences. */
 .meta{font:450 11.5px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+
+/* A band is a run of chapters on one surface. Its colour comes from CSS; with JavaScript the depth layer paints it instead,
+   with the wall seen from behind showing through (see scripts/depth.js). */
+.band{position:relative;background:var(--surface);color:var(--t1)}
+.band[data-surface="light"]{box-shadow:inset 0 1px 0 rgba(13,27,36,.08)}
+html.depth-on .band{background:transparent}
+.band > *{position:relative;z-index:1}
+/* Behind everything, the hero included: the root background is the only thing under it. */
+.depth{position:fixed;inset:0;z-index:-1;width:100%;height:100%;display:block;pointer-events:none}
