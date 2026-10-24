@@ -730,7 +730,7 @@ function init() {
     const anchors = [
       [bx - 1.0, by + 0.75, -3.4],
       [ax - 2.3, ay + 0.3, -5.0],
-      [lx + 1.75, ly - 0.15, -1.2],
+      [lx + 1.75, ly + 0.9, -1.2],
       S0,
     ];
     return { lines, nodes, picks, anchors };

@@ -1,49 +1,25 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
-import Veil from '../components/Veil.astro';
-import Signatures from '../components/Signatures.astro';
-import Now from '../components/Now.astro';
-import BiChapter from '../components/BiChapter.astro';
 import AiChapter from '../components/AiChapter.astro';
-import Leadership from '../components/Leadership.astro';
-import Entrepreneurship from '../components/Entrepreneurship.astro';
-import CvSection from '../components/CvSection.astro';
-import BuiltWithAi from '../components/BuiltWithAi.astro';
-import Contact from '../components/Contact.astro';
-import Footer from '../components/Footer.astro';
 ---
 <Base>
   <main>
     <Hero />
 
-    <!-- The far side of the wall. Bands alternate: daylight for the person and the people, the dark for the lab and the screen. -->
     <div id="work">
-      <div class="band" data-surface="light">
-        <Veil k="a" />
-        <Now />
-        <BiChapter />
-      </div>
-      <div class="band" data-surface="dark">
-        <Veil k="b" />
-        <AiChapter />
-      </div>
-      <div class="band" data-surface="light">
-        <Veil k="c" />
-        <Leadership />
-        <Entrepreneurship />
-      </div>
-      <div class="band" data-surface="dark">
-        <Veil k="d" />
-        <CvSection />
-        <BuiltWithAi />
-        <Contact />
-        <Footer />
-      </div>
-      <Signatures />
+      <AiChapter />
+
+      <section class="next" aria-labelledby="next-title">
+        <p class="meta">Still being built</p>
+        <h2 id="next-title">The other forces</h2>
+        <p>Each force opens its own section. Artificial Intelligence is the first one built.</p>
+        <ul class="todo">
+          <li id="bi">Business Intelligence <span class="mono">Not built</span></li>
+          <li id="leadership">Leadership <span class="mono">Not built</span></li>
+          <li id="entrepreneurship">Entrepreneurship <span class="mono">Not built</span></li>
+        </ul>
+      </section>
     </div>
   </main>
-  <!-- Parallax by the browser alone: each veil layer travels up as the document scrolls, the near one furthest.
-       Kept out of the processed CSS, where the minifier would fold animation-timeline into an invalid shorthand. -->
-  <style is:inline>@supports (animation-timeline: scroll()){@media (prefers-reduced-motion:no-preference){.veil .layer{animation-name:wall-par;animation-timing-function:linear;animation-fill-mode:both;animation-timeline:scroll(root block)}}}@keyframes wall-par{from{transform:translateY(0)}to{transform:translateY(var(--to))}}</style>
 </Base>

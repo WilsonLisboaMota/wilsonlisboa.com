@@ -1,10 +1,9 @@
-/* Shared by every page: tokens, reset, the two surfaces and the small type helpers. */
+/* Shared by every page: tokens, reset and the small type helpers. */
 :root{
   --deep:#021C2A;
   --ink:#0D1B24;
   --blue:#00486F;
   --mist:#E4ECE9;
-  --paper:#F5F7F6;
   --signal:#E0952F;
   --mist-70:rgba(228,236,233,.72);
   --mist-45:rgba(228,236,233,.48);
@@ -14,31 +13,15 @@
   --gutter:clamp(16px,3.4vw,48px);
   --base:clamp(28px,7vh,72px);
   --ease:cubic-bezier(.2,.7,.2,1);
-  /* Content: text steps, hairlines, the dot colour of the signatures, and the two chart series (strategy in the accent, benchmark recessive). */
+  /* Content pages: text steps, hairlines and the two chart series (strategy in the accent, benchmark recessive). */
   --t1:#E4ECE9;
   --t2:rgba(228,236,233,.76);
   --t3:rgba(228,236,233,.6);
   --line:rgba(228,236,233,.14);
   --line2:rgba(228,236,233,.07);
-  --dot:#E4ECE9;
-  --link:rgba(26,154,228,.6);
   --cyan:#1A9AE4;
   --bench:#5F6F75;
-  --surface:var(--deep);
   color-scheme:dark;
-}
-/* The light surface: the same chapters, by daylight. Text in ink, links in the logo blue, the accent unchanged. */
-[data-surface="light"]{
-  --t1:#0D1B24;
-  --t2:rgba(13,27,36,.74);
-  --t3:rgba(13,27,36,.58);
-  --line:rgba(13,27,36,.16);
-  --line2:rgba(13,27,36,.08);
-  --dot:#0D1B24;
-  --link:rgba(0,72,111,.55);
-  --bench:#7A8A90;
-  --surface:var(--paper);
-  color-scheme:light;
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;background:var(--deep)}
@@ -46,27 +29,6 @@ body{color:var(--mist);font-family:var(--sans);font-size:16px;line-height:1.5;-w
 a{color:inherit}
 :focus-visible{outline:2px solid var(--signal);outline-offset:4px;border-radius:2px}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-.mono{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.mono{font-family:var(--mono);font-size:11px;line-height:1.4;font-weight:450;letter-spacing:.09em;text-transform:uppercase}
 /* Mono caps only for short labels, never for sentences. */
 .meta{font:450 11.5px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
-
-/* A band is a run of chapters on one surface. Its colour is plain CSS, lit a little from the middle so it reads as space.
-   The wall behind it is the Veil component, first inside the band (see components/Veil.astro). */
-.band{position:relative;color:var(--t1);background:var(--surface) radial-gradient(ellipse 90% 60% at 55% 40%,var(--glow),transparent 70%);--glow:#0A2E44;--wall:rgba(228,236,233,.11)}
-.band[data-surface="light"]{--glow:#fff;--wall:rgba(0,72,111,.13);box-shadow:inset 0 1px 0 rgba(13,27,36,.08)}
-.band > *{position:relative;z-index:1}
-/* The veil: sticky, one screen tall, pulled back up by its negative margin so the content starts at the top of the band. */
-.band > .veil{position:sticky;top:0;z-index:0;height:100vh;margin-bottom:-100vh;overflow:hidden;pointer-events:none;color:var(--wall)}
-.veil .layer{position:absolute;left:0;top:0;width:100%;will-change:transform}
-.veil .far{height:200%;opacity:.55;--to:-25%}
-.veil .mid{height:240%;opacity:.8;--to:-41%}
-.veil .near{height:300%;opacity:1;--to:-60%}
-.veil svg{display:block;width:100%;height:100%}
-/* The slow drift of the lines. The parallax rule lives in index.astro, unprocessed: the CSS minifier folds animation-timeline
-   into the animation shorthand, which is invalid, and the browser drops it. */
-@media (prefers-reduced-motion:no-preference){
-  .veil svg{animation:wall-drift 46s ease-in-out infinite alternate}
-  .veil .mid svg{animation-duration:61s}
-  .veil .near svg{animation-duration:83s}
-}
-@keyframes wall-drift{from{transform:translateX(0)}to{transform:translateX(-2.4%)}}

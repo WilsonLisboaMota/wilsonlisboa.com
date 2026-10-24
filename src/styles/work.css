@@ -141,7 +141,7 @@ details.tv summary{cursor:pointer;font-size:15px;color:var(--t2);width:max-conte
 .lim b{font-weight:600}
 .lim span{color:var(--t2);font-size:16.5px}
 
-.foot{margin-top:clamp(64px,12vh,120px);padding:28px 0 56px;border-top:1px solid var(--line);color:var(--t3);font-size:14.5px}
+.foot{margin-top:clamp(64px,12vh,120px);padding:28px 0 120px;border-top:1px solid var(--line);color:var(--t3);font-size:14.5px}
 .foot p + p{margin-top:6px}
 
 @media (prefers-reduced-motion:no-preference){
