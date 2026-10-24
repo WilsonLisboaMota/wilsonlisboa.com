@@ -50,11 +50,26 @@ a{color:inherit}
 /* Mono caps only for short labels, never for sentences. */
 .meta{font:450 11.5px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
 
-/* A band is a run of chapters on one surface. Its colour comes from CSS; with JavaScript the depth layer paints it instead,
-   with the wall seen from behind showing through (see scripts/depth.js). */
-.band{position:relative;background:var(--surface);color:var(--t1)}
-.band[data-surface="light"]{box-shadow:inset 0 1px 0 rgba(13,27,36,.08)}
-html.depth-on .band{background:transparent}
+/* A band is a run of chapters on one surface. Its colour is plain CSS, lit a little from the middle so it reads as space.
+   The wall behind it is the Veil component, first inside the band (see components/Veil.astro). */
+.band{position:relative;color:var(--t1);background:var(--surface) radial-gradient(ellipse 90% 60% at 55% 40%,var(--glow),transparent 70%);--glow:#0A2E44;--wall:rgba(228,236,233,.11)}
+.band[data-surface="light"]{--glow:#fff;--wall:rgba(0,72,111,.13);box-shadow:inset 0 1px 0 rgba(13,27,36,.08)}
 .band > *{position:relative;z-index:1}
-/* Behind everything, the hero included: the root background is the only thing under it. */
-.depth{position:fixed;inset:0;z-index:-1;width:100%;height:100%;display:block;pointer-events:none}
+/* The veil: sticky, one screen tall, pulled back up by its negative margin so the content starts at the top of the band. */
+.band > .veil{position:sticky;top:0;z-index:0;height:100vh;margin-bottom:-100vh;overflow:hidden;pointer-events:none;color:var(--wall)}
+.veil .layer{position:absolute;left:0;top:0;width:100%;will-change:transform}
+.veil .far{height:200%;opacity:.55;--to:-25%}
+.veil .mid{height:240%;opacity:.8;--to:-41%}
+.veil .near{height:300%;opacity:1;--to:-60%}
+.veil svg{display:block;width:100%;height:100%}
+/* Parallax by the browser alone: each layer travels up as the document scrolls, the near one furthest. */
+@supports (animation-timeline: scroll()){
+  @media (prefers-reduced-motion:no-preference){
+    .veil .layer{animation:wall-par linear both;animation-timeline:scroll(root block)}
+    .veil svg{animation:wall-drift 46s ease-in-out infinite alternate}
+    .veil .mid svg{animation-duration:61s}
+    .veil .near svg{animation-duration:83s}
+  }
+}
+@keyframes wall-par{from{transform:translateY(0)}to{transform:translateY(var(--to))}}
+@keyframes wall-drift{from{transform:translateX(0)}to{transform:translateX(-2.4%)}}
