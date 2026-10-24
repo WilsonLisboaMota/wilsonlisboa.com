@@ -62,14 +62,11 @@ a{color:inherit}
 .veil .mid{height:240%;opacity:.8;--to:-41%}
 .veil .near{height:300%;opacity:1;--to:-60%}
 .veil svg{display:block;width:100%;height:100%}
-/* Parallax by the browser alone: each layer travels up as the document scrolls, the near one furthest. */
-@supports (animation-timeline: scroll()){
-  @media (prefers-reduced-motion:no-preference){
-    .veil .layer{animation:wall-par linear both;animation-timeline:scroll(root block)}
-    .veil svg{animation:wall-drift 46s ease-in-out infinite alternate}
-    .veil .mid svg{animation-duration:61s}
-    .veil .near svg{animation-duration:83s}
-  }
+/* The slow drift of the lines. The parallax rule lives in index.astro, unprocessed: the CSS minifier folds animation-timeline
+   into the animation shorthand, which is invalid, and the browser drops it. */
+@media (prefers-reduced-motion:no-preference){
+  .veil svg{animation:wall-drift 46s ease-in-out infinite alternate}
+  .veil .mid svg{animation-duration:61s}
+  .veil .near svg{animation-duration:83s}
 }
-@keyframes wall-par{from{transform:translateY(0)}to{transform:translateY(var(--to))}}
 @keyframes wall-drift{from{transform:translateX(0)}to{transform:translateX(-2.4%)}}

@@ -43,4 +43,7 @@ import Footer from '../components/Footer.astro';
       <Signatures />
     </div>
   </main>
+  <!-- Parallax by the browser alone: each veil layer travels up as the document scrolls, the near one furthest.
+       Kept out of the processed CSS, where the minifier would fold animation-timeline into an invalid shorthand. -->
+  <style is:inline>@supports (animation-timeline: scroll()){@media (prefers-reduced-motion:no-preference){.veil .layer{animation-name:wall-par;animation-timing-function:linear;animation-fill-mode:both;animation-timeline:scroll(root block)}}}@keyframes wall-par{from{transform:translateY(0)}to{transform:translateY(var(--to))}}</style>
 </Base>
