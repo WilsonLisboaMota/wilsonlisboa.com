@@ -41,13 +41,13 @@ function series(n) {
   return v.map(y => (y - mn) / (mx - mn));
 }
 
-// Four forces behind the membrane: x, y, strength, width.
-// 0 BI: broad, stable. 1 AI: fine interference. 2 Leadership: wide lift. 3 Entrepreneurship: drifting fold.
+// Three forces behind the membrane: x, y, strength, width.
+// 0 BI: broad, stable. 1 AI: fine interference. 2 Leadership: wide lift.
+// (A fourth, Entrepreneurship, was dropped on 25 October 2026: one co-founded consultancy is a fact for the CV, not a force.)
 const FORCE_BASE = [
   [-3.2, -0.7, 0.85, 1.7],
   [0.7, 0.95, 0.6, 1.3],
   [3.5, -0.3, 0.5, 2.3],
-  [-0.9, -2.0, 0.75, 1.1],
 ];
 
 // Height of the resting membrane, so the structures can touch it from behind.
@@ -57,10 +57,6 @@ function surfaceZ(x, y) {
   dx = x - f[0][0]; dy = y - f[0][1]; z += f[0][2] * Math.exp(-(dx * dx + dy * dy) / (f[0][3] ** 2));
   dx = x - f[1][0]; dy = y - f[1][1]; z += 0.8 * f[1][2] * Math.exp(-(dx * dx + dy * dy) / (f[1][3] ** 2));
   dx = x - f[2][0]; dy = y - f[2][1]; r = (dx * dx + dy * dy) / (f[2][3] ** 2); z += f[2][2] * Math.exp(-r * r);
-  const c = Math.cos(0.7), s = Math.sin(0.7);
-  dx = x - f[3][0]; dy = y - f[3][1];
-  const rx = c * dx - s * dy, ry = s * dx + c * dy;
-  z += f[3][2] * Math.exp(-(rx * rx) / (0.12 * f[3][3] ** 2) - (ry * ry) / (f[3][3] ** 2)) * (rx > 0 ? 1 : 0.55);
   return z;
 }
 
@@ -103,6 +99,7 @@ function init() {
     uBehind: { value: 0 },
     uHot: { value: -1 },
     uHotAmt: { value: 0 },
+    uGather: { value: 0 },
     uSpeed: { value: SPEED },
     uSize: { value: new THREE.Vector3(W, H, 0) },
     uNearest: { value: -1 },
@@ -116,8 +113,8 @@ function init() {
 
   const FIELD = /* glsl */`
     uniform float uTime, uSpeed, uReduced, uIntro, uBehind, uHot, uHotAmt;
-    uniform vec4 uF[4];
-    uniform vec2 uROff[4];
+    uniform vec4 uF[3];
+    uniform vec2 uROff[3];
     uniform vec3 uCursor;
     uniform vec4 uRip[${RIPPLES}];
     uniform float uRipSeed[${RIPPLES}];
@@ -142,10 +139,6 @@ function init() {
       d = p - uF[2].xy;
       float r = dot(d, d) / (uF[2].w * uF[2].w);
       z += uF[2].z * exp(-r * r);
-      d = p - uF[3].xy;
-      float a = 0.7 + 0.35 * sin(uTime * 0.11);
-      d = mat2(cos(a), sin(a), -sin(a), cos(a)) * d;
-      z += uF[3].z * exp(-(d.x * d.x) / (0.12 * uF[3].w * uF[3].w) - (d.y * d.y) / (uF[3].w * uF[3].w)) * (d.x > 0.0 ? 1.0 : 0.55);
 
       float zf = z;
 
@@ -238,7 +231,6 @@ function init() {
       if (r < 0.5) return uROff[0];
       if (r < 1.5) return uROff[1];
       if (r < 2.5) return uROff[2];
-      if (r < 3.5) return uROff[3];
       return vec2(0.0);
     }
   `;
@@ -379,7 +371,7 @@ function init() {
         float glimpse = (0.03 + 0.85 * clamp(ring, 0.0, 1.0) + 0.22 * cursorNear(p.xy, 1.1)) * smoothstep(1.0, 1.8, uIntro);
         glimpse *= 1.0 - 0.75 * smoothstep(-1.4, 0.4, p.z);
         float link = step(3.5, aReg);
-        float base = aReg < 0.5 ? 0.3 : aReg < 1.5 ? 0.16 : aReg < 2.5 ? 0.32 : aReg < 3.5 ? 0.34 : 0.13;
+        float base = aReg < 0.5 ? 0.3 : aReg < 1.5 ? 0.16 : aReg < 2.5 ? 0.6 : aReg < 3.5 ? 0.34 : 0.13;
         float dash = mix(1.0, step(0.5, fract(aT * 28.0)), link);
         // Signals travel along the structures: data towards the report, information towards one point, support outwards.
         float flow = aFlow > 0.0 ? pow(fract(aT * 2.0 - uTime * 0.2 * aFlow + aSeed * 7.0), 12.0) * (1.0 - uReduced) : 0.0;
@@ -387,8 +379,10 @@ function init() {
         float hot = isHot * uHotAmt;
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
         float seen = (base * dash + 0.8 * flow) * dim * (1.0 + 0.9 * hot);
+        // The Leadership trails fade behind each point: brightest at the point (aT = 1), gone at the tail.
+        float trail = mix(1.0, smoothstep(0.0, 1.0, aT), step(1.5, aReg) * step(aReg, 2.5));
         vec4 wp = modelMatrix * vec4(p, 1.0);
-        vA = mix(glimpse, seen, uBehind) * nearCam(wp.xyz);
+        vA = mix(glimpse, seen, uBehind) * trail * nearCam(wp.xyz);
         vCol = mix(uMist, uSignal, hot * uBehind);
         gl_Position = projectionMatrix * viewMatrix * wp;
       }`,
@@ -440,9 +434,9 @@ function init() {
   const riverMat = new THREE.ShaderMaterial({
     uniforms, ...additive,
     vertexShader: FIELD + /* glsl */`
-      attribute vec3 aC1, aC2, aP3;
+      attribute vec3 aC1, aC2, aP3, aL;
       attribute float aT0, aSeed;
-      uniform float uDpr;
+      uniform float uDpr, uGather;
       uniform vec3 uMist, uSignal;
       varying float vA, vG;
       varying vec3 vCol;
@@ -452,14 +446,18 @@ function init() {
         float t = uReduced > 0.5 ? aT0 : fract(aT0 + uTime * (0.03 + 0.025 * h));
         float u = 1.0 - t;
         vec3 p = u * u * u * position + 3.0 * u * u * t * aC1 + 3.0 * u * t * t * aC2 + t * t * t * aP3;
+        // The letters: each character leaves its line for its place in "AI" and comes back, in its own time.
+        float ga = smoothstep(0.0, 1.0, clamp(uGather * 1.35 - h * 0.35, 0.0, 1.0));
+        p = mix(p, aL, ga);
         p.xy += regOff(1.0);
         float ring, w, g; vec2 o;
         fields(p.xy, ring, w, g, o);
-        float glimpse = (0.02 + 0.6 * clamp(ring, 0.0, 1.0) + 0.18 * cursorNear(p.xy, 1.1)) * smoothstep(1.0, 1.8, uIntro) * (1.0 - 0.75 * smoothstep(-1.4, 0.4, p.z));
+        // From the front, only a hint: the characters show where a ripple passes, and barely otherwise.
+        float glimpse = (0.006 + 0.5 * clamp(ring, 0.0, 1.0) + 0.06 * cursorNear(p.xy, 1.1)) * smoothstep(1.0, 1.8, uIntro) * (1.0 - 0.75 * smoothstep(-1.4, 0.4, p.z));
         float isHot = 1.0 - step(0.5, abs(1.0 - uHot));
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
         float ends = smoothstep(0.0, 0.08, t) * smoothstep(0.97, 0.9, t);
-        float seen = (0.34 + 0.4 * t) * ends * dim * (1.0 + 0.8 * isHot * uHotAmt);
+        float seen = mix((0.34 + 0.4 * t) * ends, 0.85, ga) * dim * (1.0 + 0.8 * isHot * uHotAmt);
         vec4 wp = modelMatrix * vec4(p, 1.0);
         float dc = distance(wp.xyz, cameraPosition);
         vA = mix(glimpse, seen, uBehind) * nearCam(wp.xyz);
@@ -467,7 +465,7 @@ function init() {
         // The character changes now and then, each at its own pace.
         float tick = uReduced > 0.5 ? 0.0 : floor(uTime * (1.2 + h * 2.2) + h * 40.0);
         vG = floor(hash1(aSeed + tick * 0.137) * 64.0);
-        gl_PointSize = clamp((1.5 - t) * 150.0 / dc, 4.0, 22.0) * uDpr;
+        gl_PointSize = mix(clamp((1.5 - t) * 150.0 / dc, 4.0, 22.0), clamp(118.0 / dc, 5.0, 14.0), ga) * uDpr;
         gl_Position = projectionMatrix * viewMatrix * wp;
       }`,
     fragmentShader: /* glsl */`
@@ -628,16 +626,15 @@ function init() {
     });
   }
 
-  // BI: three data layers, from raw source at the back to the report at the front, with lineage between them.
-  // AI: many inputs converging, through one narrowing path, onto a single point.
-  // Leadership: one point at the back that holds up a wide ring of others, closer to the surface.
-  // Entrepreneurship: a path that bends and branches; most branches stop, one reaches the surface.
+  // BI: tables behind the wall, with lineage lines rising into the chart's own data points.
+  // AI: many inputs converging onto a single point, carrying a river of characters that can gather into "AI".
+  // Leadership: a formation, one point in front at the wall and six behind it in two wings.
   // A few dashed links make it one system.
   function buildStructure(mobile) {
     const R = rng(23);
     const LP = [], LR = [], LT = [], LF = [], LS = [], LL = [];
     const NP = [], NR = [], NS = [], NO = [];
-    const picks = [[], [], [], []];
+    const picks = [[], [], []];
     const d3 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
     const mix3 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
     const line = (a, b, n = 12) => Array.from({ length: n + 1 }, (_, i) => mix3(a, b, i / n));
@@ -666,34 +663,38 @@ function init() {
       picks[reg].push(p);
     }
 
-    // ----- BI -----
+    // ----- BI: what feeds the chart -----
+    // Tables behind the wall: one at the top, a wider one below, three separate sources at the bottom. Lineage lines
+    // rise from the sources, through the others, into the chart's own data points on the membrane.
     const [bx, by] = FORCE_BASE[0];
-    const PL = [{ z: -1.0, s: 0.8 }, { z: -2.2, s: 1.0 }, { z: -3.4, s: 1.25 }];
-    const GC = 6, GR = 4, GS = 0.34;
-    const at = (pl, c, r) => [bx + (c - (GC - 1) / 2) * GS * pl.s, by + (r - (GR - 1) / 2) * GS * pl.s * 0.92, pl.z];
-    PL.forEach((pl, pi) => {
-      for (let r = 0; r < GR; r++) {
-        if (pi === 2) {
-          // The source layer arrives broken and uneven.
-          const cut = 1 + Math.floor(R() * (GC - 3));
-          path(line(at(pl, 0, r), at(pl, cut, r), 10), 0);
-          path(line(at(pl, cut + 1, r), at(pl, GC - 1, r), 10), 0);
-        } else path(line(at(pl, 0, r), at(pl, GC - 1, r), 16), 0);
-        for (let c = 0; c < GC; c++) if (!(pi === 2 && R() < 0.2)) node(at(pl, c, r), 0, pi === 0 ? 0.9 : 0.7);
-      }
+    const TB = [
+      { cx: bx, cy: by - 0.85, z: -1.3, w: 1.9, h: 0.56, cols: 3, rows: 3 },
+      { cx: bx, cy: by - 1.75, z: -2.6, w: 2.9, h: 0.7, cols: 5, rows: 4 },
+      { cx: bx - 1.45, cy: by - 2.7, z: -3.9, w: 1.0, h: 0.62, cols: 2, rows: 3 },
+      { cx: bx, cy: by - 2.7, z: -3.9, w: 1.0, h: 0.62, cols: 2, rows: 3 },
+      { cx: bx + 1.45, cy: by - 2.7, z: -3.9, w: 1.0, h: 0.62, cols: 2, rows: 3 },
+    ];
+    const cell = (t, c, r) => [t.cx - t.w / 2 + (c + 0.5) * t.w / t.cols, t.cy + t.h / 2 - 0.1 - (r + 0.5) * (t.h - 0.1) / t.rows, t.z];
+    TB.forEach(t => {
+      const x0 = t.cx - t.w / 2, x1 = t.cx + t.w / 2, y0 = t.cy - t.h / 2, y1 = t.cy + t.h / 2, hy = y1 - 0.1;
+      [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].forEach(([x, y], i, c) => { const [nx, ny] = c[(i + 1) % 4]; path(line([x, y, t.z], [nx, ny, t.z], 8), 0); });
+      // The header: a second line close to the top edge.
+      path(line([x0, hy, t.z], [x1, hy, t.z], 8), 0);
+      path(line([x0, hy - 0.025, t.z], [x1, hy - 0.025, t.z], 8), 0);
+      for (let r = 1; r < t.rows; r++) { const y = hy - r * (t.h - 0.1) / t.rows; path(line([x0, y, t.z], [x1, y, t.z], 6), 0); }
+      for (let c = 1; c < t.cols; c++) { const x = x0 + c * t.w / t.cols; path(line([x, hy, t.z], [x, y0, t.z], 4), 0); }
     });
-    for (let i = 0; i < 7; i++) {
-      const c = Math.floor(R() * GC), r = Math.floor(R() * GR);
-      const c1 = clamp(c + Math.round((R() - 0.5) * 2), 0, GC - 1), r1 = clamp(r + Math.round((R() - 0.5) * 2), 0, GR - 1);
-      const a = at(PL[2], c, r), m = at(PL[1], c1, r1), f = at(PL[0], c1, r1);
-      path(line(a, m, 10).concat(line(m, f, 10).slice(1)), 0, 0.7 + R() * 0.5);
-    }
-    const apexB = touch(bx, by);
-    [[1, 1], [4, 1], [1, 2], [4, 2]].forEach(([c, r]) => {
-      const p = at(PL[0], c, r);
-      path(quad(p, [lerp(p[0], bx, 0.6), lerp(p[1], by, 0.6), -0.45], apexB, 14), 0, 0.9);
+    // Lineage: six lines, each from a source cell, through the two tables above, to its own point on the chart.
+    const chartDots = dotPos.filter(p => Math.abs(p[0] - bx) < 1.7).sort((a, b) => a[0] - b[0]);
+    const srcCells = [[2, 0, 1], [2, 1, 2], [3, 0, 0], [3, 1, 2], [4, 0, 1], [4, 1, 0]];
+    srcCells.forEach(([ti, c, r], i) => {
+      const a = cell(TB[ti], c, r), m = cell(TB[1], Math.min(4, i), 1 + (i % 3)), tp = cell(TB[0], Math.min(2, Math.floor(i / 2)), i % 3);
+      const d = chartDots[Math.min(chartDots.length - 1, Math.round(i * (chartDots.length - 1) / 5))] || [bx, by];
+      const end = touch(d[0], d[1]);
+      path(line(a, m, 8).concat(line(m, tp, 8).slice(1), line(tp, end, 10).slice(1)), 0, 0.7 + R() * 0.5);
+      node(a, 0, 0.8); node(m, 0, 0.8); node(tp, 0, 0.9);
     });
-    node(apexB, 0, 1.2);
+    node(touch(bx, by), 0, 1.2);
 
     // ----- AI -----
     const [ax, ay] = FORCE_BASE[1];
@@ -721,60 +722,51 @@ function init() {
     river.setAttribute('aP3', new THREE.Float32BufferAttribute(RP3, 3));
     river.setAttribute('aT0', new THREE.Float32BufferAttribute(RT, 1));
     river.setAttribute('aSeed', new THREE.Float32BufferAttribute(RS, 1));
+    // Where each character goes when the river gathers into "AI": a place along the letter strokes, mirrored in x
+    // because the far side is seen from behind, scattered a little across the stroke so it reads as a web, not a line,
+    // and shuffled so that one line's characters do not all land side by side.
+    const STROKES = [
+      [[0, 0], [0.5, 1], [1, 0]], [[0.2, 0.38], [0.8, 0.38]],
+      [[1.7, 0], [1.7, 1]], [[1.45, 0], [1.95, 0]], [[1.45, 1], [1.95, 1]],
+    ];
+    const segs = [];
+    STROKES.forEach(s => { for (let i = 1; i < s.length; i++) segs.push([s[i - 1], s[i], Math.hypot(s[i][0] - s[i - 1][0], s[i][1] - s[i - 1][1])]); });
+    // On a wide screen the word sits beside the convergence, not on it, where the fan is thin enough to read through.
+    const totalLen = segs.reduce((a, s) => a + s[2], 0), N = RP.length / 3, RL = [];
+    const LX = mobile ? ax - 0.15 : ax - 1.3, LY = mobile ? ay - 0.6 : ay - 0.85, LSC = mobile ? 1.6 : 1.5, LZ = mobile ? -4.6 : -3.4;
+    for (let i = 0; i < N; i++) {
+      let d = (((i * 7919) % N) + 0.5) / N * totalLen, seg = segs[0];
+      for (const sg of segs) { if (d <= sg[2]) { seg = sg; break; } d -= sg[2]; }
+      const t = d / seg[2], sx = seg[0][0] + (seg[1][0] - seg[0][0]) * t, sy = seg[0][1] + (seg[1][1] - seg[0][1]) * t;
+      const nx = -(seg[1][1] - seg[0][1]) / seg[2], ny = (seg[1][0] - seg[0][0]) / seg[2], j = (R() - 0.5) * 0.16;
+      RL.push(LX + (0.975 - sx - nx * j) * LSC, LY + (sy + ny * j) * LSC, LZ + (R() - 0.5) * 0.3);
+    }
+    river.setAttribute('aL', new THREE.Float32BufferAttribute(RL, 3));
 
-    // ----- Leadership -----
+    // ----- Leadership: a formation -----
+    // One point in front, at the wall; six behind in two wings, each with a trail that fades behind it (see structMat).
+    // No lines join them: the formation is in where they are.
     const [lx, ly] = FORCE_BASE[2];
-    const B = [lx + 0.1, ly - 0.4, -4.9];
-    const NRING = mobile ? 9 : 11, ring = [];
-    for (let i = 0; i < NRING; i++) {
-      const th = i / NRING * Math.PI * 2 + 0.3;
-      ring.push([lx + Math.cos(th) * 1.75, ly + Math.sin(th) * 1.3, -1.3 + 0.22 * Math.sin(th * 2 + 1)]);
-    }
-    ring.forEach((p, i) => {
-      path(line(B, p, 22), 2, 0.55);
-      const q = ring[(i + 1) % ring.length], mid = mix3(p, q, 0.5);
-      path(quad(p, [mid[0] + (mid[0] - lx) * 0.12, mid[1] + (mid[1] - ly) * 0.12, mid[2]], q, 10), 2);
-      path(line(p, touch(p[0], p[1]), 6), 2);
-      node(p, 2, 0.95);
+    const lead = touch(lx, ly), form = [lead];
+    // The V lies against the wall: the lead at its point, the wings below it and a little behind it in depth,
+    // so that from behind the camera sees the formation flat, as it is.
+    for (let k = 1; k <= 3; k++) { form.push([lx + 0.66 * k, ly - 0.55 * k, lead[2] - 0.3 - 0.35 * k]); form.push([lx - 0.66 * k, ly - 0.55 * k, lead[2] - 0.3 - 0.35 * k]); }
+    form.forEach((p, i) => {
+      const len = i === 0 ? 1.8 : 1.0 + R() * 0.5, ph = R() * 6, pts = [];
+      // The trail runs straight behind the point with a slight waver, from the tail (aT = 0) to the point (aT = 1).
+      for (let s = 0; s <= 14; s++) { const a = s / 14, back = (1 - a) * len; pts.push([p[0] + 0.08 * Math.sin(ph + back * 2.0) * (1 - a), p[1] - back, p[2] - back * 0.25]); }
+      path(pts, 2, i === 0 ? 0.9 : 0.55);
+      node(p, 2, i === 0 ? 2.0 : 1.35);
     });
-    node(B, 2, 1.7);
-
-    // ----- Entrepreneurship -----
-    const [ex, ey] = FORCE_BASE[3];
-    const apexE = touch(ex, ey);
-    const S0 = [ex - 1.5, ey - 0.45, -5.2];
-    const WP = [S0, [ex - 0.5, ey - 1.05, -4.0], [ex - 1.3, ey + 0.35, -2.8], [ex + 0.25, ey - 0.35, -1.7], apexE];
-    let main = [];
-    for (let i = 0; i < WP.length - 1; i++) {
-      const a = WP[i], b = WP[i + 1], m = mix3(a, b, 0.5);
-      const seg = quad(a, [m[0] + (R() - 0.5) * 0.9, m[1] + (R() - 0.5) * 0.9, m[2]], b, 16);
-      main = main.concat(i ? seg.slice(1) : seg);
-    }
-    path(main, 3, 0.8);
-    WP.slice(0, 4).forEach((w, i) => node(w, 3, i === 0 ? 1.4 : 0.9));
-    node(apexE, 3, 1.3);
-    // Side paths: tried, learnt from, stopped.
-    const branch = (p, depth) => {
-      const ang = R() * Math.PI * 2, len = 0.55 + R() * 0.65;
-      const q = [p[0] + Math.cos(ang) * len, p[1] + Math.sin(ang) * len * 0.85, p[2] + 0.25 + R() * 0.55];
-      const m = mix3(p, q, 0.5);
-      const pts = quad(p, [m[0] + (R() - 0.5) * 0.5, m[1] + (R() - 0.5) * 0.5, m[2]], q, 12);
-      path(pts, 3);
-      if (depth > 0 && R() < 0.5) branch(pts[7], depth - 1);
-      node(q, 3, 0.8, 1);
-    };
-    WP.slice(0, 4).forEach(w => { branch(w, 1); if (R() < 0.6) branch(w, 1); });
 
     // ----- links -----
     const link = (a, b, la, lb) => {
       const m = mix3(a, b, 0.5);
       path(quad(a, [m[0], m[1] + 0.9, m[2] - 1.5], b, 40), 4, 0, la, lb);
     };
-    link([bx, by, -2.2], [ax, ay, -4.9], 0, 1);
-    link([ax, ay, -1.4], WP[2], 1, 3);
-    link(B, [bx, by + 0.5, -3.4], 2, 0);
-    link(B, [ax + 0.8, ay, -4.8], 2, 1);
-    link(B, S0, 2, 3);
+    link([bx, by - 2.3, -3.7], [ax, ay, -4.9], 0, 1);
+    link(form[6], [bx, by - 1.5, -2.5], 2, 0);
+    link(form[5], [ax + 0.8, ay, -4.8], 2, 1);
 
     const lines = new THREE.BufferGeometry();
     lines.setAttribute('position', new THREE.Float32BufferAttribute(LP, 3));
@@ -791,10 +783,9 @@ function init() {
 
     // Where each label attaches to its structure.
     const anchors = [
-      [bx - 1.0, by + 0.75, -3.4],
+      [bx - 2.2, by - 2.5, -3.9],
       [ax - 2.3, ay + 0.3, -5.0],
-      [lx + 1.75, ly + 0.9, -1.2],
-      S0,
+      [lx + 2.6, ly - 0.9, -1.2],
     ];
     return { lines, nodes, river, picks, anchors };
   }
@@ -835,6 +826,7 @@ function init() {
     nextRipple: 0, autoRipple: !reduced, autoAt: 1.7,
     scrollP: 0, u: 0, uv: 0,
     hotPointer: -1, hotLabel: -1, hotTouch: -1, hot: -1, hotAmt: 0,
+    arrivedAt: -1, gatherAmt: 0,
   };
   const L = { w: 1, h: 1, mobile: null, cx: 0, cy: 0, ex: 0, ey: 0, fov: 30, fovMid: 50, fovEnd: 40, rEnd: 13 };
   const BASE_RY = -0.3, BASE_RX = 0.06;
@@ -956,6 +948,17 @@ function init() {
     if (S.hot >= 0) uniforms.uHot.value = S.hot;
     S.hotAmt = lerp(S.hotAmt, S.hot >= 0 ? 1 : 0, 1 - Math.exp(-dt * 10));
     uniforms.uHotAmt.value = S.hotAmt;
+
+    // The AI's letters: for two seconds, starting two seconds after the visitor arrives on the far side, and for as
+    // long as the AI is hot. Never under reduced motion, where the river stands still.
+    if (!reduced) {
+      if (u > 0.9 && S.arrivedAt < 0) S.arrivedAt = S.time;
+      if (u < 0.5) S.arrivedAt = -1;
+      const since = S.arrivedAt >= 0 ? S.time - S.arrivedAt : -1;
+      const gather = (since > 2.0 && since < 4.2) || S.hot === 1;
+      S.gatherAmt = lerp(S.gatherAmt, gather ? 1 : 0, 1 - Math.exp(-dt * 3.5));
+      uniforms.uGather.value = S.gatherAmt;
+    }
 
     updateDom(u);
     renderer.render(scene, camera);
