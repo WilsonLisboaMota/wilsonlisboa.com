@@ -434,6 +434,55 @@ function init() {
       }`,
   });
 
+  // ---------- the river of characters: what goes into the AI ----------
+  // Single characters from the hero's own alphabet travel along the AI's lines towards the one point, large and loose
+  // where a line starts, small and tight near the point, each one changing at its own pace. Flow stops under reduced motion.
+  const riverMat = new THREE.ShaderMaterial({
+    uniforms, ...additive,
+    vertexShader: FIELD + /* glsl */`
+      attribute vec3 aC1, aC2, aP3;
+      attribute float aT0, aSeed;
+      uniform float uDpr;
+      uniform vec3 uMist, uSignal;
+      varying float vA, vG;
+      varying vec3 vCol;
+      float hash1(float x) { return fract(sin(x * 127.1) * 43758.5453); }
+      void main() {
+        float h = hash1(aSeed);
+        float t = uReduced > 0.5 ? aT0 : fract(aT0 + uTime * (0.03 + 0.025 * h));
+        float u = 1.0 - t;
+        vec3 p = u * u * u * position + 3.0 * u * u * t * aC1 + 3.0 * u * t * t * aC2 + t * t * t * aP3;
+        p.xy += regOff(1.0);
+        float ring, w, g; vec2 o;
+        fields(p.xy, ring, w, g, o);
+        float glimpse = (0.02 + 0.6 * clamp(ring, 0.0, 1.0) + 0.18 * cursorNear(p.xy, 1.1)) * smoothstep(1.0, 1.8, uIntro) * (1.0 - 0.75 * smoothstep(-1.4, 0.4, p.z));
+        float isHot = 1.0 - step(0.5, abs(1.0 - uHot));
+        float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
+        float ends = smoothstep(0.0, 0.08, t) * smoothstep(0.97, 0.9, t);
+        float seen = (0.34 + 0.4 * t) * ends * dim * (1.0 + 0.8 * isHot * uHotAmt);
+        vec4 wp = modelMatrix * vec4(p, 1.0);
+        float dc = distance(wp.xyz, cameraPosition);
+        vA = mix(glimpse, seen, uBehind) * nearCam(wp.xyz);
+        vCol = mix(uMist, uSignal, isHot * uHotAmt * uBehind);
+        // The character changes now and then, each at its own pace.
+        float tick = uReduced > 0.5 ? 0.0 : floor(uTime * (1.2 + h * 2.2) + h * 40.0);
+        vG = floor(hash1(aSeed + tick * 0.137) * 64.0);
+        gl_PointSize = clamp((1.5 - t) * 150.0 / dc, 4.0, 22.0) * uDpr;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }`,
+    fragmentShader: /* glsl */`
+      uniform sampler2D uGlyphs;
+      varying float vA, vG;
+      varying vec3 vCol;
+      void main() {
+        if (vA < 0.01) discard;
+        vec2 cell = vec2(mod(vG, 8.0), 7.0 - floor(vG / 8.0));
+        vec2 uv = (cell + vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y)) / 8.0;
+        float g = texture2D(uGlyphs, uv).r;
+        gl_FragColor = vec4(vCol, g * vA);
+      }`,
+  });
+
   // ---------- the code under the surface: glyphs that show only where the pulse passes ----------
   const GLYPHS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz0123456789#%&$+=';
   const atlas = document.createElement('canvas');
@@ -564,13 +613,14 @@ function init() {
     STRUCT = buildStructure(mobile);
     const structLines = new THREE.LineSegments(STRUCT.lines, structMat);
     const structNodes = new THREE.Points(STRUCT.nodes, nodeMat);
+    const river = new THREE.Points(STRUCT.river, riverMat);
 
     const gg = new THREE.PlaneGeometry(W, H * 1.04, mobile ? 110 : 160, mobile ? 60 : 84);
     gg.translate(0, midY, 0);
     const glyphs = new THREE.Mesh(gg, glyphMat);
     uniforms.uCell.value.set(mobile ? 0.15 : 0.105, mobile ? 0.22 : 0.16);
 
-    [[fill, 0], [membrane, 1], [glyphs, 2], [ribbon, 3], [dots, 4], [structLines, -1], [structNodes, -1]].forEach(([o, order]) => {
+    [[fill, 0], [membrane, 1], [glyphs, 2], [ribbon, 3], [dots, 4], [structLines, -1], [structNodes, -1], [river, -1]].forEach(([o, order]) => {
       o.frustumCulled = false;
       o.renderOrder = order;
       group.add(o);
@@ -648,7 +698,8 @@ function init() {
     // ----- AI -----
     const [ax, ay] = FORCE_BASE[1];
     const apexA = touch(ax, ay);
-    const NC = mobile ? 30 : 44;
+    const NC = mobile ? 30 : 44, PER = mobile ? 6 : 8;
+    const RP = [], RC1 = [], RC2 = [], RP3 = [], RT = [], RS = [];
     for (let i = 0; i < NC; i++) {
       const ang = i * 2.39996, rad = 0.9 + 1.5 * Math.sqrt((i + 0.5) / NC);
       const s = [ax + Math.cos(ang) * rad, ay + Math.sin(ang) * rad * 0.82, -4.4 - R() * 1.4];
@@ -656,8 +707,20 @@ function init() {
       const c2 = [ax + Math.cos(ang) * 0.2, ay + Math.sin(ang) * 0.17, -1.4];
       path(cubic(s, c1, c2, apexA, 30), 1, 0.5 + R() * 0.7);
       node(s, 1, 0.6 + R() * 0.5);
+      // The river: a few characters on each line, spaced along it, each moving at its own pace (see riverMat).
+      for (let k = 0; k < PER; k++) {
+        RP.push(...s); RC1.push(...c1); RC2.push(...c2); RP3.push(...apexA);
+        RT.push((k + R() * 0.6) / PER); RS.push(R() * 100);
+      }
     }
     node(apexA, 1, 1.6);
+    const river = new THREE.BufferGeometry();
+    river.setAttribute('position', new THREE.Float32BufferAttribute(RP, 3));
+    river.setAttribute('aC1', new THREE.Float32BufferAttribute(RC1, 3));
+    river.setAttribute('aC2', new THREE.Float32BufferAttribute(RC2, 3));
+    river.setAttribute('aP3', new THREE.Float32BufferAttribute(RP3, 3));
+    river.setAttribute('aT0', new THREE.Float32BufferAttribute(RT, 1));
+    river.setAttribute('aSeed', new THREE.Float32BufferAttribute(RS, 1));
 
     // ----- Leadership -----
     const [lx, ly] = FORCE_BASE[2];
@@ -733,7 +796,7 @@ function init() {
       [lx + 1.75, ly + 0.9, -1.2],
       S0,
     ];
-    return { lines, nodes, picks, anchors };
+    return { lines, nodes, river, picks, anchors };
   }
 
   // ---------- the crossing: a camera path through the membrane, then round to look back at it ----------
