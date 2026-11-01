@@ -9,6 +9,8 @@ const copyEl = document.getElementById('copy');
 const behindEl = document.getElementById('behind');
 const hintEl = document.getElementById('hint');
 const labels = [...document.querySelectorAll('.force')];
+const answerEl = document.getElementById('answer');
+const answerText = answerEl.querySelector('.x');
 const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
 const mqFine = matchMedia('(hover: hover) and (pointer: fine)');
 let reduced = mqReduce.matches;
@@ -99,7 +101,14 @@ function init() {
     uBehind: { value: 0 },
     uHot: { value: -1 },
     uHotAmt: { value: 0 },
-    uGather: { value: 0 },
+    // Per force (BI, AI, Leadership): how gold it is, how bright its own point glows.
+    uGoldAmt: { value: new THREE.Vector3() },
+    uGlow: { value: new THREE.Vector3() },
+    uHeat: { value: new Array(64).fill(0) },
+    uCi0: { value: 999 },
+    uStep: { value: 0 },
+    uLit: { value: new Array(6).fill(-1) },
+    uLitAmt: { value: new Array(6).fill(0) },
     uSpeed: { value: SPEED },
     uSize: { value: new THREE.Vector3(W, H, 0) },
     uNearest: { value: -1 },
@@ -107,6 +116,7 @@ function init() {
     uBlue: { value: new THREE.Color(0x00486F) },
     uMist: { value: new THREE.Color(0xE4ECE9) },
     uSignal: { value: new THREE.Color(0xE0952F) },
+    uGold: { value: new THREE.Color(0xF0C778) },
     uGlyphs: { value: null },
     uCell: { value: new THREE.Vector2(0.085, 0.13) },
   };
@@ -233,6 +243,12 @@ function init() {
       if (r < 2.5) return uROff[2];
       return vec2(0.0);
     }
+
+    uniform vec3 uGoldAmt, uGlow;
+    uniform float uStep;
+    float perForce(vec3 v, float r) { return r < 0.5 ? v.x : r < 1.5 ? v.y : r < 2.5 ? v.z : 0.0; }
+    // The formation's step forward: up the wall and into it.
+    vec3 stepOff(float r) { return r > 1.5 && r < 2.5 ? vec3(0.0, 0.26, 0.1) * uStep : vec3(0.0); }
   `;
 
   const LIGHT = 'normalize(vec3(-0.45, 0.55, 0.7))';
@@ -327,7 +343,8 @@ function init() {
     vertexShader: FIELD + /* glsl */`
       attribute float aIdx;
       uniform float uNearest, uDpr;
-      varying float vNear;
+      uniform float uLit[6], uLitAmt[6];
+      varying float vNear, vLit;
       varying float vA;
       void main() {
         float ring; vec3 n;
@@ -335,21 +352,25 @@ function init() {
         vec4 wp = modelMatrix * vec4(pos, 1.0);
         float near = cursorNear(position.xy, 0.35);
         vNear = 1.0 - step(0.5, abs(aIdx - uNearest));
+        // A point the BI's lineage has just fed lights up.
+        float lit = 0.0;
+        for (int i = 0; i < 6; i++) lit += uLitAmt[i] * (1.0 - step(0.5, abs(aIdx - uLit[i])));
+        vLit = clamp(lit, 0.0, 1.0);
         float edge = smoothstep(0.5, 0.42, abs(position.x) / uSize.x);
-        vA = edge * mix(0.55, 1.0, max(near, vNear)) * introAt(position.x) * nearCam(wp.xyz);
-        gl_PointSize = mix(2.6, 7.0, max(near, vNear)) * uDpr;
+        vA = edge * mix(0.55, 1.0, max(max(near, vNear), vLit)) * introAt(position.x) * nearCam(wp.xyz);
+        gl_PointSize = mix(mix(2.6, 7.0, max(near, vNear)), 9.0, vLit) * uDpr;
         gl_Position = projectionMatrix * viewMatrix * wp;
       }`,
     fragmentShader: /* glsl */`
-      uniform vec3 uMist, uSignal;
-      varying float vNear;
+      uniform vec3 uMist, uSignal, uGold;
+      varying float vNear, vLit;
       varying float vA;
       void main() {
         vec2 c = gl_PointCoord - 0.5;
         float d = length(c);
         if (d > 0.5) discard;
         float a = smoothstep(0.5, 0.36, d) * vA;
-        gl_FragColor = vec4(mix(uMist, uSignal, vNear), a);
+        gl_FragColor = vec4(mix(mix(uMist, uSignal, vNear), uGold, vLit), a);
       }`,
   });
 
@@ -358,14 +379,16 @@ function init() {
   const structMat = new THREE.ShaderMaterial({
     uniforms, ...additive,
     vertexShader: FIELD + /* glsl */`
-      attribute float aReg, aT, aFlow, aSeed;
+      attribute float aReg, aT, aFlow, aSeed, aCi;
       attribute vec2 aLink;
-      uniform vec3 uMist, uSignal;
+      uniform vec3 uMist, uGold;
+      uniform float uHeat[64], uCi0;
       varying float vA;
       varying vec3 vCol;
       void main() {
         vec3 p = position;
         p.xy += mix(regOff(aLink.x), regOff(aLink.y), aT);
+        p += mix(stepOff(aLink.x), stepOff(aLink.y), aT);
         float ring, w, g; vec2 o;
         fields(p.xy, ring, w, g, o);
         float glimpse = (0.03 + 0.85 * clamp(ring, 0.0, 1.0) + 0.22 * cursorNear(p.xy, 1.1)) * smoothstep(1.0, 1.8, uIntro);
@@ -374,16 +397,24 @@ function init() {
         float base = aReg < 0.5 ? 0.3 : aReg < 1.5 ? 0.16 : aReg < 2.5 ? 0.6 : aReg < 3.5 ? 0.34 : 0.13;
         float dash = mix(1.0, step(0.5, fract(aT * 28.0)), link);
         // Signals travel along the structures: data towards the report, information towards one point, support outwards.
-        float flow = aFlow > 0.0 ? pow(fract(aT * 2.0 - uTime * 0.2 * aFlow + aSeed * 7.0), 12.0) * (1.0 - uReduced) : 0.0;
+        // In gold they run brighter.
+        float gold = perForce(uGoldAmt, aReg);
+        float flow = aFlow > 0.0 ? pow(fract(aT * 2.0 - uTime * 0.2 * aFlow * (1.0 + gold) + aSeed * 7.0), 12.0) * (1.0 - uReduced) : 0.0;
+        // An AI line glows a little while it carries the word in. The lines through the word are fainter than the rest
+        // until they do: there are many of them, side by side.
+        float heat = aCi >= 0.0 ? uHeat[int(aCi)] : 0.0;
+        float thr = step(uCi0 - 0.5, aCi);
+        base = mix(base, 0.06, thr);
+        flow *= 1.0 - 0.6 * thr;
         float isHot = 1.0 - step(0.5, abs(aReg - uHot));
         float hot = isHot * uHotAmt;
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
-        float seen = (base * dash + 0.8 * flow) * dim * (1.0 + 0.9 * hot);
+        float seen = (base * dash + (0.8 + 1.2 * gold) * flow + 0.35 * heat) * dim * (1.0 + 0.9 * hot);
         // The Leadership trails fade behind each point: brightest at the point (aT = 1), gone at the tail.
         float trail = mix(1.0, smoothstep(0.0, 1.0, aT), step(1.5, aReg) * step(aReg, 2.5));
         vec4 wp = modelMatrix * vec4(p, 1.0);
         vA = mix(glimpse, seen, uBehind) * trail * nearCam(wp.xyz);
-        vCol = mix(uMist, uSignal, hot * uBehind);
+        vCol = mix(uMist, uGold, gold * uBehind);
         gl_Position = projectionMatrix * viewMatrix * wp;
       }`,
     fragmentShader: /* glsl */`
@@ -395,25 +426,28 @@ function init() {
   const nodeMat = new THREE.ShaderMaterial({
     uniforms, ...additive,
     vertexShader: FIELD + /* glsl */`
-      attribute float aReg, aSize, aOpen;
+      attribute float aReg, aSize, aOpen, aKey;
       uniform float uDpr;
-      uniform vec3 uMist, uSignal;
+      uniform vec3 uMist, uGold;
       varying float vA, vOpen;
       varying vec3 vCol;
       void main() {
         vec3 p = position;
         p.xy += regOff(aReg);
+        p += stepOff(aReg);
         float ring, w, g; vec2 o;
         fields(p.xy, ring, w, g, o);
         float glimpse = (0.02 + 0.7 * clamp(ring, 0.0, 1.0)) * smoothstep(1.0, 1.8, uIntro) * (1.0 - 0.75 * smoothstep(-1.4, 0.4, p.z));
         float isHot = 1.0 - step(0.5, abs(aReg - uHot));
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
+        // A force's own point (the AI's one point, the formation's lead) glows when its moment comes.
+        float glow = aKey * perForce(uGlow, aReg) * uBehind;
         vec4 wp = modelMatrix * vec4(p, 1.0);
         float dc = distance(wp.xyz, cameraPosition);
-        vA = mix(glimpse, 0.85 * dim, uBehind) * nearCam(wp.xyz);
+        vA = min(1.0, mix(glimpse, 0.85 * dim, uBehind) + glow) * nearCam(wp.xyz);
         vOpen = aOpen;
-        vCol = mix(uMist, uSignal, isHot * uHotAmt * uBehind);
-        gl_PointSize = clamp(aSize * 52.0 / dc, 1.6, 9.0) * uDpr;
+        vCol = mix(mix(uMist, uGold, perForce(uGoldAmt, aReg) * uBehind), vec3(1.0, 0.95, 0.85), glow);
+        gl_PointSize = clamp(aSize * 52.0 / dc, 1.6, 9.0) * (1.0 + 1.4 * glow) * uDpr;
         gl_Position = projectionMatrix * viewMatrix * wp;
       }`,
     fragmentShader: /* glsl */`
@@ -431,13 +465,14 @@ function init() {
   // ---------- the river of characters: what goes into the AI ----------
   // Single characters from the hero's own alphabet travel along the AI's lines towards the one point, large and loose
   // where a line starts, small and tight near the point, each one changing at its own pace. Flow stops under reduced motion.
+  // When the AI turns gold the river steps back, as in the sketch.
   const riverMat = new THREE.ShaderMaterial({
     uniforms, ...additive,
     vertexShader: FIELD + /* glsl */`
-      attribute vec3 aC1, aC2, aP3, aL;
+      attribute vec3 aC1, aC2, aP3;
       attribute float aT0, aSeed;
-      uniform float uDpr, uGather;
-      uniform vec3 uMist, uSignal;
+      uniform float uDpr;
+      uniform vec3 uMist;
       varying float vA, vG;
       varying vec3 vCol;
       float hash1(float x) { return fract(sin(x * 127.1) * 43758.5453); }
@@ -446,9 +481,6 @@ function init() {
         float t = uReduced > 0.5 ? aT0 : fract(aT0 + uTime * (0.03 + 0.025 * h));
         float u = 1.0 - t;
         vec3 p = u * u * u * position + 3.0 * u * u * t * aC1 + 3.0 * u * t * t * aC2 + t * t * t * aP3;
-        // The letters: each character leaves its line for its place in "AI" and comes back, in its own time.
-        float ga = smoothstep(0.0, 1.0, clamp(uGather * 1.35 - h * 0.35, 0.0, 1.0));
-        p = mix(p, aL, ga);
         p.xy += regOff(1.0);
         float ring, w, g; vec2 o;
         fields(p.xy, ring, w, g, o);
@@ -457,15 +489,15 @@ function init() {
         float isHot = 1.0 - step(0.5, abs(1.0 - uHot));
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
         float ends = smoothstep(0.0, 0.08, t) * smoothstep(0.97, 0.9, t);
-        float seen = mix((0.34 + 0.4 * t) * ends, 0.85, ga) * dim * (1.0 + 0.8 * isHot * uHotAmt);
+        float seen = (0.34 + 0.4 * t) * ends * dim * (1.0 - 0.7 * uGoldAmt.y);
         vec4 wp = modelMatrix * vec4(p, 1.0);
         float dc = distance(wp.xyz, cameraPosition);
         vA = mix(glimpse, seen, uBehind) * nearCam(wp.xyz);
-        vCol = mix(uMist, uSignal, isHot * uHotAmt * uBehind);
+        vCol = uMist;
         // The character changes now and then, each at its own pace.
         float tick = uReduced > 0.5 ? 0.0 : floor(uTime * (1.2 + h * 2.2) + h * 40.0);
         vG = floor(hash1(aSeed + tick * 0.137) * 64.0);
-        gl_PointSize = mix(clamp((1.5 - t) * 150.0 / dc, 4.0, 22.0), clamp(118.0 / dc, 5.0, 14.0), ga) * uDpr;
+        gl_PointSize = clamp((1.5 - t) * 150.0 / dc, 4.0, 22.0) * uDpr;
         gl_Position = projectionMatrix * viewMatrix * wp;
       }`,
     fragmentShader: /* glsl */`
@@ -544,6 +576,62 @@ function init() {
         float hot = smoothstep(0.55, 1.0, vMask) * step(0.75, hash(cell + 9.7));
         vec3 col = mix(uBlue + vec3(0.1, 0.32, 0.46), uMist, hot);
         gl_FragColor = vec4(col, g * b * vEdge);
+      }`,
+  });
+
+  // ---------- the words on the far side: one particle each, moved by the CPU (see the words section below) ----------
+  // Shape 0 is a character from the hero's alphabet, 1 a table cell, 2 a point. aBlue is the glitch's offset ghost.
+  const wordMat = new THREE.ShaderMaterial({
+    uniforms, ...additive,
+    vertexShader: /* glsl */`
+      attribute float aA, aS, aG, aShape, aBlue;
+      uniform float uDpr, uBehind;
+      varying float vA, vG, vShape, vBlue;
+      void main() {
+        vA = aA * uBehind; vG = aG; vShape = aShape; vBlue = aBlue;
+        gl_PointSize = aS * uDpr;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: /* glsl */`
+      uniform sampler2D uGlyphs;
+      uniform vec3 uMist;
+      varying float vA, vG, vShape, vBlue;
+      void main() {
+        if (vA < 0.01) discard;
+        vec2 pc = gl_PointCoord;
+        float a;
+        if (vShape < 0.5) {
+          vec2 cell = vec2(mod(vG, 8.0), 7.0 - floor(vG / 8.0));
+          a = texture2D(uGlyphs, (cell + vec2(pc.x, 1.0 - pc.y)) / 8.0).r;
+        } else if (vShape < 1.5) {
+          // A cell: a fine square outline with a faint fill.
+          vec2 d = abs(pc - 0.5);
+          float m = max(d.x, d.y);
+          a = smoothstep(0.5, 0.44, m) * (0.25 + 0.75 * smoothstep(0.32, 0.4, m));
+        } else {
+          a = smoothstep(0.5, 0.15, length(pc - 0.5));
+        }
+        gl_FragColor = vec4(mix(uMist, vec3(0.25, 0.71, 1.0), vBlue), a * vA);
+      }`,
+  });
+
+  // The gold word: drawn once into a texture, laid over the scene on a plane that faces the visitor, revealed by a sweep.
+  const goldMat = () => new THREE.ShaderMaterial({
+    ...additive,
+    uniforms: { uTex: { value: null }, uAmt: { value: 0 }, uSweep: { value: 1 }, uTime: uniforms.uTime, uReduced: uniforms.uReduced, uBehind: uniforms.uBehind },
+    vertexShader: /* glsl */`
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: /* glsl */`
+      uniform sampler2D uTex;
+      uniform float uAmt, uSweep, uTime, uReduced, uBehind;
+      varying vec2 vUv;
+      void main() {
+        if (uAmt < 0.003 || vUv.x > uSweep) discard;
+        vec3 c = texture2D(uTex, vUv).rgb;
+        float breathe = uReduced > 0.5 ? 1.0 : 0.92 + 0.08 * sin(uTime / 1.1);
+        float edge = smoothstep(uSweep - 0.05, uSweep, vUv.x) * 0.35 * (1.0 - smoothstep(0.9, 1.04, uSweep));
+        gl_FragColor = vec4((c * breathe + vec3(1.0, 0.886, 0.647) * edge) * uAmt * uBehind, 1.0);
       }`,
   });
 
@@ -627,13 +715,13 @@ function init() {
   }
 
   // BI: tables behind the wall, with lineage lines rising into the chart's own data points.
-  // AI: many inputs converging onto a single point, carrying a river of characters that can gather into "AI".
+  // AI: many inputs converging onto a single point, carrying a river of characters.
   // Leadership: a formation, one point in front at the wall and six behind it in two wings.
   // A few dashed links make it one system.
   function buildStructure(mobile) {
     const R = rng(23);
-    const LP = [], LR = [], LT = [], LF = [], LS = [], LL = [];
-    const NP = [], NR = [], NS = [], NO = [];
+    const LP = [], LR = [], LT = [], LF = [], LS = [], LL = [], LC = [];
+    const NP = [], NR = [], NS = [], NO = [], NK = [];
     const picks = [[], [], []];
     const d3 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
     const mix3 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
@@ -648,18 +736,19 @@ function init() {
     });
     const touch = (x, y) => [x, y, surfaceZ(x, y) - 0.05];
 
-    function path(pts, reg, flow = 0, la = reg, lb = reg) {
+    function path(pts, reg, flow = 0, la = reg, lb = reg, ci = -1) {
       const seed = R(), len = [0];
       for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + d3(pts[i - 1], pts[i]));
       const total = len[len.length - 1] || 1;
       for (let i = 0; i < pts.length - 1; i++) {
         for (const j of [i, i + 1]) {
-          LP.push(...pts[j]); LR.push(reg); LT.push(len[j] / total); LF.push(flow); LS.push(seed); LL.push(la, lb);
+          LP.push(...pts[j]); LR.push(reg); LT.push(len[j] / total); LF.push(flow); LS.push(seed); LL.push(la, lb); LC.push(ci);
         }
       }
+      return { pts, cum: len.map(l => l / total) };
     }
-    function node(p, reg, size = 1, open = 0) {
-      NP.push(...p); NR.push(reg); NS.push(size); NO.push(open);
+    function node(p, reg, size = 1, open = 0, key = 0) {
+      NP.push(...p); NR.push(reg); NS.push(size); NO.push(open); NK.push(key);
       picks[reg].push(p);
     }
 
@@ -687,11 +776,14 @@ function init() {
     // Lineage: six lines, each from a source cell, through the two tables above, to its own point on the chart.
     const chartDots = dotPos.filter(p => Math.abs(p[0] - bx) < 1.7).sort((a, b) => a[0] - b[0]);
     const srcCells = [[2, 0, 1], [2, 1, 2], [3, 0, 0], [3, 1, 2], [4, 0, 1], [4, 1, 0]];
+    const lineage = [];
     srcCells.forEach(([ti, c, r], i) => {
       const a = cell(TB[ti], c, r), m = cell(TB[1], Math.min(4, i), 1 + (i % 3)), tp = cell(TB[0], Math.min(2, Math.floor(i / 2)), i % 3);
       const d = chartDots[Math.min(chartDots.length - 1, Math.round(i * (chartDots.length - 1) / 5))] || [bx, by];
       const end = touch(d[0], d[1]);
-      path(line(a, m, 8).concat(line(m, tp, 8).slice(1), line(tp, end, 10).slice(1)), 0, 0.7 + R() * 0.5);
+      const pl = path(line(a, m, 8).concat(line(m, tp, 8).slice(1), line(tp, end, 10).slice(1)), 0, 0.7 + R() * 0.5);
+      // Which point of the chart this line feeds, so the BI's word can light it.
+      lineage.push({ ...pl, dot: dotPos.indexOf(d), end });
       node(a, 0, 0.8); node(m, 0, 0.8); node(tp, 0, 0.9);
     });
     node(touch(bx, by), 0, 1.2);
@@ -701,12 +793,14 @@ function init() {
     const apexA = touch(ax, ay);
     const NC = mobile ? 30 : 44, PER = mobile ? 6 : 8;
     const RP = [], RC1 = [], RC2 = [], RP3 = [], RT = [], RS = [];
+    const curves = [];
     for (let i = 0; i < NC; i++) {
       const ang = i * 2.39996, rad = 0.9 + 1.5 * Math.sqrt((i + 0.5) / NC);
       const s = [ax + Math.cos(ang) * rad, ay + Math.sin(ang) * rad * 0.82, -4.4 - R() * 1.4];
       const c1 = [ax + Math.cos(ang) * rad * 0.95, ay + Math.sin(ang) * rad * 0.78, -3.0];
       const c2 = [ax + Math.cos(ang) * 0.2, ay + Math.sin(ang) * 0.17, -1.4];
-      path(cubic(s, c1, c2, apexA, 30), 1, 0.5 + R() * 0.7);
+      path(cubic(s, c1, c2, apexA, 30), 1, 0.5 + R() * 0.7, 1, 1, i);
+      curves.push([s, c1, c2, apexA]);
       node(s, 1, 0.6 + R() * 0.5);
       // The river: a few characters on each line, spaced along it, each moving at its own pace (see riverMat).
       for (let k = 0; k < PER; k++) {
@@ -714,7 +808,7 @@ function init() {
         RT.push((k + R() * 0.6) / PER); RS.push(R() * 100);
       }
     }
-    node(apexA, 1, 1.6);
+    node(apexA, 1, 1.6, 0, 1);
     const river = new THREE.BufferGeometry();
     river.setAttribute('position', new THREE.Float32BufferAttribute(RP, 3));
     river.setAttribute('aC1', new THREE.Float32BufferAttribute(RC1, 3));
@@ -722,26 +816,6 @@ function init() {
     river.setAttribute('aP3', new THREE.Float32BufferAttribute(RP3, 3));
     river.setAttribute('aT0', new THREE.Float32BufferAttribute(RT, 1));
     river.setAttribute('aSeed', new THREE.Float32BufferAttribute(RS, 1));
-    // Where each character goes when the river gathers into "AI": a place along the letter strokes, mirrored in x
-    // because the far side is seen from behind, scattered a little across the stroke so it reads as a web, not a line,
-    // and shuffled so that one line's characters do not all land side by side.
-    const STROKES = [
-      [[0, 0], [0.5, 1], [1, 0]], [[0.2, 0.38], [0.8, 0.38]],
-      [[1.7, 0], [1.7, 1]], [[1.45, 0], [1.95, 0]], [[1.45, 1], [1.95, 1]],
-    ];
-    const segs = [];
-    STROKES.forEach(s => { for (let i = 1; i < s.length; i++) segs.push([s[i - 1], s[i], Math.hypot(s[i][0] - s[i - 1][0], s[i][1] - s[i - 1][1])]); });
-    // On a wide screen the word sits beside the convergence, not on it, where the fan is thin enough to read through.
-    const totalLen = segs.reduce((a, s) => a + s[2], 0), N = RP.length / 3, RL = [];
-    const LX = mobile ? ax - 0.15 : ax - 1.3, LY = mobile ? ay - 0.6 : ay - 0.85, LSC = mobile ? 1.6 : 1.5, LZ = mobile ? -4.6 : -3.4;
-    for (let i = 0; i < N; i++) {
-      let d = (((i * 7919) % N) + 0.5) / N * totalLen, seg = segs[0];
-      for (const sg of segs) { if (d <= sg[2]) { seg = sg; break; } d -= sg[2]; }
-      const t = d / seg[2], sx = seg[0][0] + (seg[1][0] - seg[0][0]) * t, sy = seg[0][1] + (seg[1][1] - seg[0][1]) * t;
-      const nx = -(seg[1][1] - seg[0][1]) / seg[2], ny = (seg[1][0] - seg[0][0]) / seg[2], j = (R() - 0.5) * 0.16;
-      RL.push(LX + (0.975 - sx - nx * j) * LSC, LY + (sy + ny * j) * LSC, LZ + (R() - 0.5) * 0.3);
-    }
-    river.setAttribute('aL', new THREE.Float32BufferAttribute(RL, 3));
 
     // ----- Leadership: a formation -----
     // One point in front, at the wall; six behind in two wings, each with a trail that fades behind it (see structMat).
@@ -756,7 +830,7 @@ function init() {
       // The trail runs straight behind the point with a slight waver, from the tail (aT = 0) to the point (aT = 1).
       for (let s = 0; s <= 14; s++) { const a = s / 14, back = (1 - a) * len; pts.push([p[0] + 0.08 * Math.sin(ph + back * 2.0) * (1 - a), p[1] - back, p[2] - back * 0.25]); }
       path(pts, 2, i === 0 ? 0.9 : 0.55);
-      node(p, 2, i === 0 ? 2.0 : 1.35);
+      node(p, 2, i === 0 ? 2.0 : 1.35, 0, i === 0 ? 1 : 0);
     });
 
     // ----- links -----
@@ -775,11 +849,13 @@ function init() {
     lines.setAttribute('aFlow', new THREE.Float32BufferAttribute(LF, 1));
     lines.setAttribute('aSeed', new THREE.Float32BufferAttribute(LS, 1));
     lines.setAttribute('aLink', new THREE.Float32BufferAttribute(LL, 2));
+    lines.setAttribute('aCi', new THREE.Float32BufferAttribute(LC, 1));
     const nodes = new THREE.BufferGeometry();
     nodes.setAttribute('position', new THREE.Float32BufferAttribute(NP, 3));
     nodes.setAttribute('aReg', new THREE.Float32BufferAttribute(NR, 1));
     nodes.setAttribute('aSize', new THREE.Float32BufferAttribute(NS, 1));
     nodes.setAttribute('aOpen', new THREE.Float32BufferAttribute(NO, 1));
+    nodes.setAttribute('aKey', new THREE.Float32BufferAttribute(NK, 1));
 
     // Where each label attaches to its structure.
     const anchors = [
@@ -787,7 +863,9 @@ function init() {
       [ax - 2.3, ay + 0.3, -5.0],
       [lx + 2.6, ly - 0.9, -1.2],
     ];
-    return { lines, nodes, river, picks, anchors };
+    // Each force's own point, which its word is placed from: the middle table, the one point, the lead.
+    const keys = [[TB[1].cx, TB[1].cy, TB[1].z], apexA, lead];
+    return { lines, nodes, river, picks, anchors, keys, curves, lineage, form };
   }
 
   // ---------- the crossing: a camera path through the membrane, then round to look back at it ----------
@@ -818,6 +896,561 @@ function init() {
     }
   }
 
+  // ---------- the words: each force says its name in its own material, then hands it to the force ----------
+  // AI (the sketch of 25 October, "the singularity"): characters glitch in, hold, and are swallowed along the lines into
+  // the one point; an answer comes out of it. BI: cells fill in row by row, like a table loading, then rise along the
+  // lineage and light the chart's own points. Leadership: points fly in with trails to write the word, then join the
+  // formation, which steps forward while its lead glows. Pointing at a force (or the first tap) shows its word composed,
+  // in gold, and plays its moment. One word at a time; with reduced motion the words stand still.
+  const ANSWERS = ['no edge yet.', '62% sure. Bar: 95%.', 'a payment lapsed.'];
+  const MF = 200, WORD_FONT = `800 ${MF}px "Mona Sans", "Arial Black", Arial, sans-serif`;
+  const WORDS = [
+    { text: 'BI', shape: 1, rows: [9, 14], inT: 0.95, holdT: 0.9 },
+    { text: 'AI', shape: 0, rows: [15, 26], inT: 0.7, holdT: 1.0 },
+    { text: 'LEAD', shape: 2, rows: [8, 12], inT: 1.2, holdT: 0.8 },
+  ].map((w, k) => ({ ...w, k, pts: [], ph: 'idle', t0: 0, bands: [], bandT: 0, moment: false, fed: [], gold: 0, goldOn: false, goldT: 0, mesh: null, tex: null }));
+  // Where each word sits on the far side, as seen from there: its centre, in units of its own height, from the force's
+  // own point; and its height, as a share of the screen's shorter side. Tall screens use the space above and below.
+  const PLACE = {
+    wide: [{ dx: -2.45, dy: 0.58, h: 0.11 }, { dx: -1.9, dy: -0.42, h: 0.16 }, { dx: 0.5, dy: 2.45, h: 0.066 }],
+    tall: [{ dx: 0.2, dy: 2.3, h: 0.12 }, { dx: -0.92, dy: -1.4, h: 0.15 }, { dx: 0.5, dy: 4.4, h: 0.078 }],
+  };
+
+  function drawMasks() {
+    WORDS.forEach(w => {
+      const c = document.createElement('canvas');
+      let g = c.getContext('2d');
+      g.font = WORD_FONT;
+      c.width = Math.ceil(g.measureText(w.text).width) + 40;
+      c.height = Math.round(MF * 0.9);
+      g = c.getContext('2d');
+      g.font = WORD_FONT;
+      g.fillStyle = '#fff';
+      g.fillText(w.text, 20, Math.round(MF * 0.8));
+      const d = g.getImageData(0, 0, c.width, c.height).data, m = new Uint8Array(c.width * c.height);
+      let x0 = 1e9, x1 = -1, y0 = 1e9, y1 = -1;
+      for (let i = 0; i < m.length; i++) {
+        if (d[i * 4 + 3] < 128) continue;
+        m[i] = 1;
+        const px = i % c.width, py = (i - px) / c.width;
+        x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
+      }
+      Object.assign(w, { mask: m, mw: c.width, mh: c.height, x0, x1, y0, y1, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, lw: 0 });
+    });
+  }
+  const onMask = (w, x, y) => { x |= 0; y |= 0; return x >= 0 && y >= 0 && x < w.mw && y < w.mh && w.mask[y * w.mw + x] === 1; };
+
+  // The gold word, as in the sketch: a glowing outline, a fine mesh inside, a loose constellation around, a few stars;
+  // only the AI comes apart, in shards off the side that faces its point. lw thickens the strokes when the word is small.
+  function drawGold(w, lw) {
+    const R = rng(29 + w.k), S2 = 3, MG = 60, on = (x, y) => onMask(w, x, y);
+    const ox = w.x0 - MG, oy = w.y0 - MG;
+    const c = document.createElement('canvas');
+    c.width = Math.round((w.x1 - w.x0 + 2 * MG) * S2);
+    c.height = Math.round((w.y1 - w.y0 + 2 * MG) * S2);
+    const g = c.getContext('2d');
+    g.fillStyle = '#000';
+    g.fillRect(0, 0, c.width, c.height);
+    g.setTransform(S2, 0, 0, S2, -ox * S2, -oy * S2);
+    g.globalCompositeOperation = 'lighter';
+    g.lineCap = g.lineJoin = 'round';
+    const col = a => `rgba(240,199,120,${a})`;
+    const pts = [];
+    for (let y = w.y0; y <= w.y1; y++) for (let x = w.x0; x <= w.x1; x++) {
+      if (on(x, y) && (!on(x - 1, y) || !on(x + 1, y) || !on(x, y - 1) || !on(x, y + 1)) && R() < 0.42) pts.push({ x, y, t: 'edge' });
+    }
+    for (let n = 0, tries = 0; n < 700 * w.text.length && tries < 2e5; tries++) {
+      const x = w.x0 + R() * (w.x1 - w.x0), y = w.y0 + R() * (w.y1 - w.y0);
+      if (on(x, y)) { pts.push({ x, y, t: 'in' }); n++; }
+    }
+    if (w.k === 1) for (let n = 0, tries = 0; n < 240 && tries < 6e4; tries++) {
+      const x = w.x0 + R() * (w.x1 - w.x0 + 70), y = w.y0 + R() * (w.y1 - w.y0);
+      if (on(x, y)) continue;
+      let dl = 0;
+      while (dl < 70 && !on(x - dl, y)) dl++;
+      if (dl >= 2 && dl < 70 && R() < Math.exp(-dl / 16)) { pts.push({ x, y, t: 'frag' }); n++; }
+    }
+    const amb = [];
+    for (let n = 0; n < 45 * w.text.length;) {
+      const x = w.x0 - 50 + R() * (w.x1 - w.x0 + 100), y = w.y0 - 45 + R() * (w.y1 - w.y0 + 90);
+      if (!on(x, y)) { amb.push({ x, y, t: 'amb' }); n++; }
+    }
+    const link = (P, r, maxN) => {
+      const grid = new Map(), key = (i, j) => i + ',' + j, out = [], seen = new Set();
+      P.forEach((p, i) => { const k = key(Math.floor(p.x / r), Math.floor(p.y / r)); (grid.get(k) || grid.set(k, []).get(k)).push(i); });
+      P.forEach((p, i) => {
+        const gx = Math.floor(p.x / r), gy = Math.floor(p.y / r), cand = [];
+        for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) (grid.get(key(gx + a, gy + b)) || []).forEach(j => {
+          if (j !== i) { const d = Math.hypot(P[j].x - p.x, P[j].y - p.y); if (d < r) cand.push([d, j]); }
+        });
+        cand.sort((u, v) => u[0] - v[0]).slice(0, maxN).forEach(([, j]) => {
+          const s = i < j ? i + '-' + j : j + '-' + i;
+          if (!seen.has(s)) { seen.add(s); out.push([p, P[j]]); }
+        });
+      });
+      return out;
+    };
+    const stroke = (ls, width, a) => { g.lineWidth = width * lw; g.strokeStyle = col(a); g.beginPath(); ls.forEach(([p, q]) => { g.moveTo(p.x, p.y); g.lineTo(q.x, q.y); }); g.stroke(); };
+    const dot = (x, y, r) => { g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.fill(); };
+    stroke(link(amb, 48, 2), 0.5, 0.07);
+    g.fillStyle = col(0.35);
+    amb.forEach(p => dot(p.x, p.y, 0.8 * lw));
+    g.font = WORD_FONT;
+    g.fillStyle = col(0.05);
+    g.fillText(w.text, 20, Math.round(MF * 0.8));
+    const groups = { in: [], edge: [], frag: [] };
+    link(pts, 12, 4).forEach(l => groups[l[0].t === 'frag' || l[1].t === 'frag' ? 'frag' : l[0].t === 'edge' && l[1].t === 'edge' ? 'edge' : 'in'].push(l));
+    stroke(groups.in, 0.45, 0.2); stroke(groups.frag, 0.5, 0.3); stroke(groups.edge, 0.7, 0.55);
+    pts.filter(p => p.t === 'frag' && R() < 0.3).forEach(p => {
+      const s = 2.5 + R() * 5, a = R() * 6.28, b = a + 2 + R();
+      g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x + s * Math.cos(a), p.y + s * Math.sin(a)); g.lineTo(p.x + s * Math.cos(b), p.y + s * Math.sin(b)); g.closePath();
+      g.fillStyle = col(0.1); g.fill(); g.lineWidth = 0.5 * lw; g.strokeStyle = col(0.35); g.stroke();
+    });
+    g.shadowColor = 'rgba(240,190,100,.9)';
+    g.shadowBlur = 7 * S2 * lw;
+    g.lineWidth = 1.1 * lw;
+    g.strokeStyle = 'rgba(255,226,165,.85)';
+    g.strokeText(w.text, 20, Math.round(MF * 0.8));
+    g.shadowBlur = 0;
+    g.lineWidth = 0.6 * lw;
+    g.strokeStyle = 'rgba(255,240,205,.8)';
+    g.strokeText(w.text, 20, Math.round(MF * 0.8));
+    // Inside, a deeper gold and less of it: added up over hundreds of points, a pale gold turns white.
+    pts.forEach(p => { g.fillStyle = p.t === 'in' ? 'rgba(240,186,96,.38)' : 'rgba(252,222,155,.85)'; dot(p.x, p.y, (p.t === 'edge' ? 0.75 : p.t === 'frag' ? 0.7 : 0.55) * lw); });
+    pts.filter(p => R() < (p.t === 'edge' ? 0.03 : p.t === 'frag' ? 0.05 : 0.006)).forEach(p => {
+      const hg = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, 6 * lw);
+      hg.addColorStop(0, 'rgba(255,232,180,.55)'); hg.addColorStop(1, 'rgba(255,232,180,0)');
+      g.fillStyle = hg; dot(p.x, p.y, 6 * lw);
+      g.fillStyle = '#FFF4DC'; dot(p.x, p.y, 1.2 * lw);
+    });
+    return c;
+  }
+
+  // Placing the words needs the view from the far side, where they are read: a second camera, set as the real one ends.
+  const endCam = new THREE.PerspectiveCamera(30, 1, 0.05, 200);
+  const wv = new THREE.Vector3(), wr = new THREE.Vector3(), wu = new THREE.Vector3(), wf = new THREE.Vector3();
+  const bez3 = (c, t) => { const u = 1 - t; return [0, 1, 2].map(i => u * u * u * c[0][i] + 3 * u * u * t * c[1][i] + 3 * u * t * t * c[2][i] + t * t * t * c[3][i]); };
+  const alongPath = (pl, t) => {
+    let i = 1;
+    while (i < pl.cum.length - 1 && pl.cum[i] < t) i++;
+    const a = pl.pts[i - 1], b = pl.pts[i], f = clamp((t - pl.cum[i - 1]) / ((pl.cum[i] - pl.cum[i - 1]) || 1), 0, 1);
+    return [lerp(a[0], b[0], f), lerp(a[1], b[1], f), lerp(a[2], b[2], f)];
+  };
+  let wordPts = null, throughObj = null, aiCurves = [];
+
+  // As in the sketch, most of the lines into the AI's point cross its word on the way: they start beside it, run
+  // through it and on to the point, and they are the ones that carry it in. They depend on where the word sits.
+  function throughLines(w, toPx, depth) {
+    const R = rng(41), f = w.frame, NT = L.mobile ? 10 : 16, hc = f.hh * 2, ap = toPx(STRUCT.keys[1]);
+    wv.set(...STRUCT.keys[1]).sub(endCam.position);
+    const apDepth = wv.dot(wf);
+    const at = (x, y, d) => {
+      wv.set(x / L.w * 2 - 1, -y / L.h * 2 + 1, 0.5).unproject(endCam).sub(endCam.position).normalize();
+      return endCam.position.clone().addScaledVector(wv, d / wv.dot(wf)).toArray();
+    };
+    const through = [];
+    for (let i = 0; i < NT; i++) {
+      const y = f.sy - f.hh + (i + 0.5) / NT * 2 * f.hh + (R() - 0.5) * 0.1 * hc;
+      through.push([
+        at(f.sx - f.hw * (1.5 + R() * 0.6), y + (R() - 0.5) * 0.3 * hc, depth - 0.6),
+        at(f.sx - f.hw + (0.35 + R() * 0.6) * 2 * f.hw, y + (R() - 0.5) * 0.15 * hc, depth),
+        at(ap[0] - (0.67 + R() * 0.33) * hc, ap[1] + (y - ap[1]) * (0.22 + R() * 0.3), apDepth - 1.4),
+        STRUCT.keys[1],
+      ]);
+    }
+    aiCurves = STRUCT.curves.concat(through);
+    uniforms.uCi0.value = STRUCT.curves.length;
+    const P = [], T = [], F = [], SD = [], CI = [];
+    through.forEach((c, i) => {
+      const fl = 0.5 + R() * 0.7, sd = R();
+      for (let j = 0; j < 30; j++) for (const jj of [j, j + 1]) { P.push(...bez3(c, jj / 30)); T.push(jj / 30); F.push(fl); SD.push(sd); CI.push(STRUCT.curves.length + i); }
+    });
+    if (throughObj) { group.remove(throughObj); throughObj.geometry.dispose(); }
+    const n = P.length / 3, g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+    g.setAttribute('aReg', new THREE.Float32BufferAttribute(new Float32Array(n).fill(1), 1));
+    g.setAttribute('aT', new THREE.Float32BufferAttribute(T, 1));
+    g.setAttribute('aFlow', new THREE.Float32BufferAttribute(F, 1));
+    g.setAttribute('aSeed', new THREE.Float32BufferAttribute(SD, 1));
+    g.setAttribute('aLink', new THREE.Float32BufferAttribute(new Float32Array(n * 2).fill(1), 2));
+    g.setAttribute('aCi', new THREE.Float32BufferAttribute(CI, 1));
+    throughObj = new THREE.LineSegments(g, structMat);
+    throughObj.frustumCulled = false;
+    throughObj.renderOrder = -1;
+    group.add(throughObj);
+  }
+
+  function placeWords() {
+    if (!STRUCT || !WORDS[0].mask) return;
+    // The particles are made anew, so a word caught mid-way (a phone turned, a window resized) stops, and the next
+    // one comes in a moment.
+    WORDS.forEach(w => { if (w.ph !== 'idle') { w.ph = 'idle'; if (WQ.cur === w.k) { WQ.cur = -1; WQ.next = S.time + 1; } } });
+    rig(1);
+    endCam.aspect = L.w / L.h;
+    endCam.fov = L.fovEnd;
+    endCam.position.copy(camPos);
+    endCam.lookAt(camTgt);
+    endCam.setViewOffset(L.w, L.h, -(L.ex - L.w / 2), -(L.ey - L.h / 2), L.w, L.h);
+    endCam.updateProjectionMatrix();
+    endCam.updateMatrixWorld();
+    wr.setFromMatrixColumn(endCam.matrixWorld, 0).normalize();
+    wu.setFromMatrixColumn(endCam.matrixWorld, 1).normalize();
+    endCam.getWorldDirection(wf);
+    const toPx = p => { wv.set(p[0], p[1], p[2]).project(endCam); return [(wv.x * 0.5 + 0.5) * L.w, (-wv.y * 0.5 + 0.5) * L.h]; };
+    const t = smooth(0.7, 1.55, L.w / L.h), short = Math.min(L.w, L.h);
+    // What each word's material can carry it along, as seen from the far side.
+    const linPx = STRUCT.lineage.map(pl => pl.pts.map(p => toPx(p)));
+    const formX = STRUCT.form.map((p, i) => [toPx(p)[0], i]).sort((a, b) => a[0] - b[0]);
+    STRUCT.lineage.forEach((pl, i) => { uniforms.uLit.value[i] = pl.dot; });
+
+    WORDS.forEach((w, k) => {
+      const pw = PLACE.wide[k], pt = PLACE.tall[k];
+      const hc = lerp(pt.h, pw.h, t) * short;
+      const key = toPx(STRUCT.keys[k]);
+      const sx = key[0] + lerp(pt.dx, pw.dx, t) * hc, sy = key[1] + lerp(pt.dy, pw.dy, t) * hc;
+      // The word lies on a plane through that point of the screen, at the depth of its force, facing the visitor.
+      // The AI's sits nearer, where its lines start, so that they can carry it in to the point on the wall.
+      wv.set(...STRUCT.keys[k]).sub(endCam.position);
+      const depth = wv.dot(wf) - (k === 1 ? 4.5 : 0);
+      wv.set(sx / L.w * 2 - 1, -sy / L.h * 2 + 1, 0.5).unproject(endCam).sub(endCam.position).normalize();
+      const centre = endCam.position.clone().addScaledVector(wv, depth / wv.dot(wf));
+      const ppm = hc / (w.y1 - w.y0), kw = ppm * 2 * depth * Math.tan(THREE.MathUtils.degToRad(L.fovEnd) / 2) / L.h;
+      w.frame = { centre, r: wr.clone(), u: wu.clone(), sx, sy, ppm, kw, hw: (w.x1 - w.x0) * ppm / 2, hh: (w.y1 - w.y0) * ppm / 2 };
+      w.lift = hc * kw / ppm;
+      if (k === 1) throughLines(w, toPx, depth);
+      const curvePx = k === 1 ? aiCurves.map(c => Array.from({ length: 45 }, (_, j) => toPx(bez3(c, j / 64)))) : [];
+
+      // The particles: a grid over the letters; the edge is brighter. Cells keep a strict grid, like a table.
+      const rows = Math.round(lerp(w.rows[0], w.rows[1], t)), s = (w.y1 - w.y0) / rows, R = rng(7 + k);
+      const size = s * ppm * (w.shape === 0 ? 1.3 : w.shape === 1 ? 0.86 : 0.55);
+      w.pts = [];
+      for (let r = 0, my = w.y0 + s / 2; my < w.y1; my += s, r++) for (let c = 0, mx = w.x0 + s / 2; mx < w.x1; mx += s, c++) {
+        if (!onMask(w, mx, my)) continue;
+        const j = w.shape === 1 ? 0 : s * 0.15, x = mx + (R() - 0.5) * 2 * j, y = my + (R() - 0.5) * 2 * j;
+        const edge = !(onMask(w, mx - s, my) && onMask(w, mx + s, my) && onMask(w, mx, my - s) && onMask(w, mx, my + s));
+        const lx = (x - w.cx) * kw, ly = -(y - w.cy) * kw;
+        w.pts.push({
+          mx: x, my: y, row: r, col: c, edge, R: R(), ch: (R() * 64) | 0,
+          b: [centre.x + wr.x * lx + wu.x * ly, centre.y + wr.y * lx + wu.y * ly, centre.z + wr.z * lx + wu.z * ly],
+          px: [sx + (x - w.cx) * ppm, sy + (y - w.cy) * ppm],
+          a: w.shape === 0 ? (edge ? 0.88 + R() * 0.12 : 0.42 + R() * 0.3) : w.shape === 1 ? (edge ? 0.85 : 0.5) : 0.9,
+          size: Math.max(w.shape === 2 ? 2.2 : 3.2, size),
+        });
+      }
+      w.nRows = rows;
+      w.nCols = Math.ceil((w.x1 - w.x0) / s);
+      // Where each particle goes when the word is handed over. BI's cells share themselves out over the six lineage
+      // lines, a column of the word to each, so that every point the lineage feeds lights up.
+      if (k === 0) {
+        const order = w.pts.map((p, i) => [p.px[0], i]).sort((a, b) => a[0] - b[0]);
+        const lines = linPx.map((ls, li) => [ls[0][0], li]).sort((a, b) => a[0] - b[0]);
+        order.forEach(([, i], rank) => { w.pts[i].li = lines[Math.min(lines.length - 1, Math.floor(rank / order.length * lines.length))][1]; });
+      }
+      w.pts.forEach(p => {
+        let best = 1e18;
+        if (k === 1) curvePx.forEach((cs, ci) => cs.forEach((q, jj) => { const d = (q[0] - p.px[0]) ** 2 + (q[1] - p.px[1]) ** 2; if (d < best) { best = d; p.ci = ci; p.ts = jj / 64; } }));
+        if (k === 0) linPx[p.li].forEach((q, jj) => {
+          if (STRUCT.lineage[p.li].cum[jj] > 0.66) return;
+          const d = (q[0] - p.px[0]) ** 2 + (q[1] - p.px[1]) ** 2;
+          if (d < best) { best = d; p.ls = STRUCT.lineage[p.li].cum[jj]; }
+        });
+        p.hop = Math.sqrt(best);
+      });
+      if (k === 1) {
+        const ap = toPx(STRUCT.keys[1]), far = Math.max(...w.pts.map(p => Math.hypot(p.px[0] - ap[0], p.px[1] - ap[1])));
+        w.pts.forEach(p => { p.near = 1 - Math.hypot(p.px[0] - ap[0], p.px[1] - ap[1]) / far; });
+      }
+      if (k === 0) { const mh = Math.max(...w.pts.map(p => p.hop)); w.pts.forEach(p => { p.near = 1 - p.hop / (mh || 1); }); }
+      if (k === 2) {
+        const order = w.pts.map((p, i) => [p.px[0], i]).sort((a, b) => a[0] - b[0]);
+        order.forEach(([, i], rank) => { const p = w.pts[i]; p.xr = rank / order.length; p.fi = formX[Math.min(6, Math.floor(p.xr * 7))][1]; });
+      }
+
+      // The gold word on its plane, a little larger than the letters for the constellation around them.
+      if (!w.mesh) {
+        w.mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), goldMat());
+        w.mesh.matrixAutoUpdate = false;
+        w.mesh.frustumCulled = false;
+        w.mesh.renderOrder = 6;
+        group.add(w.mesh);
+      }
+      const lw = clamp(Math.round(2 * 0.9 / ppm) / 2, 1, 3);
+      if (lw !== w.lw) {
+        if (w.tex) w.tex.dispose();
+        w.tex = new THREE.CanvasTexture(drawGold(w, lw));
+        w.tex.minFilter = THREE.LinearMipmapLinearFilter;
+        w.tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+        w.mesh.material.uniforms.uTex.value = w.tex;
+        w.lw = lw;
+      }
+      const gw = (w.x1 - w.x0 + 120) * kw, gh = (w.y1 - w.y0 + 120) * kw;
+      w.mesh.matrix.makeBasis(wr.clone().multiplyScalar(gw), wu.clone().multiplyScalar(gh), wf.clone().negate()).setPosition(centre);
+      w.mesh.matrixWorldNeedsUpdate = true;
+    });
+
+    // One buffer for all three: the AI's characters each have a ghost for the glitch, the Leadership's points two trail marks.
+    let n = 0;
+    WORDS.forEach(w => { w.off = n; w.mult = w.k === 1 ? 2 : w.k === 2 ? 3 : 1; n += w.pts.length * w.mult; });
+    if (wordPts) { group.remove(wordPts); wordPts.geometry.dispose(); }
+    const geo = new THREE.BufferGeometry();
+    const attr = sz => new THREE.BufferAttribute(new Float32Array(n * sz), sz).setUsage(THREE.DynamicDrawUsage);
+    ['position', 'aA', 'aS', 'aG', 'aBlue'].forEach(a => geo.setAttribute(a, attr(a === 'position' ? 3 : 1)));
+    const shape = new Float32Array(n);
+    WORDS.forEach(w => shape.fill(w.shape, w.off, w.off + w.pts.length * w.mult));
+    geo.setAttribute('aShape', new THREE.BufferAttribute(shape, 1));
+    wordPts = new THREE.Points(geo, wordMat);
+    wordPts.frustumCulled = false;
+    wordPts.renderOrder = 5;
+    group.add(wordPts);
+    if (wordsReady) wordsWrite(S.time, 0);
+  }
+
+  // The schedule: the AI first, under a second after arriving, then BI, then Leadership; after that one word every
+  // 6 to 10 seconds, in turn. Nothing new starts while a force is pointed at.
+  const ORDER = [1, 0, 2];
+  const WQ = { i: 0, next: -1, cur: -1, round: 0 };
+  const FX = { stepAt: -1, glow: [0, 0, 0], litQ: [] };
+  const ans = { i: -1, ph: 'off', t: 0, n: 0, shown: '' };
+  let wordsReady = false, wordsShown = false;
+  const ripple = (p, k, amp) => { const o = uniforms.uROff.value[k]; addRipple(p[0] + o.x, p[1] + o.y, amp); };
+
+  function startAnswer(now) { ans.i = (ans.i + 1) % ANSWERS.length; ans.ph = 'type'; ans.t = now; ans.n = 0; }
+  // A force's moment: the AI answers; BI's lineage lights the chart's points in turn; the formation steps forward.
+  function moment(k, now, hover) {
+    if (k === 1) { if (hover || !WORDS[1].goldOn) startAnswer(now); FX.glow[1] = 1; if (!hover) ripple(STRUCT.keys[1], 1, 0.22); }
+    if (k === 0 && hover) STRUCT.lineage.forEach((pl, li) => FX.litQ.push({ li, at: now + li * 0.12 }));
+    if (k === 2) { FX.stepAt = now; FX.glow[2] = 1; ripple(STRUCT.keys[2], 2, 0.22); }
+  }
+  function startWord(w, now) {
+    w.ph = 'in'; w.t0 = now; w.moment = false; w.fed = [];
+    w.bands = []; w.bandT = 0;
+    w.pts.forEach(p => {
+      p.ch = (Math.random() * 64) | 0;
+      // BI fills in like a table loading; the Leadership's points arrive from below, left to right.
+      if (w.k === 0) p.tIn = 0.75 * p.row / w.nRows + 0.15 * p.col / w.nCols;
+      if (w.k === 2) { p.tIn = 0.55 * p.xr + p.R * 0.15; p.from = [(Math.random() - 0.5) * 0.4, -(1.6 + Math.random() * 0.8)]; }
+    });
+  }
+  function handOver(w, now) {
+    w.ph = 'out'; w.t0 = now;
+    w.pts.forEach(p => {
+      const r = Math.random();
+      if (w.k === 1) { p.d0 = now + (1 - p.near) * 0.9 + r * 0.45; p.hopT = 0.18 + Math.min(p.hop, 140) * 0.006; p.ride = 0.65 + (1 - p.ts) * 1.3 + Math.random() * 0.3; }
+      if (w.k === 0) { p.d0 = now + (1 - p.near) * 0.7 + r * 0.25; p.hopT = 0.15 + Math.min(p.hop, 160) * 0.004; p.ride = 0.8 + (1 - p.ls) * 0.9 + Math.random() * 0.25; }
+      if (w.k === 2) { p.d0 = now + p.xr * 0.35 + r * 0.2; p.ride = 0.75 + Math.random() * 0.2; }
+    });
+  }
+  function wordDone(w, now) {
+    w.ph = 'idle';
+    WQ.cur = -1;
+    WQ.round++;
+    WQ.i = (WQ.i + 1) % ORDER.length;
+    WQ.next = now + (WQ.round < ORDER.length ? 1.4 : 6 + Math.random() * 4);
+  }
+
+  function wordsStep(dt, u) {
+    const now = S.time;
+    if (u > 0.9 && S.arrivedAt < 0) { S.arrivedAt = now; WQ.i = 0; WQ.round = 0; WQ.cur = -1; WQ.next = now + 0.9; }
+    if (u < 0.5 && S.arrivedAt >= 0) { S.arrivedAt = -1; WQ.cur = -1; WORDS.forEach(w => { w.ph = 'idle'; }); ans.ph = 'off'; FX.litQ.length = 0; }
+    WORDS.forEach((w, k) => {
+      const on = S.hot === k;
+      if (on && !w.goldOn) { w.goldT = now; if (!reduced) moment(k, now, true); }
+      if (!on && w.goldOn && k === 1 && ans.ph === 'wait') ans.ph = 'off';
+      w.goldOn = on;
+      w.gold = reduced ? (on ? 1 : 0) : clamp(w.gold + (on ? 1 : -1) * dt / 0.45, 0, 1);
+      const m = w.mesh && w.mesh.material.uniforms;
+      if (m) { m.uAmt.value = w.gold; m.uSweep.value = reduced || !on ? 1.06 : lerp(-0.06, 1.06, smooth(0, 0.75, now - w.goldT)); }
+    });
+    uniforms.uGoldAmt.value.set(WORDS[0].gold, WORDS[1].gold, WORDS[2].gold);
+
+    if (reduced) {
+      uniforms.uGlow.value.set(0, S.hot === 1 ? 1 : 0, S.hot === 2 ? 1 : 0);
+      uniforms.uLitAmt.value.fill(S.hot === 0 ? 1 : 0);
+      uniforms.uStep.value = 0;
+    } else {
+      if (S.arrivedAt >= 0 && WQ.cur < 0 && S.hot < 0 && now >= WQ.next) { WQ.cur = ORDER[WQ.i]; startWord(WORDS[WQ.cur], now); }
+      WORDS.forEach(w => {
+        if (w.ph === 'in' && now - w.t0 > w.inT) { w.ph = 'hold'; w.t0 = now; }
+        else if (w.ph === 'hold' && now - w.t0 > w.holdT) handOver(w, now);
+      });
+      // The answer types out of the point, stays, and erases; while the AI is gold, the next one follows.
+      const e = now - ans.t, len = ans.i >= 0 ? ANSWERS[ans.i].length : 0;
+      if (ans.ph === 'wait' && e > 0.9) startAnswer(now);
+      else if (ans.ph === 'type') { ans.n = Math.min(len, Math.floor(e / 0.062)); if (ans.n === len) { ans.ph = 'hold'; ans.t = now; } }
+      else if (ans.ph === 'hold' && e > 2.8) { ans.ph = 'erase'; ans.t = now; }
+      else if (ans.ph === 'erase') { ans.n = Math.max(0, len - Math.floor(e / 0.024)); if (!ans.n) { ans.t = now; ans.ph = WORDS[1].goldOn ? 'wait' : 'off'; } }
+
+      const heat = uniforms.uHeat.value, lit = uniforms.uLitAmt.value;
+      for (let i = 0; i < heat.length; i++) heat[i] *= Math.exp(-dt * 2.75);
+      for (let i = 0; i < lit.length; i++) lit[i] *= Math.exp(-dt * 0.9);
+      FX.litQ = FX.litQ.filter(q => { if (now < q.at) return true; lit[q.li] = 1; return false; });
+      FX.glow[1] *= Math.exp(-dt * 1.3);
+      FX.glow[2] *= Math.exp(-dt * 1.0);
+      uniforms.uGlow.value.set(0, FX.glow[1], FX.glow[2]);
+      let st = 0;
+      if (FX.stepAt >= 0) {
+        const se = now - FX.stepAt;
+        st = se < 0.3 ? 1 - (1 - se / 0.3) ** 2 : se < 0.7 ? 1 : 1 - smooth(0.7, 2.3, se);
+        if (se > 2.3) FX.stepAt = -1;
+      }
+      uniforms.uStep.value = st;
+    }
+    wordsWrite(now, dt);
+  }
+
+  // Every particle's place, brightness, size and character for this frame.
+  function wordsWrite(now, dt) {
+    if (!wordPts) return;
+    const ga = wordPts.geometry.attributes;
+    const P = ga.position.array, A = ga.aA.array, SZ = ga.aS.array, G = ga.aG.array, B = ga.aBlue.array;
+    const show = S.arrivedAt >= 0 || (reduced && S.u > 0.5);
+    if (!show && !wordsShown) return;
+    wordsShown = show;
+    A.fill(0);
+    if (show) WORDS.forEach(w => {
+      // A word fades as its gold appears, and steps back while another force is pointed at.
+      const fade = (1 - w.gold) * (1 - 0.6 * S.hotAmt * (S.hot >= 0 && S.hot !== w.k ? 1 : 0)), f = w.frame, o = uniforms.uROff.value[w.k], N = w.pts.length;
+      const put = (i, x, y, z, a, s, g, blue) => { P[i * 3] = x; P[i * 3 + 1] = y; P[i * 3 + 2] = z; A[i] = a; SZ[i] = s; G[i] = g; B[i] = blue; };
+      const at = (i, p, dx, dy, a, s, g, blue) => put(i, p.b[0] + f.r.x * dx + f.u.x * dy, p.b[1] + f.r.y * dx + f.u.y * dy, p.b[2] + f.r.z * dx + f.u.z * dy, a, s, g, blue);
+      if (reduced) { w.pts.forEach((p, j) => at(w.off + j, p, 0, 0, p.a * 0.7 * fade, p.size, p.ch, 0)); return; }
+      if (w.ph === 'idle' || fade < 0.01) return;
+
+      if (w.k === 1) {
+        // The glitch: bands of the word slip sideways and scramble, with a blue ghost; during the hold, now and then.
+        if (w.ph === 'in' || w.ph === 'hold') {
+          const every = w.ph === 'in' ? 0.07 : 0.9 + Math.random() * 0.9;
+          if (now - w.bandT > every) {
+            w.bandT = now;
+            w.bands = [];
+            const nb = w.ph === 'in' ? 2 + ((Math.random() * 3) | 0) : Math.random() < 0.55 ? 1 : 0;
+            for (let b = 0; b < nb; b++) w.bands.push({ y0: w.y0 + Math.random() * (w.y1 - w.y0), h: 6 + Math.random() * 26, dx: (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 20), until: now + (w.ph === 'in' ? 0.07 : 0.12 + Math.random() * 0.14) });
+          }
+          w.bands = w.bands.filter(b => now < b.until);
+          const v = w.ph === 'in' ? clamp((now - w.t0) / w.inT * 1.25, 0, 1) : 1;
+          const jit = w.ph === 'in' ? (Math.random() - 0.5) * 8 * (1 - v) : 0;
+          w.pts.forEach((p, j) => {
+            if (Math.random() < 0.9 * dt) p.ch = (Math.random() * 64) | 0;
+            if (w.ph === 'in' && Math.random() > v) return;
+            let b = null;
+            for (const q of w.bands) if (p.my >= q.y0 && p.my <= q.y0 + q.h) { b = q; break; }
+            at(w.off + j, p, (jit + (b ? b.dx : 0)) * f.kw, 0, p.a * fade, p.size, b ? (Math.random() * 64) | 0 : p.ch, 0);
+            if (b) at(w.off + N + j, p, (b.dx * 1.4 + 3) * f.kw, 0, 0.55 * fade, p.size, p.ch, 1);
+          });
+        } else {
+          // Swallowed: each character steps onto its nearest line, the ones nearest the point first, and rides it in.
+          let left = 0, gone = 0;
+          w.pts.forEach((p, j) => {
+            const e = now - p.d0;
+            if (e < 0) { left++; at(w.off + j, p, (Math.random() - 0.5) * 1.2 * f.kw, 0, p.a * fade, p.size, p.ch, 0); return; }
+            const cv = aiCurves[p.ci];
+            if (e < p.hopT) {
+              left++;
+              const k3 = 1 - (1 - e / p.hopT) ** 3, q = bez3(cv, p.ts);
+              put(w.off + j, lerp(p.b[0], q[0] + o.x, k3), lerp(p.b[1], q[1] + o.y, k3), lerp(p.b[2], q[2], k3), (p.a + 0.2 * k3) * fade, p.size, p.ch, 0);
+              return;
+            }
+            const uu = (e - p.hopT) / p.ride;
+            if (uu >= 1) { gone++; return; }
+            left++;
+            const tt = p.ts + (1 - p.ts) * uu ** 1.8, q = bez3(cv, tt), sh = (tt - p.ts) / (1 - p.ts);
+            uniforms.uHeat.value[p.ci] = Math.min(1, uniforms.uHeat.value[p.ci] + 2.1 * dt);
+            put(w.off + j, q[0] + o.x, q[1] + o.y, q[2], (p.a + 0.25) * (1 - uu ** 6) * fade, p.size * (1 - 0.79 * sh), p.ch, 0);
+          });
+          if (!w.moment && gone > 0.75 * N) { w.moment = true; moment(1, now, false); }
+          if (!left) wordDone(w, now);
+        }
+      }
+
+      if (w.k === 0) {
+        if (w.ph === 'in' || w.ph === 'hold') {
+          // A table loading: row by row; during the hold, one bright row runs down it, like a query.
+          const e = now - w.t0, hr = w.ph === 'hold' ? e / w.holdT * (w.nRows + 2) - 1 : -9;
+          w.pts.forEach((p, j) => {
+            const v = w.ph === 'in' ? clamp((e - p.tIn) / 0.12, 0, 1) : 1;
+            if (v <= 0) return;
+            at(w.off + j, p, 0, 0, (p.a * v + 0.6 * Math.exp(-((p.row - hr) ** 2) / 1.5)) * fade, p.size, 0, 0);
+          });
+        } else {
+          // Handed over: each cell steps onto the nearest lineage line and rises along it into the chart.
+          let left = 0;
+          w.pts.forEach((p, j) => {
+            const e = now - p.d0;
+            if (e < 0) { left++; at(w.off + j, p, 0, 0, p.a * fade, p.size, 0, 0); return; }
+            const pl = STRUCT.lineage[p.li];
+            if (e < p.hopT) {
+              left++;
+              const k3 = 1 - (1 - e / p.hopT) ** 3, q = alongPath(pl, p.ls);
+              put(w.off + j, lerp(p.b[0], q[0] + o.x, k3), lerp(p.b[1], q[1] + o.y, k3), lerp(p.b[2], q[2], k3), (p.a + 0.2 * k3) * fade, p.size, 0, 0);
+              return;
+            }
+            const uu = (e - p.hopT) / p.ride;
+            if (uu >= 1) {
+              if (!w.fed[p.li]) { w.fed[p.li] = true; uniforms.uLitAmt.value[p.li] = 1; if (!w.moment) { w.moment = true; ripple(pl.end, 0, 0.14); } }
+              return;
+            }
+            left++;
+            const q = alongPath(pl, p.ls + (1 - p.ls) * uu ** 1.4);
+            put(w.off + j, q[0] + o.x, q[1] + o.y, q[2], (p.a + 0.2) * (1 - uu ** 8) * fade, p.size * (1 - 0.55 * uu), 0, 0);
+          });
+          if (!left) wordDone(w, now);
+        }
+      }
+
+      if (w.k === 2) {
+        // Each point with two marks behind it, where it was a moment ago: its trail.
+        const trail = (j, pos, a, s) => {
+          [[0.07, 0.45, 0.8], [0.14, 0.2, 0.62]].forEach(([back, ta, ts], m) => {
+            const q = pos(back);
+            if (q) put(w.off + N * (m + 1) + j, q[0], q[1], q[2], a * ta, s * ts, 0, 0);
+          });
+        };
+        if (w.ph === 'in' || w.ph === 'hold') {
+          const e = now - w.t0;
+          w.pts.forEach((p, j) => {
+            if (w.ph === 'hold') { at(w.off + j, p, 0, 0, p.a * fade, p.size, 0, 0); return; }
+            const fly = back => {
+              const v = (e - back - p.tIn) / 0.5;
+              if (v < 0) return null;
+              const k3 = 1 - (1 - Math.min(1, v)) ** 3, dx = p.from[0] * w.lift * (1 - k3), dy = p.from[1] * w.lift * (1 - k3);
+              return [p.b[0] + f.r.x * dx + f.u.x * dy, p.b[1] + f.r.y * dx + f.u.y * dy, p.b[2] + f.r.z * dx + f.u.z * dy];
+            };
+            const q = fly(0);
+            if (!q) return;
+            put(w.off + j, q[0], q[1], q[2], p.a * fade, p.size, 0, 0);
+            if (e - p.tIn < 0.6) trail(j, fly, p.a * fade, p.size);
+          });
+        } else {
+          // Handed over: the points fly to the formation, each to the one above its part of the word, and are taken in.
+          let left = 0, gone = 0;
+          const so = uniforms.uStep.value;
+          w.pts.forEach((p, j) => {
+            const e = now - p.d0;
+            if (e < 0) { left++; at(w.off + j, p, 0, 0, p.a * fade, p.size, 0, 0); return; }
+            const tg = STRUCT.form[p.fi];
+            const fly = back => {
+              const v = clamp((e - back) / p.ride, 0, 1), k3 = v * v * (3 - 2 * v);
+              const ex = tg[0] + o.x, ey = tg[1] + o.y + 0.26 * so, ez = tg[2] + 0.1 * so;
+              const cx = (p.b[0] + ex) / 2, cy = Math.min(p.b[1], ey) - 0.35, cz = (p.b[2] + ez) / 2, u1 = 1 - k3;
+              return [u1 * u1 * p.b[0] + 2 * u1 * k3 * cx + k3 * k3 * ex, u1 * u1 * p.b[1] + 2 * u1 * k3 * cy + k3 * k3 * ey, u1 * u1 * p.b[2] + 2 * u1 * k3 * cz + k3 * k3 * ez];
+            };
+            if (e >= p.ride) { gone++; return; }
+            left++;
+            const v = e / p.ride, a = (p.a + 0.1) * (1 - smooth(0.82, 1, v)) * fade, q = fly(0);
+            put(w.off + j, q[0], q[1], q[2], a, p.size, 0, 0);
+            trail(j, fly, a, p.size);
+          });
+          if (!w.moment && gone > 0.75 * N) { w.moment = true; moment(2, now, false); }
+          if (!left) wordDone(w, now);
+        }
+      }
+    });
+    ['position', 'aA', 'aS', 'aG', 'aBlue'].forEach(a => { ga[a].needsUpdate = true; });
+  }
+
+  // The words need the site's own typeface: drawn as soon as it is there, and again if it arrives late.
+  function wordsInit() { drawMasks(); WORDS.forEach(w => { w.lw = 0; }); wordsReady = true; placeWords(); kick(); }
+  document.fonts.load(WORD_FONT).then(wordsInit, wordsInit);
+
   // ---------- state ----------
   const S = {
     time: 0, intro: reduced ? 2 : 0,
@@ -826,7 +1459,7 @@ function init() {
     nextRipple: 0, autoRipple: !reduced, autoAt: 1.7,
     scrollP: 0, u: 0, uv: 0,
     hotPointer: -1, hotLabel: -1, hotTouch: -1, hot: -1, hotAmt: 0,
-    arrivedAt: -1, gatherAmt: 0,
+    arrivedAt: -1,
   };
   const L = { w: 1, h: 1, mobile: null, cx: 0, cy: 0, ex: 0, ey: 0, fov: 30, fovMid: 50, fovEnd: 40, rEnd: 13 };
   const BASE_RY = -0.3, BASE_RX = 0.06;
@@ -844,20 +1477,24 @@ function init() {
     // Framing follows the shape of the screen, not just its width: 0 on tall phones, 1 on wide desktops,
     // with folding phones and tablets (close to square) in between.
     const t = smooth(0.7, 1.55, w / h);
-    L.fov = fit(D, W * Math.cos(BASE_RY), H, lerp(1.12, 0.7, t), lerp(0.5, 0.82, t));
+    // On a tall phone the membrane is framed wider than the screen (its sides cut off), so it fills about half the
+    // height instead of a third, and sits closer to the title.
+    L.fov = fit(D, W * Math.cos(BASE_RY), H, lerp(1.65, 0.7, t), lerp(0.5, 0.82, t));
     L.rEnd = lerp(17, 13, t);
     L.fovEnd = fit(L.rEnd, 11, 7.5, lerp(0.98, 0.66, t), lerp(0.5, 0.8, t));
     L.fovMid = Math.max(L.fov, 52);
     L.cx = lerp(0.5, 0.6, t) * w;
-    L.cy = lerp(0.36, 0.42, t) * h;
+    L.cy = lerp(0.33, 0.42, t) * h;
     L.ex = lerp(0.5, 0.6, t) * w;
     L.ey = lerp(0.45, 0.47, t) * h;
     labels.forEach(el => { el._w = 0; });
+    answerEl._full = null;
     if (L.mobile !== mobile) {
       L.mobile = mobile;
       build(mobile);
       lastSide = null;
     }
+    placeWords();
   }
 
   function addRipple(x, y, amp = 0.32, seed = Math.random() * 100) {
@@ -949,17 +1586,7 @@ function init() {
     S.hotAmt = lerp(S.hotAmt, S.hot >= 0 ? 1 : 0, 1 - Math.exp(-dt * 10));
     uniforms.uHotAmt.value = S.hotAmt;
 
-    // The AI's letters: for two seconds, starting two seconds after the visitor arrives on the far side, and for as
-    // long as the AI is hot. Never under reduced motion, where the river stands still.
-    if (!reduced) {
-      if (u > 0.9 && S.arrivedAt < 0) S.arrivedAt = S.time;
-      if (u < 0.5) S.arrivedAt = -1;
-      const since = S.arrivedAt >= 0 ? S.time - S.arrivedAt : -1;
-      const gather = (since > 2.0 && since < 4.2) || S.hot === 1;
-      S.gatherAmt = lerp(S.gatherAmt, gather ? 1 : 0, 1 - Math.exp(-dt * 3.5));
-      uniforms.uGather.value = S.gatherAmt;
-    }
-
+    wordsStep(dt, u);
     updateDom(u);
     renderer.render(scene, camera);
   }
@@ -1005,6 +1632,23 @@ function init() {
       lastHot = S.hot;
     }
 
+    // The AI's answer comes out of its point. With reduced motion it simply stands there, whole.
+    const ansOn = lo > 0.01 && (reduced || ans.ph === 'type' || ans.ph === 'hold' || ans.ph === 'erase');
+    if (ansOn) {
+      const full = reduced ? ANSWERS[0] : ANSWERS[ans.i], txt = reduced ? full : full.slice(0, ans.n);
+      // Measured whole once, so the line can stay inside the frame while it types.
+      if (answerEl._full !== full) { answerText.textContent = full; answerEl._w = answerText.offsetWidth + 16; answerEl._full = full; ans.shown = null; }
+      if (txt !== ans.shown) { answerText.textContent = txt; ans.shown = txt; }
+      const s = project(STRUCT.keys[1], 1), gut = L.mobile ? 16 : 48;
+      const shift = Math.min(-6, L.w - gut - answerEl._w - s[0]);
+      answerEl.style.transform = `translate3d(${s[0].toFixed(1)}px,${s[1].toFixed(1)}px,0)`;
+      answerEl.style.setProperty('--shift', `${shift.toFixed(1)}px`);
+      answerEl.style.opacity = lo.toFixed(3);
+      answerEl.classList.toggle('blink', !reduced && ans.ph === 'hold');
+      answerEl.classList.toggle('gold', S.hot === 1);
+    }
+    if (ansOn !== answerEl._on) { answerEl._on = ansOn; answerEl.style.visibility = ansOn ? 'visible' : 'hidden'; if (!ansOn) answerEl.style.opacity = '0'; }
+
     // The front needs no instructions: the surface shows it reacts. Only the far side gets a hint.
     const side = u > 0.5;
     if (side !== lastSide) { lastSide = side; hintEl.hidden = !side; }
@@ -1037,6 +1681,8 @@ function init() {
   }
   function pickForce(cx, cy) {
     const r = canvas.getBoundingClientRect(), x = cx - r.left, y = cy - r.top;
+    // Pointing at a force's word counts as pointing at the force.
+    for (const w of WORDS) { const f = w.frame; if (f && Math.abs(x - f.sx) < f.hw + 8 && Math.abs(y - f.sy) < f.hh + 8) return w.k; }
     let best = -1, bd = (L.mobile ? 44 : 60) ** 2;
     STRUCT.picks.forEach((pts, k) => pts.forEach(p => {
       const s = project(p, k), d = (s[0] - x) ** 2 + (s[1] - y) ** 2;

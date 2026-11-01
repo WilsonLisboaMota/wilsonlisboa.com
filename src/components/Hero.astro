@@ -35,12 +35,15 @@ import '../styles/hero.css';
       <p class="r-note mono" aria-hidden="true">Illustrative data</p>
     </div>
 
-    <!-- Each label: the name, and one fact the shape cannot say. The shape says the rest. -->
+    <!-- Each label: the name only. The shapes, and the words they make, say the rest. -->
     <nav class="forces" id="forces" aria-label="What lies behind the dashboard">
-      <a class="force" href="#bi" data-k="0"><b>Business Intelligence</b><i>Power BI platform owner · Dremio · Databricks</i></a>
-      <a class="force" href="#ai" data-k="1"><b>Artificial Intelligence</b><i>Trading bot · Personal CFO · Property Deal Radar</i></a>
-      <a class="force" href="#leadership" data-k="2"><b>Leadership</b><i>A team of six BI developers</i></a>
+      <a class="force" href="#bi" data-k="0"><b>Business Intelligence</b></a>
+      <a class="force" href="#ai" data-k="1"><b>Artificial Intelligence</b></a>
+      <a class="force" href="#leadership" data-k="2"><b>Leadership</b></a>
     </nav>
+
+    <!-- What comes out of the AI's point, typed (see membrane.js). Decorative, so hidden from screen readers. -->
+    <p class="answer" id="answer" aria-hidden="true"><span class="t"><span class="x"></span><span class="c"></span></span></p>
   </div>
 </section>
 

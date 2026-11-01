@@ -25,15 +25,23 @@ h1 .dot{display:inline;color:var(--signal)}
 .behind{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:620px;opacity:0;pointer-events:none}
 .behind .big{margin:0;font-size:clamp(25px,2.6vw,40px);line-height:1.12;font-weight:480;font-stretch:104%;letter-spacing:-.022em;max-width:24ch;text-shadow:0 0 30px rgba(2,28,42,.9)}
 
-/* Labels sit on the structure; their position is set from the 3D scene every frame. */
-.forces{position:absolute;inset:0;z-index:3;pointer-events:none}
+/* Labels sit on the structure; their position is set from the 3D scene every frame. A force pointed at turns gold, as its word does. */
+.forces{position:absolute;inset:0;z-index:3;pointer-events:none;--gold:#F0C778}
 .force{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:3px;padding:2px 0 6px 20px;margin-top:-9px;text-decoration:none;color:var(--mist);opacity:0;visibility:hidden;pointer-events:auto;white-space:nowrap;will-change:transform,opacity}
 .force::before{content:"";position:absolute;left:0;top:12px;width:12px;height:1px;background:var(--mist-45);transition:background-color .2s var(--ease),width .3s var(--ease)}
 .force b{font-weight:600;font-size:15px;letter-spacing:-.005em;transition:color .2s var(--ease);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}
-.force i{font-style:normal;font-size:13px;line-height:1.3;color:var(--mist-70);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}
-.force.hot b,.force:focus-visible b{color:var(--signal)}
-.force.hot::before,.force:focus-visible::before{background:var(--signal);width:16px}
+.force.hot b,.force:focus-visible b{color:var(--gold)}
+.force.hot::before,.force:focus-visible::before{background:var(--gold);width:16px}
 .force:focus-visible{outline-offset:2px}
+
+/* The AI's answer: a short line from the point, then the text as it types, with the site's orange caret. */
+.answer{position:absolute;left:0;top:0;z-index:3;margin:0;padding-top:30px;font:500 13px/1 var(--mono);letter-spacing:.01em;color:var(--mist);white-space:pre;pointer-events:none;opacity:0;visibility:hidden;will-change:transform,opacity;text-shadow:0 0 6px var(--deep),0 0 14px var(--deep)}
+.answer::before{content:"";position:absolute;left:0;top:7px;width:1px;height:17px;background:rgba(228,236,233,.3)}
+.answer.gold::before{background:rgba(240,199,120,.5)}
+.answer .t{display:inline-block;transform:translateX(var(--shift,-6px))}
+.answer .c{display:inline-block;width:.55em;height:.95em;margin-left:.12em;vertical-align:-.1em;background:var(--signal)}
+.answer.blink .c{animation:caret 1.06s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
 
 .readout{position:absolute;z-index:4;right:var(--gutter);bottom:var(--base);display:flex;flex-direction:column;align-items:flex-end;gap:12px;text-align:right;pointer-events:none}
 .readout p{margin:0}
@@ -61,8 +69,7 @@ h1 .dot{display:inline;color:var(--signal)}
   .force{padding-left:16px}
   .force::before{width:9px}
   .force b{font-size:13px}
-  .force i{display:none}
-  .force.hot i{display:block}
+  .answer{font-size:12px}
   .fallback{left:5%;top:14%;width:90%;height:34%}
 }
 @media (max-width:759px) and (max-height:700px){
