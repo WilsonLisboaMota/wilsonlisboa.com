@@ -105,8 +105,9 @@ function init() {
     uEnergy: { value: new THREE.Vector3() },
     uGlow: { value: new THREE.Vector3() },
     uHeat: { value: new Array(96).fill(0) },
-    // How present the AI's word is: the river of characters recedes while the word is composed, as if it had gone into it.
-    uRiverDim: { value: 0 },
+    // How present the AI's word is: its roots in the field show while it is there, and the river of characters recedes,
+    // as if it had gone into the word.
+    uWordP: { value: 0 },
     uStep: { value: 0 },
     uLit: { value: new Array(6).fill(-1) },
     uLitAmt: { value: new Array(6).fill(0) },
@@ -381,10 +382,10 @@ function init() {
   const structMat = new THREE.ShaderMaterial({
     uniforms, ...additive,
     vertexShader: FIELD + /* glsl */`
-      attribute float aReg, aT, aFlow, aSeed, aCi;
+      attribute float aReg, aT, aFlow, aSeed, aCi, aRoot;
       attribute vec2 aLink;
-      uniform vec3 uMist, uSpark;
-      uniform float uHeat[96];
+      uniform vec3 uMist, uSpark, uGold;
+      uniform float uHeat[96], uWordP;
       varying float vA;
       varying vec3 vCol;
       void main() {
@@ -404,6 +405,9 @@ function init() {
         float flow = aFlow > 0.0 ? pow(fract(aT * 2.0 - uTime * 0.2 * aFlow * (1.0 + en) + aSeed * 7.0), 12.0) * (1.0 - uReduced) : 0.0;
         // An AI line glows a little while it carries the word in.
         float heat = aCi >= 0.0 ? uHeat[int(aCi)] : 0.0;
+        // The lines rooted in the AI's word (aRoot 1: they grow out of a letter; 0.5: they pass through one) run brighter
+        // while the word is there, most of all where they leave the letter.
+        base *= 1.0 + uWordP * (1.2 * aRoot + step(0.75, aRoot) * 1.8 * (1.0 - aT) * (1.0 - aT));
         float isHot = 1.0 - step(0.5, abs(aReg - uHot));
         float hot = isHot * uHotAmt;
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
@@ -469,7 +473,7 @@ function init() {
     vertexShader: FIELD + /* glsl */`
       attribute vec3 aC1, aC2, aP3;
       attribute float aT0, aSeed;
-      uniform float uDpr, uRiverDim;
+      uniform float uDpr, uWordP;
       uniform vec3 uMist;
       varying float vA, vG;
       varying vec3 vCol;
@@ -487,7 +491,7 @@ function init() {
         float isHot = 1.0 - step(0.5, abs(1.0 - uHot));
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
         float ends = smoothstep(0.0, 0.08, t) * smoothstep(0.97, 0.9, t);
-        float seen = (0.34 + 0.4 * t) * ends * dim * (1.0 - 0.7 * uEnergy.y) * (1.0 - 0.75 * uRiverDim);
+        float seen = (0.34 + 0.4 * t) * ends * dim * (1.0 - 0.7 * uEnergy.y) * (1.0 - 0.75 * uWordP);
         vec4 wp = modelMatrix * vec4(p, 1.0);
         float dc = distance(wp.xyz, cameraPosition);
         vA = mix(glimpse, seen, uBehind) * nearCam(wp.xyz);
@@ -615,6 +619,7 @@ function init() {
 
   // ---------- geometry ----------
   let built = null, STRUCT = null;
+  const riverOn = () => new URLSearchParams(location.search).get('river') !== '0' && location.hash !== '#no-river';
   const dotPos = [];
 
   function build(mobile) {
@@ -678,8 +683,9 @@ function init() {
     const structLines = new THREE.LineSegments(STRUCT.lines, structMat);
     const structNodes = new THREE.Points(STRUCT.nodes, nodeMat);
     const river = new THREE.Points(STRUCT.river, riverMat);
-    // For the review of 2 November: ?river=0 shows the fan without its characters.
-    river.visible = new URLSearchParams(location.search).get('river') !== '0';
+    // For the review of 2 November: ?river=0, or #no-river, shows the fan without its characters.
+    river.visible = riverOn();
+    STRUCT.riverMesh = river;
 
     const gg = new THREE.PlaneGeometry(W, H * 1.04, mobile ? 110 : 160, mobile ? 60 : 84);
     gg.translate(0, midY, 0);
@@ -831,6 +837,7 @@ function init() {
     lines.setAttribute('aSeed', new THREE.Float32BufferAttribute(LS, 1));
     lines.setAttribute('aLink', new THREE.Float32BufferAttribute(LL, 2));
     lines.setAttribute('aCi', new THREE.Float32BufferAttribute(LC, 1));
+    lines.setAttribute('aRoot', new THREE.Float32BufferAttribute(new Float32Array(LP.length / 3), 1));
     const nodes = new THREE.BufferGeometry();
     nodes.setAttribute('position', new THREE.Float32BufferAttribute(NP, 3));
     nodes.setAttribute('aReg', new THREE.Float32BufferAttribute(NR, 1));
@@ -841,17 +848,18 @@ function init() {
     // The word AI is rooted in this field: once the word is placed (see rootAI), some of these lines are moved to start
     // inside its letters. This rewrites one line, its start node and its characters in place; aiOrig keeps the originals.
     const aiOrig = curves.map(c => c.map(p => p.slice()));
-    function rerootAI(i, s, c1, c2) {
+    function rerootAI(i, s, c1, c2, root = 0) {
       const pts = cubic(s, c1, c2, apexA, 30), len = [0], at = aiAt[i];
       for (let k = 1; k < pts.length; k++) len.push(len[k - 1] + d3(pts[k - 1], pts[k]));
       const total = len[len.length - 1] || 1;
       const P = lines.attributes.position.array, T = lines.attributes.aT.array;
       let v = at.line;
       for (let k = 0; k < 30; k++) for (const j of [k, k + 1]) { P.set(pts[j], v * 3); T[v] = len[j] / total; v++; }
+      lines.attributes.aRoot.array.fill(root, at.line, at.line + 60);
       nodes.attributes.position.array.set(s, at.node * 3);
       const RPa = river.attributes.position.array, C1 = river.attributes.aC1.array, C2 = river.attributes.aC2.array;
       for (let k = 0; k < PER; k++) { const r = (at.river + k) * 3; RPa.set(s, r); C1.set(c1, r); C2.set(c2, r); }
-      [lines.attributes.position, lines.attributes.aT, nodes.attributes.position, river.attributes.position, river.attributes.aC1, river.attributes.aC2].forEach(a => { a.needsUpdate = true; });
+      [lines.attributes.position, lines.attributes.aT, lines.attributes.aRoot, nodes.attributes.position, river.attributes.position, river.attributes.aC1, river.attributes.aC2].forEach(a => { a.needsUpdate = true; });
       curves[i] = [s, c1, c2, apexA];
       picks[1][at.pick] = s;
     }
@@ -960,19 +968,45 @@ function init() {
   // The word AI is rooted in the field it sits in, as in the sketch of 1 November: the lines of the fan that start
   // nearest to it are moved to start inside its letters and run from there to the point. The rest stay as they are.
   function rootAI(w) {
-    const R = rng(41), f = w.frame, NR = L.mobile ? 8 : 14, ap = STRUCT.keys[1], hw = (w.y1 - w.y0) * f.kw;
-    STRUCT.aiOrig.forEach((c, i) => STRUCT.rerootAI(i, c[0], c[1], c[2]));
-    const near = STRUCT.aiOrig.map((c, i) => { wv.set(...c[0]).project(endCam); return [Math.hypot((wv.x * 0.5 + 0.5) * L.w - f.sx, (-wv.y * 0.5 + 0.5) * L.h - f.sy), i]; })
-      .sort((a, b) => a[0] - b[0]).slice(0, NR);
-    near.forEach(([, i]) => {
-      let mx = w.cx, my = w.cy;
-      for (let tries = 0; tries < 2000; tries++) { const x = w.x0 + R() * (w.x1 - w.x0), y = w.y0 + R() * (w.y1 - w.y0); if (onMask(w, x, y)) { mx = x; my = y; break; } }
-      const lx = (mx - w.cx) * f.kw, ly = -(my - w.cy) * f.kw;
-      const s = [f.centre.x + f.r.x * lx + f.u.x * ly, f.centre.y + f.r.y * lx + f.u.y * ly, f.centre.z + f.r.z * lx + f.u.z * ly];
-      // Out of the letter with a slight turn, then into the point the way the other lines go.
-      const jx = (R() - 0.5) * 0.5 * hw, jy = (R() - 0.5) * 0.5 * hw;
-      const c1 = [0, 1, 2].map(k => s[k] + (ap[k] - s[k]) * 0.25 + f.r.getComponent(k) * jx + f.u.getComponent(k) * jy);
-      STRUCT.rerootAI(i, s, c1, STRUCT.aiOrig[i][2]);
+    const R = rng(41), f = w.frame, ap = STRUCT.keys[1], O = STRUCT.aiOrig;
+    const NR = L.mobile ? 7 : 12, NW = L.mobile ? 3 : 6, NT = L.mobile ? 6 : 10, hc = (w.y1 - w.y0) * f.kw;
+    O.forEach((c, i) => STRUCT.rerootAI(i, c[0], c[1], c[2], 0));
+    const onPlane = (mx, my) => { const lx = (mx - w.cx) * f.kw, ly = -(my - w.cy) * f.kw; return [f.centre.x + f.r.x * lx + f.u.x * ly, f.centre.y + f.r.y * lx + f.u.y * ly, f.centre.z + f.r.z * lx + f.u.z * ly]; };
+    const inLetter = () => { for (let k = 0; k < 2000; k++) { const x = w.x0 + R() * (w.x1 - w.x0), y = w.y0 + R() * (w.y1 - w.y0); if (onMask(w, x, y)) return [x, y]; } return [w.cx, w.cy]; };
+    const px = p => { wv.set(p[0], p[1], p[2]).project(endCam); return [(wv.x * 0.5 + 0.5) * L.w, (-wv.y * 0.5 + 0.5) * L.h]; };
+    const add = (a, b, k) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k];
+    const apx = px(ap), dw = Math.hypot(f.sx - apx[0], f.sy - apx[1]) || 1;
+    // Away from the point, along the word's plane.
+    const ax = (f.sx - apx[0]) / dw, ay = -(f.sy - apx[1]) / dw, away = [f.r.x * ax + f.u.x * ay, f.r.y * ax + f.u.y * ay, f.r.z * ax + f.u.z * ay];
+    const up = [f.u.x, f.u.y, f.u.z];
+    const used = new Set();
+    // Which lines start nearest the word, on the screen: these become its roots.
+    const byStart = O.map((c, i) => { const q = px(c[0]); return [Math.hypot(q[0] - f.sx, q[1] - f.sy), i]; }).sort((a, b) => a[0] - b[0]);
+    byStart.slice(0, NR + NW).forEach(([, i], n) => {
+      used.add(i);
+      const [mx, my] = inLetter(), s = onPlane(mx, my);
+      if (n < NR) {
+        // Grown out of a letter: a slight turn, then into the point the way the other lines go.
+        const c1 = [0, 1, 2].map(k => s[k] + (ap[k] - s[k]) * 0.25 + f.r.getComponent(k) * (R() - 0.5) * 0.5 * hc + f.u.getComponent(k) * (R() - 0.5) * 0.5 * hc);
+        STRUCT.rerootAI(i, s, c1, O[i][2], 1);
+      } else {
+        // Out of a letter above or below, round the edge of the word, then in to the point.
+        const side = my < w.cy ? 1 : -1, e = onPlane(mx, side > 0 ? w.y0 - 0.45 * (w.y1 - w.y0) : w.y1 + 0.45 * (w.y1 - w.y0));
+        STRUCT.rerootAI(i, s, add(e, away, 0.3 * hc), add(O[i][2], up, side * 0.4 * hc), 1);
+      }
+    });
+    // Lines that start beyond the word and pass near it are bent to run through a letter on their way to the point.
+    const cand = O.map((c, i) => {
+      if (used.has(i)) return null;
+      const q0 = px(c[0]); if (Math.hypot(q0[0] - apx[0], q0[1] - apx[1]) < 1.15 * dw) return null;
+      let best = 1e9, bt = 0.3;
+      for (let t = 0.15; t <= 0.6; t += 0.025) { const q = px(bez3(c, t)), d = Math.hypot(q[0] - f.sx, q[1] - f.sy); if (d < best) { best = d; bt = t; } }
+      return [best, i, bt];
+    }).filter(Boolean).sort((a, b) => a[0] - b[0]).slice(0, NT);
+    cand.forEach(([, i, t]) => {
+      const c = O[i], target = onPlane(...inLetter()), at = bez3(c, t), k = 1 / (3 * t * (1 - t));
+      const d = [target[0] - at[0], target[1] - at[1], target[2] - at[2]];
+      STRUCT.rerootAI(i, c[0], add(c[1], d, k), add(c[2], d, k), 0.5);
     });
     aiCurves = STRUCT.curves;
   }
@@ -1159,7 +1193,7 @@ function init() {
     });
     uniforms.uEnergy.value.set(WORDS[0].E, WORDS[1].E, WORDS[2].E);
     const wp = WORDS[1].ph === 'in' || WORDS[1].ph === 'hold' ? 1 : 0;
-    uniforms.uRiverDim.value = reduced ? wp : lerp(uniforms.uRiverDim.value, wp, 1 - Math.exp(-dt * 4));
+    uniforms.uWordP.value = reduced ? wp : lerp(uniforms.uWordP.value, wp, 1 - Math.exp(-dt * 4));
 
     if (reduced) {
       uniforms.uGlow.value.set(0, S.hot === 1 ? 1 : 0, S.hot === 2 ? 1 : 0);
@@ -2194,6 +2228,7 @@ function init() {
     kick();
   }
   addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('hashchange', () => { if (STRUCT && STRUCT.riverMesh) STRUCT.riverMesh.visible = riverOn(); kick(); });
 
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible) kick(); }).observe(stage);
   new ResizeObserver(() => { layout(); onScroll(); }).observe(stage);
