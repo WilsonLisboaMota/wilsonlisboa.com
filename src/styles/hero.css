@@ -3,6 +3,8 @@
 .hero{position:relative;height:260vh;height:260svh}
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;isolation:isolate}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;-webkit-tap-highlight-color:transparent;cursor:crosshair}
+/* What the far side draws in 2D over the scene: LEADER, the AI's lit mesh, BI's packets (see membrane.js). */
+#fx{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 
 .top{position:absolute;inset:0 0 auto 0;z-index:4;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:calc(env(safe-area-inset-top,0px) + 18px) var(--gutter) 0;pointer-events:none}
 .top a{pointer-events:auto}
@@ -25,7 +27,7 @@ h1 .dot{display:inline;color:var(--signal)}
 .behind{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:620px;opacity:0;pointer-events:none}
 .behind .big{margin:0;font-size:clamp(25px,2.6vw,40px);line-height:1.12;font-weight:480;font-stretch:104%;letter-spacing:-.022em;max-width:24ch;text-shadow:0 0 30px rgba(2,28,42,.9)}
 
-/* Labels sit on the structure; their position is set from the 3D scene every frame. A force pointed at turns gold, as its word does. */
+/* Labels sit on the structure; their position is set from the 3D scene every frame. A force pointed at turns gold. */
 .forces{position:absolute;inset:0;z-index:3;pointer-events:none;--gold:#F0C778}
 .force{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:3px;padding:2px 0 6px 20px;margin-top:-9px;text-decoration:none;color:var(--mist);opacity:0;visibility:hidden;pointer-events:auto;white-space:nowrap;will-change:transform,opacity}
 .force::before{content:"";position:absolute;left:0;top:12px;width:12px;height:1px;background:var(--mist-45);transition:background-color .2s var(--ease),width .3s var(--ease)}
@@ -49,7 +51,7 @@ h1 .dot{display:inline;color:var(--signal)}
 .r-note{color:var(--mist-45)}
 
 .fallback{position:absolute;left:30%;top:16%;width:60%;height:46%}
-.no-gl #gl,.no-gl .forces{display:none}
+.no-gl #gl,.no-gl #fx,.no-gl .forces{display:none}
 
 /* ---------- after the chapters: what is still to come (quiet, aligned with the chapter grid) ---------- */
 .next{position:relative;max-width:1320px;margin:0 auto;padding:clamp(56px,10vh,104px) var(--gutter) clamp(72px,12vh,140px)}
