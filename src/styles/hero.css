@@ -29,6 +29,9 @@ h1 .dot{display:inline;color:var(--signal)}
 
 /* Labels sit on the structure; their position is set from the 3D scene every frame. A force pointed at turns gold. */
 .forces{position:absolute;inset:0;z-index:3;pointer-events:none;--gold:#F0C778}
+/* Out of sight, still in the tab order: each link is a focusable point, its force lit while it has focus. */
+.forces.sr .force{opacity:1;visibility:visible;width:1px;height:1px;padding:0;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;transform:none!important}
+.forces.sr .force::before{display:none}
 .force{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:3px;padding:2px 0 6px 20px;margin-top:-9px;text-decoration:none;color:var(--mist);opacity:0;visibility:hidden;pointer-events:auto;white-space:nowrap;will-change:transform,opacity}
 .force::before{content:"";position:absolute;left:0;top:12px;width:12px;height:1px;background:var(--mist-45);transition:background-color .2s var(--ease),width .3s var(--ease)}
 .force b{font-weight:600;font-size:15px;letter-spacing:-.005em;transition:color .2s var(--ease);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}

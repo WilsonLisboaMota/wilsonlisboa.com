@@ -491,7 +491,7 @@ function init() {
         float isHot = 1.0 - step(0.5, abs(1.0 - uHot));
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
         float ends = smoothstep(0.0, 0.08, t) * smoothstep(0.97, 0.9, t);
-        float seen = (0.34 + 0.4 * t) * ends * dim * (1.0 - 0.7 * uEnergy.y) * (1.0 - 0.75 * uWordP);
+        float seen = (0.34 + 0.4 * t) * ends * dim * (1.0 - 0.7 * uEnergy.y) * (1.0 - 0.45 * uWordP);
         vec4 wp = modelMatrix * vec4(p, 1.0);
         float dc = distance(wp.xyz, cameraPosition);
         vA = mix(glimpse, seen, uBehind) * nearCam(wp.xyz);
@@ -1015,7 +1015,7 @@ function init() {
     if (!STRUCT || !WORDS[0].mask) return;
     // The particles are made anew, so a word caught mid-way (a phone turned, a window resized) stops, and the next
     // one comes in a moment.
-    WORDS.forEach(w => { if (w.ph !== 'idle') { w.ph = 'idle'; if (WQ.cur === w.k) { WQ.cur = -1; WQ.next = S.time + 1; } } });
+    WORDS.forEach(w => { if (w.ph !== 'idle') { w.ph = 'idle'; w.soft = true; w.reAt = S.time + 1; } });
     rig(1);
     endCam.aspect = L.w / L.h;
     endCam.fov = L.fovEnd;
@@ -1132,8 +1132,9 @@ function init() {
 
   // The schedule: the AI first, under a second after arriving, then BI, then Leadership; after that one word every
   // 6 to 10 seconds, in turn. Nothing new starts while a force is pointed at.
-  const ORDER = [1, 0, 2];
-  const WQ = { i: 0, next: -1, cur: -1, round: 0 };
+  // The words stand on the far side (Wilson, 5 November 2026): all three come in soon after the visitor arrives, AI
+  // first, and stay. A word leaves only when its force is opened, and comes back softly a little later.
+  const ARRIVE = [1, 0, 2], SOFT_IN = 2.2, RE_AFTER = 2.5;
   const FX = { stepAt: -1, glow: [0, 0, 0], litQ: [] };
   const ans = { i: -1, ph: 'off', t: 0, n: 0, shown: '' };
   let wordsReady = false, wordsShown = false;
@@ -1147,14 +1148,14 @@ function init() {
     if (k === 2) { FX.stepAt = now; FX.glow[2] = 1; ripple(STRUCT.keys[2], 2, 0.22); }
   }
   function startWord(w, now) {
-    w.ph = 'in'; w.t0 = now; w.moment = false; w.fed = [];
+    w.ph = 'in'; w.t0 = now; w.moment = false; w.fed = []; w.reAt = 0; w.startAt = -1;
     w.bands = []; w.bandT = 0;
     w.pts.forEach(p => {
       p.ch = (Math.random() * 64) | 0;
       // BI fills in like a table loading.
       if (w.k === 0) p.tIn = 0.75 * p.row / w.nRows + 0.15 * p.col / w.nCols;
     });
-    if (w.k === 2) leaderStart(now * 1000);
+    if (w.k === 2) leaderStart(now * 1000, w.soft);
   }
   function handOver(w, now) {
     w.ph = 'out'; w.t0 = now;
@@ -1165,27 +1166,28 @@ function init() {
     });
     if (w.k === 2) leaderOut(now * 1000);
   }
-  function wordDone(w, now) {
-    w.ph = 'idle';
-    // A word called in by pointing at its force does not move the schedule on.
-    if (WQ.cur !== w.k) return;
-    WQ.cur = -1;
-    WQ.round++;
-    WQ.i = (WQ.i + 1) % ORDER.length;
-    WQ.next = now + (WQ.round < ORDER.length ? 1.4 : 6 + Math.random() * 4);
-  }
+  // Gone, the word comes back on its own, softly, a moment later.
+  function wordDone(w, now) { w.ph = 'idle'; w.soft = true; w.reAt = now + RE_AFTER; }
+  // A word that was clicked has left (or mostly): the page glides to its section, unless the visitor has moved on.
+  function handedOver(w) { if (!w.openAfter) return; w.openAfter = false; if (S.u > 0.85) goTo(w.k); }
 
   function wordsStep(dt, u) {
     const now = S.time;
-    if (u > 0.9 && S.arrivedAt < 0) { S.arrivedAt = now; WQ.i = 0; WQ.round = 0; WQ.cur = -1; WQ.next = now + 0.9; }
-    if (u < 0.5 && S.arrivedAt >= 0) { S.arrivedAt = -1; WQ.cur = -1; WORDS.forEach(w => { w.ph = 'idle'; }); ans.ph = 'off'; FX.litQ.length = 0; }
+    if (u > 0.9 && S.arrivedAt < 0) {
+      S.arrivedAt = now;
+      // The first time, the words come in as they do; coming back, softly.
+      const soft = S.arrivals++ > 0;
+      WORDS.forEach((w, k) => { w.startAt = now + 0.6 + 0.45 * ARRIVE.indexOf(k); w.soft = soft; w.reAt = 0; w.openAfter = false; });
+      PUL.next = now + 3.6; PUL.i = 0;
+    }
+    if (u < 0.5 && S.arrivedAt >= 0) { S.arrivedAt = -1; WORDS.forEach(w => { w.ph = 'idle'; w.startAt = -1; w.reAt = 0; w.pulse = 0; w.openAfter = false; }); PUL.k = -1; PUL.next = -1; ans.ph = 'off'; FX.litQ.length = 0; }
     // Pointing at a force energises it: up in a third of a second, down in a little over half. Its word is called in
     // if it is away, and stays while the force is pointed at.
     WORDS.forEach((w, k) => {
       const on = S.hot === k;
       if (on && !w.on) {
         w.onT = now;
-        if (!reduced) { moment(k, now, true); if (w.ph === 'idle' || w.ph === 'out') startWord(w, now); }
+        if (!reduced) { moment(k, now, true); if (w.ph === 'idle') startWord(w, now); }
       }
       if (!on && w.on && k === 1 && ans.ph === 'wait') ans.ph = 'off';
       w.on = on;
@@ -1200,11 +1202,11 @@ function init() {
       uniforms.uLitAmt.value.fill(S.hot === 0 ? 1 : 0);
       uniforms.uStep.value = 0;
     } else {
-      if (S.arrivedAt >= 0 && WQ.cur < 0 && S.hot < 0 && now >= WQ.next && WORDS[ORDER[WQ.i]].ph === 'idle') { WQ.cur = ORDER[WQ.i]; startWord(WORDS[WQ.cur], now); }
       WORDS.forEach(w => {
-        if (w.ph === 'in' && now - w.t0 > w.inT) { w.ph = 'hold'; w.t0 = now; }
-        else if (w.ph === 'hold' && now - w.t0 > w.holdT && !w.on && w.E < 0.05) handOver(w, now);
+        if (w.ph === 'idle' && S.arrivedAt >= 0 && ((w.startAt >= 0 && now >= w.startAt) || (w.reAt && now >= w.reAt))) startWord(w, now);
+        if (w.ph === 'in' && now - w.t0 > w.inT * (w.soft ? SOFT_IN : 1)) { w.ph = 'hold'; w.t0 = now; }
       });
+      pulsarStep(now);
       // The answer types out of the point, stays, and erases; while the AI is energised, the next one follows.
       const e = now - ans.t, len = ans.i >= 0 ? ANSWERS[ans.i].length : 0;
       if (ans.ph === 'wait' && e > 0.9) startAnswer(now);
@@ -1242,7 +1244,7 @@ function init() {
     if (show) WORDS.forEach(w => {
       // LEADER is drawn on the overlay. A word steps back while another force is pointed at.
       if (w.k === 2) return;
-      const fade = 1 - 0.6 * S.hotAmt * (S.hot >= 0 && S.hot !== w.k ? 1 : 0), f = w.frame, o = uniforms.uROff.value[w.k], N = w.pts.length;
+      const fade = (1 - 0.6 * S.hotAmt * (S.hot >= 0 && S.hot !== w.k ? 1 : 0)) * (1 + 0.45 * (w.pulse || 0)), f = w.frame, o = uniforms.uROff.value[w.k], N = w.pts.length;
       const put = (i, x, y, z, a, s, g, blue) => { P[i * 3] = x; P[i * 3 + 1] = y; P[i * 3 + 2] = z; A[i] = a; SZ[i] = s; G[i] = g; B[i] = blue; };
       const at = (i, p, dx, dy, a, s, g, blue) => put(i, p.b[0] + f.r.x * dx + f.u.x * dy, p.b[1] + f.r.y * dx + f.u.y * dy, p.b[2] + f.r.z * dx + f.u.z * dy, a, s, g, blue);
       if (reduced) { w.pts.forEach((p, j) => at(w.off + j, p, 0, 0, p.a * 0.7 * fade, p.size, p.ch, 0)); return; }
@@ -1251,16 +1253,16 @@ function init() {
       if (w.k === 1) {
         // The glitch: bands of the word slip sideways and scramble, with a blue ghost; during the hold, now and then.
         if (w.ph === 'in' || w.ph === 'hold') {
-          const every = w.ph === 'in' ? 0.07 : 0.9 + Math.random() * 0.9;
+          const sm2 = w.soft ? SOFT_IN : 1, every = w.ph === 'in' ? 0.07 : 0.9 + Math.random() * 0.9;
           if (now - w.bandT > every) {
             w.bandT = now;
             w.bands = [];
-            const nb = w.ph === 'in' ? 2 + ((Math.random() * 3) | 0) : Math.random() < 0.55 ? 1 : 0;
+            const nb = w.ph === 'in' ? (w.soft ? (Math.random() < 0.25 ? 1 : 0) : 2 + ((Math.random() * 3) | 0)) : Math.random() < 0.55 ? 1 : 0;
             for (let b = 0; b < nb; b++) w.bands.push({ y0: w.y0 + Math.random() * (w.y1 - w.y0), h: 6 + Math.random() * 26, dx: (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 20), until: now + (w.ph === 'in' ? 0.07 : 0.12 + Math.random() * 0.14) });
           }
           w.bands = w.bands.filter(b => now < b.until);
-          const v = w.ph === 'in' ? clamp((now - w.t0) / w.inT * 1.25, 0, 1) : 1;
-          const jit = w.ph === 'in' ? (Math.random() - 0.5) * 8 * (1 - v) : 0;
+          const v = w.ph === 'in' ? clamp((now - w.t0) / (w.inT * sm2) * 1.25, 0, 1) : 1;
+          const jit = w.ph === 'in' ? (Math.random() - 0.5) * 8 * (1 - v) * (w.soft ? 0.3 : 1) : 0;
           w.pts.forEach((p, j) => {
             if (Math.random() < 0.9 * dt) p.ch = (Math.random() * 64) | 0;
             if (w.ph === 'in' && Math.random() > v) return;
@@ -1291,7 +1293,7 @@ function init() {
             uniforms.uHeat.value[p.ci] = Math.min(1, uniforms.uHeat.value[p.ci] + 2.1 * dt);
             put(w.off + j, q[0] + o.x, q[1] + o.y, q[2], (p.a + 0.25) * (1 - uu ** 6) * fade, p.size * (1 - 0.79 * sh), p.ch, 0);
           });
-          if (!w.moment && gone > 0.75 * N) { w.moment = true; moment(1, now, false); }
+          if (!w.moment && gone > 0.75 * N) { w.moment = true; moment(1, now, false); handedOver(w); }
           if (!left) wordDone(w, now);
         }
       }
@@ -1304,7 +1306,7 @@ function init() {
           let hr = w.ph === 'hold' && E < 0.3 ? e / w.holdT * (w.nRows + 2) - 1 : -9;
           if (E >= 0.3) hr = ((now % 0.45) / 0.45) * (w.nRows + 2) - 1;
           w.pts.forEach((p, j) => {
-            const v = w.ph === 'in' ? clamp((e - p.tIn) / 0.12, 0, 1) : 1;
+            const v = w.ph === 'in' ? clamp((e - p.tIn * (w.soft ? SOFT_IN : 1)) / (0.12 * (w.soft ? SOFT_IN : 1)), 0, 1) : 1;
             if (v <= 0) return;
             let a = p.a * v + (E < 0.3 ? 0.6 : 0.45) * Math.exp(-((p.row - hr) ** 2) / 1.5);
             a += (1 - Math.min(1, a)) * 0.4 * E;
@@ -1327,7 +1329,7 @@ function init() {
             }
             const uu = (e - p.hopT) / p.ride;
             if (uu >= 1) {
-              if (!w.fed[p.li]) { w.fed[p.li] = true; uniforms.uLitAmt.value[p.li] = 1; if (!w.moment) { w.moment = true; ripple(pl.end, 0, 0.14); } }
+              if (!w.fed[p.li]) { w.fed[p.li] = true; uniforms.uLitAmt.value[p.li] = 1; if (!w.moment) { w.moment = true; ripple(pl.end, 0, 0.14); handedOver(w); } }
               return;
             }
             left++;
@@ -1634,7 +1636,7 @@ function init() {
   function leaderWipe(now) {
     const st = LD.st, M = LD.M, run = (t0, dur, show) => ({ show, x: lerp(M.x0 - SOFT / 2, M.x1 + SOFT / 2, clamp((now - t0) / dur, 0, 1)) });
     if (st.ph === 'idle') return { a: 0 };
-    if (st.ph === 'in') return run(st.t + 600, 600, true);
+    if (st.ph === 'in') { const m = st.soft ? SOFT_IN : 1; return run(st.t + 600 * m, 600 * m, true); }
     if (st.ph === 'out') return run(st.t + 100, 470, false);
     return { a: 1 };
   }
@@ -1646,7 +1648,7 @@ function init() {
     return g;
   };
 
-  function leaderStart(now) { if (!LD) return; LD.st.ph = 'in'; LD.st.t = now; LD.st.moment = false; }
+  function leaderStart(now, soft) { if (!LD) return; LD.st.ph = 'in'; LD.st.t = now; LD.st.moment = false; LD.st.soft = !!soft; }
   function leaderOut(now) {
     if (!LD) return;
     const st = LD.st, R = Math.random;
@@ -1668,7 +1670,7 @@ function init() {
       return [u * u * p.bx + 2 * u * k * cx + k * k * tg[0], u * u * p.by + 2 * u * k * cy + k * k * tg[1], (p.a + 0.1) * (1 - sm(clamp((v - 0.82) / 0.18, 0, 1))), true];
     }
     if (st.ph === 'in') {
-      const v = (tt - st.t - p.tIn * 1000) / 550;
+      const m = st.soft ? SOFT_IN : 1, v = (tt - st.t - p.tIn * 1000 * m) / (550 * m);
       if (v <= 0) return null;
       const k = 1 - (1 - Math.min(1, v)) ** 3, ox = p.d[0] * p.sd + p.sx, oy = p.d[1] * p.sd;
       return [p.bx + ox * (1 - k), p.by + oy * (1 - k), p.a * Math.min(1, v * 2) * clamp(1 - (v - 1) / 0.6, 0, 1), v < 1.6];
@@ -1733,7 +1735,7 @@ function init() {
     LD.LT = STRUCT.form.map((_, i) => { const q = formPx(i), mq = toMask(m, q[0], q[1]); return [LD.cx + (mq[0] - w2.cx) / k, LD.cy + (mq[1] - w2.cy) / k]; });
     if (st.ph === 'out') {
       let gone = 0; LD.pts.forEach(p => { if (now - p.d0 >= p.ride) gone++; });
-      if (!st.moment && gone > 0.75 * LD.pts.length) { st.moment = true; moment(2, S.time, false); }
+      if (!st.moment && gone > 0.75 * LD.pts.length) { st.moment = true; moment(2, S.time, false); handedOver(w2); }
       if (gone === LD.pts.length) { st.ph = 'idle'; wordDone(w2, S.time); }
     }
     LD.pts.forEach((p, i) => { const q = st.ph === 'idle' ? null : leaderPos(p, now), o = LD.P[i]; if (!q) { o.vis = false; return; } o.x = q[0]; o.y = q[1]; o.a = q[2]; o.mv = q[3]; o.vis = true; });
@@ -1786,7 +1788,7 @@ function init() {
       const zs = Math.max(1, 0.55 / sc);
       LD.SPARKS.forEach(n => {
         const pr = presence(w, n.x); if (pr < 0.02) return;
-        const tw = 0.5 + 0.5 * Math.sin(tt * (1.3 + n.sp) + n.tw), a = pr * (0.16 * tw ** 4 + (0.5 + 0.4 * tw) * E);
+        const tw = 0.5 + 0.5 * Math.sin(tt * (1.3 + n.sp) + n.tw), a = pr * (0.16 * tw ** 4 + (0.5 + 0.4 * tw) * Math.max(E, 0.7 * (w2.pulse || 0)));
         if (a < 0.01) return;
         const r = (3 + 3.5 * E) * (0.8 + 0.4 * tw) * zs; fc.globalAlpha = Math.min(1, a) * ga; fc.drawImage(STAR, n.x - r, n.y - r, 2 * r, 2 * r);
       });
@@ -1825,6 +1827,50 @@ function init() {
     fc.globalAlpha = 1; fc.globalCompositeOperation = 'source-over';
   }
 
+  // ----- the pulsar: on each word in turn, a star flares for a second and sends out a ring, and the word brightens;
+  // the sign that the words are for clicking. AI, BI, LEADER, then a pause, round again. Not while a word is pointed at.
+  const PUL = { k: -1, t0: 0, next: -1, i: 0, dur: 1.1 };
+  function pulsarStep(now) {
+    if (reduced) return;
+    if (PUL.k >= 0) {
+      const w = WORDS[PUL.k], t = clamp((now - PUL.t0) / PUL.dur, 0, 1);
+      w.pulse = Math.sin(Math.PI * t);
+      if (t >= 1 || w.ph !== 'hold' || S.hot === PUL.k) { w.pulse = 0; PUL.k = -1; PUL.next = now + (PUL.i % 3 === 0 ? 6.5 : 0.5); }
+      return;
+    }
+    if (PUL.next < 0 || now < PUL.next) return;
+    const k = ARRIVE[PUL.i % 3];
+    PUL.i++;
+    if (WORDS[k].ph === 'hold' && S.hot !== k) { PUL.k = k; PUL.t0 = now; } else PUL.next = now + 0.3;
+  }
+  // Where the star sits on each word: a top corner of the AI's mesh, the top-right cell of BI, a top node of LEADER.
+  function pulsarAt(k) {
+    const w = WORDS[k];
+    if (k === 1 && w.net) { const m = planeOf(w), c = w.net.corners.reduce((b, n) => (n.x + n.y < b.x + b.y ? n : b), w.net.corners[0] || { x: w.x0, y: w.y0 }); return [m.a[0] * c.x + m.b[0] * c.y + m.e, m.a[1] * c.x + m.b[1] * c.y + m.f]; }
+    if (k === 0 && w.pts.length) { const p = w.pts.reduce((b, q) => (q.mx - 0.6 * q.my > b.mx - 0.6 * b.my ? q : b), w.pts[0]); return pj(...p.b); }
+    if (k === 2 && LD) {
+      const m = planeOf(w), kk = (w.x1 - w.x0) / (LD.M.x1 - LD.M.x0), n = LD.SPARKS.reduce((b, q) => (q.x - 0.6 * q.y > b.x - 0.6 * b.y ? q : b), LD.SPARKS[0]);
+      const x = w.cx + (n.x - LD.cx) * kk, y = w.cy + (n.y - LD.cy) * kk;
+      return [m.a[0] * x + m.b[0] * y + m.e, m.a[1] * x + m.b[1] * y + m.f];
+    }
+    return null;
+  }
+  function pulsarDraw(now) {
+    if (PUL.k < 0) return;
+    const q = pulsarAt(PUL.k); if (!q) return;
+    const t = clamp((now - PUL.t0) / PUL.dur, 0, 1), e = Math.sin(Math.PI * t), ga = otherDim(PUL.k), w = WORDS[PUL.k];
+    // Sized to the word: the ring reaches about its height, the star a little under a third of it.
+    const hc = Math.max(24, (w.y1 - w.y0) * w.frame.ppm), sz = Math.min(1, hc / 70);
+    setPx(); fc.globalCompositeOperation = 'lighter';
+    const r = 6 + Math.min(90, 1.05 * hc) * t;
+    fc.globalAlpha = 0.5 * (1 - t) * ga; fc.strokeStyle = rgba(SPARK, 1); fc.lineWidth = 1; fc.beginPath(); fc.arc(q[0], q[1], r, 0, 6.283); fc.stroke();
+    const sr = (8 + 16 * e) * (0.55 + 0.45 * sz); fc.globalAlpha = Math.min(1, e * 1.3) * ga; fc.drawImage(STAR, q[0] - sr, q[1] - sr, 2 * sr, 2 * sr);
+    const cr = (4 + 4 * e) * (0.6 + 0.4 * sz), g = fc.createRadialGradient(q[0], q[1], 0, q[0], q[1], cr);
+    g.addColorStop(0, rgba(mixc([255, 255, 255], GOLD, 0.7 * e), 0.9 * e)); g.addColorStop(1, rgba(GOLD, 0));
+    fc.fillStyle = g; fc.beginPath(); fc.arc(q[0], q[1], cr, 0, 6.283); fc.fill();
+    fc.globalAlpha = 1; fc.globalCompositeOperation = 'source-over';
+  }
+
   // Every frame, after the scene: step and draw the overlay. Off the far side it is cleared once and left alone.
   function fxFrame(dt) {
     const show = wordsReady && STRUCT && WORDS[2].frame && (S.arrivedAt >= 0 || (reduced && S.u > 0.5));
@@ -1843,6 +1889,7 @@ function init() {
     biFxDraw(now);
     aiFxDraw(now);
     leaderDraw(now * 1000, m2);
+    pulsarDraw(now);
   }
 
   // ---------- state ----------
@@ -1853,7 +1900,7 @@ function init() {
     nextRipple: 0, autoRipple: !reduced, autoAt: 1.7,
     scrollP: 0, u: 0, uv: 0,
     hotPointer: -1, hotLabel: -1, hotTouch: -1, hot: -1, hotAmt: 0,
-    arrivedAt: -1,
+    arrivedAt: -1, arrivals: 0,
   };
   const L = { w: 1, h: 1, mobile: null, cx: 0, cy: 0, ex: 0, ey: 0, fov: 30, fovMid: 50, fovEnd: 40, rEnd: 13 };
   const BASE_RY = -0.3, BASE_RX = 0.06;
@@ -2000,7 +2047,9 @@ function init() {
     hintEl.style.opacity = smooth(0.84, 0.96, u).toFixed(3);
 
     const lo = smooth(0.84, 0.96, u);
-    if (lo < 0.01) {
+    // The labels are gone from the picture (Wilson, 5 November 2026): the words are the buttons. The links stay in the
+    // page, out of sight, for the keyboard and for screen readers.
+    if (lo < 0.01 || true) {
       labels.forEach(el => { if (el._on) { el.style.opacity = '0'; el.style.visibility = 'hidden'; el._on = false; } });
     } else {
       // Keep every label inside the frame, clear of the header and the text at the bottom, and clear of each other.
@@ -2048,7 +2097,7 @@ function init() {
     // The front needs no instructions: the surface shows it reacts. Only the far side gets a hint.
     const side = u > 0.5;
     if (side !== lastSide) { lastSide = side; hintEl.hidden = !side; }
-    const hint = mqFine.matches ? 'Point at a force' : S.hotTouch >= 0 ? 'Tap again to open' : 'Tap a force';
+    const hint = mqFine.matches ? 'Point at a word' : S.hotTouch >= 0 ? 'Tap again to open' : 'Tap a word';
     if (hint !== lastHint) { hintEl.textContent = hint; lastHint = hint; }
   }
 
@@ -2148,8 +2197,18 @@ function init() {
   canvas.addEventListener('pointercancel', () => { tapStart = null; });
 
   // Opening a force glides to its section instead of jumping there.
+  // Opening a force: its word leaves the way it does (swallowed, risen into the chart, flown to the formation), and
+  // the page glides to the section as it goes. A word already away opens the section at once.
   function openForce(k) {
     S.hotTouch = -1;
+    const w = WORDS[k];
+    if (reduced || w.ph === 'idle' || w.ph === 'out' || !w.pts.length) { goTo(k); return; }
+    w.openAfter = true;
+    if (w.ph === 'in') { w.ph = 'hold'; w.t0 = S.time; }
+    handOver(w, S.time);
+    kick();
+  }
+  function goTo(k) {
     const target = document.querySelector(labels[k].getAttribute('href'));
     if (!target) return;
     const toY = () => target.getBoundingClientRect().top + scrollY - 24;

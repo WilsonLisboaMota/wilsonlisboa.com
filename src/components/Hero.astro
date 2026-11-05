@@ -32,12 +32,13 @@ import '../styles/hero.css';
     </div>
 
     <div class="readout">
-      <p class="r-hint mono" id="hint" aria-hidden="true" hidden>Point at a force</p>
+      <p class="r-hint mono" id="hint" aria-hidden="true" hidden>Point at a word</p>
       <p class="r-note mono" aria-hidden="true">Illustrative data</p>
     </div>
 
-    <!-- Each label: the name only. The shapes, and the words they make, say the rest. -->
-    <nav class="forces" id="forces" aria-label="What lies behind the dashboard">
+    <!-- The words on the far side are the buttons (see membrane.js). These links stay for the keyboard and for screen
+         readers, out of sight; focusing one lights its force up, as pointing does. -->
+    <nav class="forces sr" id="forces" aria-label="What lies behind the dashboard">
       <a class="force" href="#bi" data-k="0"><b>Business Intelligence</b></a>
       <a class="force" href="#ai" data-k="1"><b>Artificial Intelligence</b></a>
       <a class="force" href="#leadership" data-k="2"><b>Leadership</b></a>
