@@ -1923,11 +1923,15 @@ function init() {
     // height instead of a third, and sits closer to the title.
     L.fov = fit(D, W * Math.cos(BASE_RY), H, lerp(1.65, 0.7, t), lerp(0.5, 0.82, t));
     L.rEnd = lerp(17, 13, t);
-    L.fovEnd = fit(L.rEnd, 11, 7.5, lerp(0.98, 0.66, t), lerp(0.5, 0.8, t));
+    // The far side tighter on wide screens (Wilson, 6 November 2026): the structures take more of the width. On a
+    // 16:9 screen the height already rules; on a wider window (a browser on a wide monitor) the camera comes in as far
+    // as the AI's fan at the top and the BI's tables at the bottom allow.
+    const wide = smooth(1.75, 2.4, w / h);
+    L.fovEnd = fit(L.rEnd, 11, 7.5, lerp(0.98, 0.76, t), lerp(0.5, lerp(0.85, 1.0, wide), t));
     L.fovMid = Math.max(L.fov, 52);
     L.cx = lerp(0.5, 0.6, t) * w;
     L.cy = lerp(0.33, 0.42, t) * h;
-    L.ex = lerp(0.5, 0.6, t) * w;
+    L.ex = lerp(0.5, 0.56, t) * w;
     L.ey = lerp(0.45, 0.47, t) * h;
     labels.forEach(el => { el._w = 0; });
     answerEl._full = null;
