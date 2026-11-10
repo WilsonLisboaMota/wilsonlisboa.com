@@ -1,7 +1,19 @@
 /* The hero. Loaded only by pages that include the Hero component. */
 /* ---------- hero: the stage stays put while the scroll carries the visitor through the membrane ---------- */
-.hero{position:relative;height:260vh;height:260svh}
+/* 260 for the crossing, and 70 more that stay on the far side (DWELL in membrane.js). */
+.hero{position:relative;height:330vh;height:330svh}
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;isolation:isolate}
+/* Held on the far side: the page tries to move, and springs back. */
+.stage.tug{animation:tug .62s cubic-bezier(.3,.6,.3,1)}
+@keyframes tug{0%{transform:none}32%{transform:translateY(-34px)}64%{transform:translateY(8px)}100%{transform:none}}
+html.held{overflow:hidden}
+html.held body{touch-action:none}
+/* When the far side lets go: two small arrows say there is more below. */
+.cue{position:absolute;z-index:4;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:20px;height:26px;margin-left:-10px;opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
+.cue.on{opacity:1}
+.cue i{position:absolute;left:3px;top:0;width:13px;height:13px;border:solid var(--mist);border-width:0 1.5px 1.5px 0;transform:rotate(45deg);animation:cue 1.8s ease-in-out infinite}
+.cue i + i{top:9px;animation-delay:.2s}
+@keyframes cue{0%,100%{opacity:.2;translate:0 -3px}50%{opacity:.95;translate:0 3px}}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;-webkit-tap-highlight-color:transparent;cursor:crosshair}
 /* What the far side draws in 2D over the scene: LEADER, the AI's lit mesh, BI's packets (see membrane.js). */
 #fx{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
@@ -74,5 +86,6 @@ h1 .dot{display:inline;color:var(--signal)}
 }
 /* With reduced motion the scroll still leads behind, but as a cut instead of a flight. */
 @media (prefers-reduced-motion:reduce){
-  .hero{height:180vh;height:180svh}
+  .hero{height:250vh;height:250svh}
+  .stage.tug,.cue i{animation:none}
 }

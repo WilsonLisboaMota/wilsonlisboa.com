@@ -1,0 +1,32 @@
+---
+// One piece of work as a card: a moving drawing, a status, a name and a few words. It tilts under a mouse.
+// Most cards open a sheet with what is behind them; a card marked external leaves the site instead.
+import type { Work } from '../data/site';
+import Viz from './Viz.astro';
+
+interface Props { w: Work }
+const { w } = Astro.props;
+const arrow = '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const out = '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 17 7M9 7h8v8"/></svg>';
+---
+{w.external ? (
+  <a class="card" href={w.href} rel="noopener" data-tilt>
+    <span class="card-v"><Viz kind={w.viz} /></span>
+    <span class="card-b">
+      <span class:list={['st', { live: w.live }]}>{w.tag}</span>
+      <span class="card-n">{w.name}</span>
+      <span class="card-a">{w.answer}</span>
+    </span>
+    <Fragment set:html={out} />
+  </a>
+) : (
+  <button class="card" type="button" data-sheet={`sheet-${w.id}`} data-tilt aria-haspopup="dialog">
+    <span class="card-v"><Viz kind={w.viz} /></span>
+    <span class="card-b">
+      <span class:list={['st', { live: w.live }]}>{w.tag}</span>
+      <span class="card-n">{w.name}</span>
+      <span class="card-a">{w.answer}</span>
+    </span>
+    <Fragment set:html={arrow} />
+  </button>
+)}

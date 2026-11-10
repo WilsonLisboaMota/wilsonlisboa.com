@@ -1,85 +1,22 @@
 ---
-// The end of the page: the CV as one band, how the site was built (every commit, by day), contact and the last line.
-import { execSync } from 'node:child_process';
+// The end of the page: three ways to reach Wilson, as three things to press, and the last line.
 import { person } from '../data/site';
-
-// Every commit of this repository, read from Git when the site is built: one dot per commit, stacked by day.
-let log: { day: string; subject: string }[] = [];
-try {
-  log = execSync('git log --reverse --date=short --format=%ad%x09%s', { cwd: new URL('../../', import.meta.url) })
-    .toString().trim().split('\n').filter(Boolean).map(l => { const [day, ...s] = l.split('\t'); return { day, subject: s.join(' ') }; });
-} catch {}
-const dayN = (s: string) => Math.round(Date.parse(s + 'T00:00:00Z') / 864e5);
-const first = log.length ? dayN(log[0].day) : 0, last = log.length ? dayN(log[log.length - 1].day) : 0;
-const spanDays = Math.max(1, last - first);
-const stacks = new Map<number, typeof log>();
-log.forEach(c => { const k = dayN(c.day) - first; stacks.set(k, [...(stacks.get(k) || []), c]); });
-const tallest = Math.max(1, ...[...stacks.values()].map(s => s.length));
-const left = (k: number) => `${(k / spanDays * 100).toFixed(2)}%`;
-const fmt = (s: string) => new Date(s + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-const isRevert = (s: string) => /^Revert\b/.test(s);
-const reverted = log.find(c => isRevert(c.subject));
-const days = stacks.size;
+import Icon from './Icon.astro';
 ---
-<section class="cvb" id="cv" data-sec aria-labelledby="cv-t">
-  <div class="w">
-    <div>
-      <h2 id="cv-t">The full record.</h2>
-      <p>The CV as a page that moves, and as a PDF.</p>
-    </div>
-    <div class="act">
-      <a class="energy" href={person.cv}>Open the CV</a>
-      <a class="lk" href={person.pdf}>Download the PDF</a>
-    </div>
-  </div>
-</section>
-
-<section class="sx" id="built" data-sec aria-labelledby="bw-t">
-  <div class="w">
-    <div class="hd wide">
-      <p class="meta kick">Built with AI</p>
-      <h2 id="bw-t">Built with AI. <em>Every step on record.</em></h2>
-      <p class="ld">Claude wrote the code. I set the direction and rejected what failed.</p>
-    </div>
-
-    {log.length > 1 && (
-      <div class="strip">
-        <div class="dots" style={`height:${tallest * 10 + 14}px`} role="img" aria-label={`${log.length} commits on ${days} days, from ${fmt(log[0].day)} to ${fmt(log[log.length - 1].day)} 2026.`}>
-          {[...stacks.entries()].map(([k, cs]) => (
-            <span class="day" style={`left:${left(k)}`}>{cs.map(c => <i class:list={[{ rv: isRevert(c.subject) }]} title={`${fmt(c.day)}: ${c.subject}`}></i>)}</span>
-          ))}
-        </div>
-        <p class="dots-ax" aria-hidden="true"><span>{fmt(log[0].day)}</span><span>{fmt(log[log.length - 1].day)}</span></p>
-        <p class="strip-k">
-          <span><i></i>{log.length} commits on {days} days. Each dot is one change you can read.</span>
-          {reverted && <span><i class="rv"></i>{fmt(reverted.day)}: a full build, thrown away the same day.</span>}
-        </p>
-        <div class="bw-act">
-          <a class="btn" href="/built-with-ai/">Read the build log</a>
-          <a class="lk" href="https://github.com/WilsonLisboaMota/wilsonlisboa.com" rel="noopener">The repository on GitHub</a>
-        </div>
-      </div>
-    )}
-  </div>
-</section>
-
 <section class="sx ct" id="contact" data-sec aria-labelledby="ct-t">
   <div class="w">
-    <div class="hd wide">
-      <p class="meta kick">Contact</p>
-      <h2 id="ct-t">Say hello. <em>I read every message.</em></h2>
-    </div>
+    <h2 id="ct-t">Say hello.</h2>
     <div class="ct-g">
-      <a href={`mailto:${person.email}`}><b>{person.email}</b><span>Email</span></a>
-      <a href={person.linkedin} rel="noopener"><b>LinkedIn</b><span>wilson-lisboa-mota</span></a>
-      <a href={person.pdf}><b>The CV, as a PDF</b><span>One page</span></a>
+      <a class="ct-i" href={`mailto:${person.email}`}><Icon name="mail" /><span>{person.email}</span></a>
+      <a class="ct-i" href={person.linkedin} rel="noopener"><Icon name="in" /><span>LinkedIn</span></a>
+      <a class="ct-i" href={person.pdf}><Icon name="doc" /><span>The CV, as a PDF</span></a>
     </div>
   </div>
 </section>
 
 <footer class="ft">
   <div class="w">
-    <p>© {new Date().getFullYear()} Wilson Mota · Astro, three.js and Claude · no cookies, no trackers</p>
-    <p><a href="#top">Back to the surface ↑</a></p>
+    <p>© {new Date().getFullYear()} Wilson Mota</p>
+    <p><a href="/built-with-ai/">How this site was built</a><a href="#top">Back to the surface ↑</a></p>
   </div>
 </footer>

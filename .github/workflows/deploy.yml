@@ -22,9 +22,6 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v7
-        with:
-          # The site reads its own Git history (commit counts, the build strip), so fetch all of it.
-          fetch-depth: 0
       - name: Install, build and upload the site
         uses: withastro/action@v6
         with:

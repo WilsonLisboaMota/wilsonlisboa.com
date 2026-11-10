@@ -1,7 +1,11 @@
 ---
-// Artificial Intelligence: four rules, closed until asked, and each project as an exhibit:
-// a flood of data on the left, one answer on the right, and what is behind it one button away.
-import { rules, projects } from '../data/site';
+// Artificial Intelligence: how the work passes between Wilson and the AI, as one drawing (the relay), then each
+// project as a card with its own small moving drawing. What is behind a card opens in a sheet.
+import { relay, projects } from '../data/site';
+import Card from './Card.astro';
+import Sheet from './Sheet.astro';
+import Viz from './Viz.astro';
+import Icon from './Icon.astro';
 
 // The AI drawing from the hero: about 44 curves that start scattered and converge on one point.
 const fx = 268, fy = 112;
@@ -15,9 +19,32 @@ for (let i = 0; i < 44; i++) {
 }
 sig += `<circle cx="${fx}" cy="${fy}" r="3.5"/>`;
 
-// Each row of the flood drifts at its own pace.
-const pace = [64, 92, 74, 100, 82];
-const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-3.8"/></svg>';
+// The relay, drawn twice from the same steps: across on a wide screen, down on a phone. Two lanes, one line passing
+// between them; each step lights as the line's bright stretch reaches it (its share of the line's length).
+function track(across: boolean) {
+  const n = relay.length;
+  const pts = relay.map((s, i) => across
+    ? { x: 84 + i * (1032 / (n - 1)), y: s.who === 'me' ? 62 : 146 }
+    : { x: s.who === 'me' ? 40 : 190, y: 46 + i * 76 });
+  let d = `M${pts[0].x.toFixed(1)} ${pts[0].y}`;
+  const cum = [0];
+  for (let i = 1; i < n; i++) {
+    const a = pts[i - 1], b = pts[i];
+    const c1 = across ? { x: (a.x + b.x) / 2, y: a.y } : { x: a.x, y: (a.y + b.y) / 2 };
+    const c2 = across ? { x: (a.x + b.x) / 2, y: b.y } : { x: b.x, y: (a.y + b.y) / 2 };
+    d += `C${c1.x.toFixed(1)} ${c1.y.toFixed(1)} ${c2.x.toFixed(1)} ${c2.y.toFixed(1)} ${b.x.toFixed(1)} ${b.y}`;
+    let len = 0, px = a.x, py = a.y;
+    for (let s = 1; s <= 24; s++) {
+      const t = s / 24, u = 1 - t;
+      const x = u * u * u * a.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * b.x;
+      const y = u * u * u * a.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * b.y;
+      len += Math.hypot(x - px, y - py); px = x; py = y;
+    }
+    cum.push(cum[i - 1] + len);
+  }
+  return { d, pts: pts.map((p, i) => ({ ...p, f: cum[i] / cum[n - 1], ...relay[i] })) };
+}
+const wide = track(true), tall = track(false);
 ---
 <section class="sx" id="ai" data-sec aria-labelledby="ai-t">
   <div class="w">
@@ -25,73 +52,40 @@ const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-
       <p class="meta kick">Artificial Intelligence</p>
       <h2 id="ai-t">AI brings speed. <em>We bring judgement.</em></h2>
       <svg class="sig" viewBox="0 0 320 200" aria-hidden="true" set:html={sig}></svg>
-      <p class="ld">Four AI projects, each turning a flood of data into one clear answer.</p>
     </div>
 
-    <div class="rules">
-      {rules.map(r => (
-        <details class="rule">
-          <summary>{r.t}</summary>
-          <p>{r.d}</p>
-          <a class="lk" href={r.href}>{r.a}</a>
-        </details>
-      ))}
-    </div>
+    <figure class="relay" data-live aria-label={`How the work passes between me and the AI: ${relay.map(s => `${s.who === 'me' ? 'I' : 'the AI'} ${s.t}`).join(', ')}.`}>
+      <svg class="rl rl-w" viewBox="0 0 1200 208" aria-hidden="true">
+        <text class="lane me" x="0" y="67">ME</text><text class="lane ai" x="0" y="151">AI</text>
+        <path class="ln" d={wide.d} /><path class="run" pathLength="1000" d={wide.d} />
+        {wide.pts.map(p => (
+          <g class:list={['nd', p.who]} style={`--f:${p.f.toFixed(3)}`}>
+            <circle cx={p.x.toFixed(1)} cy={p.y} r="7" />
+            <text x={p.x.toFixed(1)} y={p.who === 'me' ? p.y - 22 : p.y + 34} text-anchor="middle">{p.t}</text>
+          </g>
+        ))}
+      </svg>
+      <svg class="rl rl-t" viewBox="0 0 360 548" aria-hidden="true">
+        <text class="lane me" x="40" y="16" text-anchor="middle">ME</text><text class="lane ai" x="190" y="16" text-anchor="middle">AI</text>
+        <path class="ln" d={tall.d} /><path class="run" pathLength="1000" d={tall.d} />
+        {tall.pts.map(p => (
+          <g class:list={['nd', p.who]} style={`--f:${p.f.toFixed(3)}`}>
+            <circle cx={p.x} cy={p.y} r="7" />
+            <text x={p.x + 18} y={p.y + 5}>{p.t}</text>
+          </g>
+        ))}
+      </svg>
+    </figure>
 
-    <div class="exs">
-      <p class="meta"><span>The evidence</span><span>The words in each flood are illustrative</span></p>
-      {projects.map(p => (
-        <article class="ex" id={p.id}>
-          <div class="ex-g">
-            <div>
-              <p class:list={['st', { live: p.live }]}>{p.status}</p>
-              <h3>{p.name}</h3>
-              <p class="ln">{p.line}</p>
-              <div class="ex-act">
-                <button class="go-b" type="button" aria-expanded="false" aria-controls={`bh-${p.id}`}><span class="x">Go behind</span><span class="y">Back to the surface</span><Fragment set:html={chev} /></button>
-                {p.href && <a class="btn" href={p.href}>{p.cta}</a>}
-              </div>
-            </div>
-            <div class="inst">
-              <div class="fl" aria-hidden="true">
-                <div class="fl-p">
-                  {p.flood.map((row, i) => (
-                    <div class="fl-r" style={`--d:${pace[i % pace.length]}s`}>
-                      {[0, 1, 2, 3, 4, 5].flatMap(() => row).map(t => t.startsWith('*') ? <b>{t.slice(1)}</b> : <span>{t}</span>)}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div class="out">
-                <p class="gate">{p.gate}</p>
-                <p class="ans"><span class="ty" data-text={p.answer}>{p.answer}</span><i class="car" aria-hidden="true"></i></p>
-                <p class="means">{p.means}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bh" id={`bh-${p.id}`}>
-            <div class="bh-in">
-              <div class="bh-g">
-                <div class="bh-c me"><h4>What I decided</h4><ul>{p.me.map(t => <li>{t}</li>)}</ul></div>
-                <div class="bh-c ai"><h4>{p.aiLabel}</h4><ul>{p.ai.map(t => <li>{t}</li>)}</ul></div>
-                <div class="bh-c no"><h4>Not there yet</h4><ul>{p.not.map(t => <li>{t}</li>)}</ul></div>
-                <div class="bh-c pf">
-                  {p.proof.kind === 'bars' && (
-                    <div class="bars" role="img" aria-label={`${p.proof.rows.map(r => `${r.l}: ${r.t}`).join('. ')}. The bar: ${p.proof.goal}%.`}>
-                      {p.proof.rows.map(r => <div class="r"><p><span>{r.l}</span><b>{r.t}</b></p><div class="t"><i style={`width:${r.v}%`}></i></div></div>)}
-                      <span class="goal"><em>The bar: {p.proof.goal}%</em></span>
-                    </div>
-                  )}
-                  {p.proof.kind === 'steps' && <ol class="steps">{p.proof.steps.map(s => <li>{s}</li>)}</ol>}
-                  {p.proof.kind === 'phone' && <span class="phone"><img src={p.proof.src} alt={p.proof.alt} width="390" height="560" loading="lazy" decoding="async" /></span>}
-                  <p class="pf-cap">{p.proof.cap}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
-      ))}
+    <h3 class="sub">Four projects</h3>
+    <div class="cards">
+      {projects.map(p => <Card w={p} />)}
     </div>
+    <a class="wide" href="/built-with-ai/" data-live>
+      <Viz kind="wall" />
+      <span class="wide-b"><span class="card-n">And this site</span><span class="card-a">built with Claude, every decision on record.</span></span>
+      <Icon name="arrow" />
+    </a>
   </div>
+  {projects.map(p => <Sheet w={p} />)}
 </section>

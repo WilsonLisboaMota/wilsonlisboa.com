@@ -1,0 +1,35 @@
+---
+// What is behind a card: who decided what, what the AI did, what is not there yet, and one piece of proof.
+// A native dialog, opened by the card (see after.js); on a phone it rises from the bottom.
+import type { Work } from '../data/site';
+
+interface Props { w: Work }
+const { w } = Astro.props;
+---
+<dialog class="sheet" id={`sheet-${w.id}`} aria-labelledby={`sh-${w.id}`}>
+  <form method="dialog"><button class="x" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
+  <div class="sheet-h">
+    <p class:list={['st', { live: w.live }]}>{w.status}</p>
+    <h3 id={`sh-${w.id}`}>{w.name}</h3>
+    {w.line && <p class="ln">{w.line}</p>}
+  </div>
+  <div class="bh-g">
+    {w.me && <div class="bh-c me"><h4>What I decided</h4><ul>{w.me.map(t => <li>{t}</li>)}</ul></div>}
+    {w.ai && <div class="bh-c ai"><h4>{w.aiLabel}</h4><ul>{w.ai.map(t => <li>{t}</li>)}</ul></div>}
+    {w.not && <div class="bh-c no"><h4>Not there yet</h4><ul>{w.not.map(t => <li>{t}</li>)}</ul></div>}
+    {w.proof && (
+      <div class="bh-c pf">
+        {w.proof.kind === 'bars' && (
+          <div class="bars" role="img" aria-label={`${w.proof.rows.map(r => `${r.l}: ${r.t}`).join('. ')}. The bar: ${w.proof.goal}%.`}>
+            {w.proof.rows.map(r => <div class="r"><p><span>{r.l}</span><b>{r.t}</b></p><div class="t"><i style={`width:${r.v}%`}></i></div></div>)}
+            <span class="goal"><em>The bar: {w.proof.goal}%</em></span>
+          </div>
+        )}
+        {w.proof.kind === 'steps' && <ol class="steps">{w.proof.steps.map(s => <li>{s}</li>)}</ol>}
+        {w.proof.kind === 'phone' && <span class="phone"><img src={w.proof.src} alt={w.proof.alt} width="390" height="560" loading="lazy" decoding="async" /></span>}
+        <p class="pf-cap">{w.proof.cap}</p>
+      </div>
+    )}
+  </div>
+  {w.href && <p class="sheet-f"><a class="btn" href={w.href}>{w.cta}</a></p>}
+</dialog>

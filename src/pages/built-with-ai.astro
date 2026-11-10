@@ -1,14 +1,11 @@
 ---
 import Page from '../layouts/Page.astro';
-import { execSync } from 'node:child_process';
 
-let commits = 0;
-try { commits = +execSync('git rev-list --count HEAD', { cwd: new URL('../../', import.meta.url) }).toString().trim(); } catch {}
 ---
 <Page
   title="How this site was built · Wilson Mota"
   description="The build log of wilsonlisboa.com: what Claude did, what Wilson decided, what was rejected, and the rules that kept the numbers honest."
-  back={{ href: '/#built', label: 'Home' }}
+  back={{ href: '/#ai', label: 'Home' }}
 >
   <section class="sec hd" aria-labelledby="t">
     <div class="lab"><p class="meta kick">Build log</p></div>
@@ -17,10 +14,8 @@ try { commits = +execSync('git rev-list --count HEAD', { cwd: new URL('../../', 
       <p class="facts"><span>Astro · three.js</span><span>Claude Code</span><span>GitHub Pages</span><span>Since 15 October 2026</span></p>
     </div>
     <div class="proof" role="list">
-      <div role="listitem"><p class="v">{commits || '—'} commits</p><p class="l">On the public repository, each one a change you can read.</p></div>
       <div role="listitem"><p class="v">1 log</p><p class="l">A decision file, kept in Portuguese, that records every choice and every rejection.</p></div>
       <div role="listitem"><p class="v">1 full build</p><p class="l">Built in one pass on 24 October, and thrown away the same day.</p></div>
-      <div role="listitem"><p class="v">0 trackers</p><p class="l">No cookies, no analytics, no third-party scripts beyond the fonts.</p></div>
       <div role="listitem"><p class="v">0 invented</p><p class="l">Numbers. Each one traces to a record, a file or a price series.</p></div>
     </div>
     <p class="proof-sum">The AI built fast. <span>The site is what survived the review.</span></p>

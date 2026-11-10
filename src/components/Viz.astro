@@ -1,0 +1,88 @@
+---
+// The small moving drawing on each card: one per piece of work, each showing what that piece does.
+// All of them move with CSS only, and only while their card is on screen (see .live in after.css).
+import { sure } from '../data/site';
+
+interface Props { kind: 'bars' | 'lapse' | 'radar' | 'orbit' | 'term' | 'stack' | 'seal' | 'wall' }
+const { kind } = Astro.props;
+
+const f = (v: number) => v.toFixed(1);
+// Radar: where each blip sits, by angle (clockwise from the right) and distance; it lights as the sweep passes it.
+const blips = [[40, 60], [115, 38], [200, 70], [250, 30], [320, 50]].map(([a, r]) => ({ x: 160 + r * Math.cos(a * Math.PI / 180), y: 92 + r * Math.sin(a * Math.PI / 180), d: a / 360 * 4 }));
+const six = [0, 1, 2, 3, 4, 5].map(k => ({ x: 160 + 62 * Math.cos(k * Math.PI / 3), y: 90 + 62 * Math.sin(k * Math.PI / 3) }));
+// The wall: the hero's fine lines, seen small.
+const wave = (y: number, ph: number) => { let d = `M-20 ${y}`; for (let x = 0; x <= 680; x += 40) d += ` Q${x - 20} ${f(y + 9 * Math.sin(ph + x / 70))} ${x} ${f(y + 5 * Math.sin(ph + 1 + x / 90))}`; return d; };
+---
+{kind === 'bars' && (
+  <svg class="vz vz-bars" viewBox="0 0 320 180" aria-hidden="true">
+    {sure.rows.map((r, i) => (
+      <g>
+        <text class="t" x="24" y={40 + i * 44}>{r.t}</text>
+        <rect class="tr" x="24" y={46 + i * 44} width="272" height="12" rx="3" />
+        <rect class="b" x="24" y={46 + i * 44} width={f(Math.max(3, 272 * r.v / 100))} height="12" rx="3" style={`--d:${i * 0.2}s`} />
+      </g>
+    ))}
+    <line class="goal" x1={f(24 + 272 * sure.goal / 100)} x2={f(24 + 272 * sure.goal / 100)} y1="26" y2="150" />
+    <text class="t g" x={f(24 + 272 * sure.goal / 100 - 6)} y="24" text-anchor="end">the bar: {sure.goal}%</text>
+  </svg>
+)}
+{kind === 'lapse' && (
+  <svg class="vz vz-lapse" viewBox="0 0 320 180" aria-hidden="true">
+    {[0, 1, 2].flatMap(row => Array.from({ length: 12 }, (_, i) => {
+      const x = f(30 + i * 23.6), y = 50 + row * 40;
+      const on = row === 0 || (row === 1 && i % 3 === 0) || (row === 2 && i < 8);
+      if (row === 2 && i === 8) return <circle class="gone" cx={x} cy={y} r="7" />;
+      return <circle class:list={[on ? 'on' : 'off']} cx={x} cy={y} r={on ? 4.5 : 2} style={`--d:${(i * 0.3).toFixed(2)}s`} />;
+    }))}
+    <line class="scan" x1="0" x2="0" y1="28" y2="152" />
+  </svg>
+)}
+{kind === 'radar' && (
+  <svg class="vz vz-radar" viewBox="0 0 320 180" aria-hidden="true">
+    <circle class="r" cx="160" cy="92" r="28" /><circle class="r" cx="160" cy="92" r="54" /><circle class="r" cx="160" cy="92" r="80" />
+    <path class="r" d="M80 92h160M160 12v160" />
+    <g class="sweep"><path class="w" d="M160 92L240 92A80 80 0 0 0 200 22.7Z" /><path class="e" d="M160 92L240 92" /></g>
+    {blips.map(b => <circle class="blip" cx={f(b.x)} cy={f(b.y)} r="3.5" style={`--d:${b.d.toFixed(2)}s`} />)}
+  </svg>
+)}
+{kind === 'orbit' && (
+  <svg class="vz vz-orbit" viewBox="0 0 320 180" aria-hidden="true">
+    <g class="spin">
+      <circle class="r" cx="160" cy="90" r="62" />
+      {six.map(p => <path class="r" d={`M160 90L${f(p.x)} ${f(p.y)}`} />)}
+      {six.map(p => <circle class="n" cx={f(p.x)} cy={f(p.y)} r="5.5" />)}
+    </g>
+    <path class="core" d="M143 77h11l4 4h19v22h-34z" />
+  </svg>
+)}
+{kind === 'term' && (
+  <span class="vz vz-term" aria-hidden="true">
+    <i style="--d:0s">› run every measure, once</i>
+    <b style="--d:1.2s">← 91 answer · <u>7 fail</u></b>
+    <i style="--d:2.6s">› why do they fail?</i>
+    <b style="--d:3.8s">← 2 root causes</b>
+  </span>
+)}
+{kind === 'stack' && (
+  <svg class="vz vz-stack" viewBox="0 0 320 180" aria-hidden="true">
+    {['s1', 's2', 's3'].map((c, i) => (
+      <g class={c}>
+        <rect class="pg" x="92" y="40" width="136" height="100" rx="8" />
+        <path class="in" d={i === 2 ? 'M106 122V96M122 122V82M138 122V104M154 122V70M170 122V90M106 58h44' : i === 1 ? 'M106 118l22-18 20 10 26-30 28 12M106 58h60' : 'M106 60h108M106 76h108M106 92h72M106 108h90'} />
+      </g>
+    ))}
+  </svg>
+)}
+{kind === 'seal' && (
+  <svg class="vz vz-seal" viewBox="0 0 320 180" aria-hidden="true">
+    <circle class="ticks" cx="160" cy="90" r="56" />
+    <circle class="ring" cx="160" cy="90" r="42" />
+    <path class="ok" pathLength="1" d="M141 91l13 13 26-28" />
+  </svg>
+)}
+{kind === 'wall' && (
+  <svg class="vz vz-wall" viewBox="0 0 640 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g class="drift">{[18, 30, 42, 54, 66, 78, 90, 102].map((y, i) => <path class="r" d={wave(y, i * 0.7)} />)}</g>
+    <path class="hot" d={wave(60, 2.2)} />
+  </svg>
+)}

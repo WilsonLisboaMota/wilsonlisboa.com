@@ -1,24 +1,26 @@
 ---
-// The first thing on the far side: who, where, and four numbers, each a way in. The commit count is read from Git.
-import { execSync } from 'node:child_process';
+// The first thing on the far side: who, the CV, and three numbers, each a way in.
 import { person, projects } from '../data/site';
-
-let commits = 0;
-try { commits = +execSync('git rev-list --count HEAD', { cwd: new URL('../../', import.meta.url) }).toString().trim(); } catch {}
+import Icon from './Icon.astro';
 
 const kpis = [
-  { v: '7', l: 'years in Business Intelligence', a: 'The trajectory', href: '#trajectory' },
-  { v: '6', l: 'BI developers in the team I lead', a: 'Leadership', href: '#leadership' },
-  { v: String(projects.length), l: 'AI projects, from live to alpha', a: 'The projects', href: '#ai' },
-  { v: commits ? String(commits) : '—', l: 'commits building this site with AI', a: 'How it was built', href: '#built' },
+  { v: 7, l: 'years in Business Intelligence', href: '#trajectory' },
+  { v: 6, l: 'BI developers in my team', href: '#leadership' },
+  { v: projects.length, l: 'AI projects, from live to alpha', href: '#ai' },
 ];
 ---
 <section class="now w" id="now" data-sec aria-label="Now">
-  <div class="now-id">
-    <img src="/cv/photo.jpg" alt="Wilson Mota" width="76" height="76" loading="lazy" decoding="async">
-    <p><b>{person.name}</b><span>{person.role} · {person.place}</span></p>
+  <div class="now-top">
+    <div class="now-id">
+      <img src="/cv/photo.jpg" alt="Wilson Mota" width="88" height="88" decoding="async">
+      <p><b>{person.name}</b><span>{person.role}</span><span>{person.place}</span></p>
+    </div>
+    <div class="now-cv">
+      <a class="cvbtn" href={person.cv}><span>Open the CV</span><Icon name="star" /></a>
+      <a class="pdf" href={person.pdf} aria-label="Download the CV as a PDF"><Icon name="down" /><span>PDF</span></a>
+    </div>
   </div>
   <ul class="kpi">
-    {kpis.map(k => <li><a href={k.href}><b>{k.v}</b><span>{k.l}</span><i>{k.a} ↓</i></a></li>)}
+    {kpis.map(k => <li><a href={k.href}><b data-count={k.v}>{k.v}</b><span>{k.l}</span><Icon name="arrow" /></a></li>)}
   </ul>
 </section>

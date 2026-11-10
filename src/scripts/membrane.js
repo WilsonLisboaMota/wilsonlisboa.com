@@ -412,7 +412,7 @@ function init() {
         float hot = isHot * uHotAmt;
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
         float seen = (base * dash * (1.0 + 1.0 * en) + (0.8 + 1.2 * en) * flow + 0.35 * heat) * dim * (1.0 + 0.9 * hot);
-        // The Leadership trails fade behind each point: brightest at the point (aT = 1), gone at the tail.
+        // Each stroke of a Leadership arrowhead is brightest at its tip (aT = 1) and fades towards the wing (aT = 0).
         float trail = mix(1.0, smoothstep(0.0, 1.0, aT), step(1.5, aReg) * step(aReg, 2.5));
         vec4 wp = modelMatrix * vec4(p, 1.0);
         vA = mix(glimpse, seen, uBehind) * trail * nearCam(wp.xyz);
@@ -805,19 +805,22 @@ function init() {
     river.setAttribute('aSeed', new THREE.Float32BufferAttribute(RS, 1));
 
     // ----- Leadership: a formation -----
-    // One point in front, at the wall; six behind in two wings, each with a trail that fades behind it (see structMat).
-    // No lines join them: the formation is in where they are.
+    // Seven arrowheads flying up the wall: one in front, six behind it in two wings. No lines join them: the formation
+    // is in where they are and in the one direction they share. (They were points with trails until 10 Nov 2026; seen
+    // still, a round head with a wavering tail read as something swimming.)
     const [lx, ly] = FORCE_BASE[2];
     const lead = touch(lx, ly), form = [lead];
     // The V lies against the wall: the lead at its point, the wings below it and a little behind it in depth,
     // so that from behind the camera sees the formation flat, as it is.
     for (let k = 1; k <= 3; k++) { form.push([lx + 0.66 * k, ly - 0.55 * k, lead[2] - 0.3 - 0.35 * k]); form.push([lx - 0.66 * k, ly - 0.55 * k, lead[2] - 0.3 - 0.35 * k]); }
     form.forEach((p, i) => {
-      const len = i === 0 ? 1.8 : 1.0 + R() * 0.5, ph = R() * 6, pts = [];
-      // The trail runs straight behind the point with a slight waver, from the tail (aT = 0) to the point (aT = 1).
-      for (let s = 0; s <= 14; s++) { const a = s / 14, back = (1 - a) * len; pts.push([p[0] + 0.08 * Math.sin(ph + back * 2.0) * (1 - a), p[1] - back, p[2] - back * 0.25]); }
-      path(pts, 2, i === 0 ? 0.9 : 0.55);
-      node(p, 2, i === 0 ? 2.0 : 1.35, 0, i === 0 ? 1 : 0);
+      // Two straight strokes from the wing tips (aT = 0, where the shader lets them fade) to the tip (aT = 1), and a
+      // shorter pair inside them, so each reads as a solid arrowhead and not as a hairline.
+      const w = i === 0 ? 0.36 : 0.25, h = i === 0 ? 0.48 : 0.33;
+      for (const k of [1, 0.55]) for (const side of [-1, 1]) {
+        path(line([p[0] + side * w * k, p[1] - h * k, p[2] - 0.08 * k], p, 6), 2, i === 0 ? 0.9 : 0.55);
+      }
+      node(p, 2, i === 0 ? 1.5 : 0.8, 0, i === 0 ? 1 : 0);
     });
 
     // ----- links -----
@@ -2242,7 +2245,11 @@ function init() {
   const sine = t => 0.5 - 0.5 * Math.cos(Math.PI * t);
   const cubicInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const heroTop = () => hero.getBoundingClientRect().top + scrollY;
-  const behindY = () => heroTop() + (hero.offsetHeight - innerHeight) * 0.985;
+  // The hero is taller than the crossing: its last DWELL of a screen stays on the far side, so the words have time
+  // to arrive even where nothing can hold the scroll.
+  const DWELL = 0.7;
+  const crossRange = () => Math.max(1, hero.offsetHeight - innerHeight - stage.offsetHeight * DWELL);
+  const behindY = () => heroTop() + crossRange() * 0.985;
   const workY = () => document.getElementById('work').getBoundingClientRect().top + scrollY;
 
   function stopJourney() {
@@ -2276,7 +2283,7 @@ function init() {
   ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(type => addEventListener(type, stopJourney, { passive: true, capture: true }));
 
   // The crossing takes its time: about five seconds from the front to the far side.
-  const toBehind = { to: behindY, ms: d => clamp(d / (hero.offsetHeight - innerHeight) * 5400, 1200, 5400), ease: sine };
+  const toBehind = { to: behindY, ms: d => clamp(d / crossRange() * 5400, 1200, 5400), ease: sine };
 
   document.querySelector('.cta').addEventListener('click', e => {
     e.preventDefault();
@@ -2285,9 +2292,72 @@ function init() {
     travel([toBehind, { pause: 1700 }, { to: workY, ms: () => 1500, ease: cubicInOut }]);
   });
 
+  // ---------- the far side holds on ----------
+  // The scroll that arrives behind the wall stops there, so the words have time to come in. The next one, if it comes
+  // early, is held back with a tug; the one after goes on. Once per visit; never during a guided journey, and never
+  // with reduced motion. After HOLD_MS the visitor has had the time, and the next scroll simply goes on.
+  const HOLD_MS = 4200, HELD = { passive: false, capture: true };
+  const cueEl = document.getElementById('cue');
+  const gate = { state: reduced ? 'open' : 'ahead', at: 0, lastWheel: 0, tugAt: 0, timer: 0 };
+  // Overlay scrollbars (phones, trackpads): the page itself can be stopped with no change of layout.
+  const overlayBars = () => innerWidth - document.documentElement.clientWidth < 1;
+  const onFarSide = () => scrollY >= behindY() - 1 && scrollY <= heroTop() + hero.offsetHeight - innerHeight + 1;
+  const showCue = () => { if (cueEl) cueEl.classList.toggle('on', gate.state === 'open' && onFarSide()); };
+  function letGo() {
+    // Still the same gesture rolling on: wait until it rests, so it is the next one that moves the page.
+    if (performance.now() - gate.lastWheel < 200) { gate.timer = setTimeout(letGo, 120); return; }
+    gate.state = 'open';
+    clearTimeout(gate.timer);
+    document.documentElement.classList.remove('held');
+    removeEventListener('wheel', onHeldWheel, HELD);
+    removeEventListener('keydown', onHeldKey, HELD);
+    removeEventListener('touchstart', onHeldTouch, HELD);
+    showCue();
+  }
+  function tug() {
+    gate.tugAt = performance.now();
+    stage.classList.remove('tug'); void stage.offsetWidth; stage.classList.add('tug');
+    clearTimeout(gate.timer);
+    gate.timer = setTimeout(letGo, 520);
+  }
+  // A new gesture while held, at time t. True: keep holding it back. False: let it through.
+  function heldGesture(t) {
+    const since = t - gate.at;
+    if (gate.tugAt || since < 420) return true;
+    if (since > HOLD_MS) { gate.lastWheel = 0; letGo(); return false; }
+    tug();
+    return true;
+  }
+  function onHeldWheel(e) {
+    if (e.deltaY <= 0) return;
+    const fresh = e.timeStamp - gate.lastWheel > 200;
+    gate.lastWheel = e.timeStamp;
+    if (!fresh || heldGesture(e.timeStamp)) e.preventDefault();
+  }
+  function onHeldKey(e) {
+    if (!['ArrowDown', 'PageDown', 'End', ' '].includes(e.key)) return;
+    if (e.repeat || heldGesture(e.timeStamp)) e.preventDefault();
+  }
+  function onHeldTouch(e) { if (e.timeStamp - gate.at > 250) heldGesture(e.timeStamp); }
+  function hold() {
+    gate.state = 'held'; gate.at = gate.lastWheel = performance.now(); gate.tugAt = 0;
+    if (overlayBars()) document.documentElement.classList.add('held');
+    scrollTo(0, Math.min(scrollY, behindY() + stage.offsetHeight * DWELL * 0.4));
+    addEventListener('wheel', onHeldWheel, HELD);
+    addEventListener('keydown', onHeldKey, HELD);
+    addEventListener('touchstart', onHeldTouch, HELD);
+    gate.timer = setTimeout(letGo, HOLD_MS);
+  }
+
   function onScroll() {
-    const range = hero.offsetHeight - innerHeight;
-    S.scrollP = range > 0 ? clamp(-hero.getBoundingClientRect().top / range, 0, 1) : 0;
+    S.scrollP = clamp(-hero.getBoundingClientRect().top / crossRange(), 0, 1);
+    if (gate.state === 'ahead' && !reduced) {
+      const far = behindY();
+      // Far past it already (a link, a restored position, a guided journey): nothing to hold.
+      if (scrollY > far + stage.offsetHeight * DWELL) gate.state = 'open';
+      else if (scrollY >= far && !journey) hold();
+    }
+    showCue();
     kick();
   }
   addEventListener('scroll', onScroll, { passive: true });

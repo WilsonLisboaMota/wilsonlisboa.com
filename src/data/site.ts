@@ -1,6 +1,6 @@
 // Everything the home page says below the hero, in one place.
 // Facts come from the CV, Wilson's project notes and the records; nothing here is estimated.
-// The streams of words in each project ("flood") are illustrative, and the page says so.
+// The small moving drawings on the cards are illustrations, except the trading bot's bars, which are its real results.
 
 export const person = {
   name: 'Wilson Mota',
@@ -15,86 +15,73 @@ export const person = {
 // ---------- Artificial Intelligence ----------
 const bot = '/work/ai-trading-bot/';
 
-export const rules = [
-  { t: 'I choose the tools. The AI builds.', d: 'In the trading bot, I picked the broker and the AI models that read the news. Claude wrote the code and the tests.', href: `${bot}#who`, a: 'Who did what' },
-  { t: 'The bar is set before the results.', d: 'The pass marks were written down before the first test. No idea reached them, and the page says so.', href: `${bot}#research`, a: 'The research' },
-  { t: 'Results are checked twice.', d: "A second AI agent redid the bot's calculations on its own. The Bitcoin figures were rebuilt from raw prices.", href: `${bot}bitcoin-study/`, a: 'The Bitcoin study' },
-  { t: 'What fails stays on the page.', d: 'Every case study ends with its limits, down to a leaked API key that had to be revoked.', href: `${bot}#limits`, a: "The trading bot's limits" },
+// How the work passes between Wilson and the AI, in order. The four rules approved on 19 Oct 2026, as one drawing.
+export const relay: { who: 'me' | 'ai'; t: string }[] = [
+  { who: 'me', t: 'choose the tools' },
+  { who: 'ai', t: 'builds' },
+  { who: 'me', t: 'set the bar first' },
+  { who: 'ai', t: 'runs the tests' },
+  { who: 'ai', t: 'a second AI re-checks' },
+  { who: 'me', t: 'decide' },
+  { who: 'me', t: 'show what failed' },
 ];
 
-export interface Project {
+export interface Work {
   id: string;
   name: string;
   status: string;
+  /** The status in a word or two, for the card. The full one is on the sheet. */
+  tag: string;
   live?: boolean;
-  line: string;
-  /** What stands between the flood and the answer. */
-  gate: string;
+  /** Which small drawing the card carries. */
+  viz: 'bars' | 'lapse' | 'radar' | 'orbit' | 'term' | 'stack' | 'seal';
+  /** The few words on the card. */
   answer: string;
-  means: string;
-  /** Rows of illustrative words; a leading * marks a word that lights up. */
-  flood: string[][];
+  /** One sentence, shown when the card is opened. */
+  line?: string;
   href?: string;
   cta?: string;
-  aiLabel: string;
-  me: string[];
-  ai: string[];
-  not: string[];
-  proof:
+  /** A card with no sheet behind it: it leaves the site. */
+  external?: boolean;
+  aiLabel?: string;
+  me?: string[];
+  ai?: string[];
+  not?: string[];
+  proof?:
     | { kind: 'bars'; cap: string; goal: number; rows: { l: string; v: number; t: string }[] }
     | { kind: 'steps'; cap: string; steps: string[] }
     | { kind: 'phone'; cap: string; src: string; alt: string };
 }
 
-export const projects: Project[] = [
+// The trading bot's research results: how sure the edge is real, against the bar set before the tests.
+export const sure = { goal: 95, rows: [{ l: 'Follow the trend', v: 62, t: '62%' }, { l: 'Step back when the market is nervous', v: 91, t: '91%' }, { l: 'Buy the dip', v: 0.6, t: 'almost 0%' }] };
+
+export const projects: Work[] = [
   {
     id: 'bot',
     name: 'AI Trading Bot',
     status: 'Live on paper trading',
+    tag: 'Live',
     live: true,
-    line: 'AI builds a trading bot in minutes. The hard part is tuning it to behave the way I would.',
-    gate: 'AI reads the news · code decides',
+    viz: 'bars',
     answer: 'no edge yet.',
-    means: 'Three ideas, tested against a bar set in advance. None passed, and the page says so.',
-    flood: [
-      ['earnings beat', '*upgrade', 'new contract', 'recall', 'guidance cut', 'record quarter', '*profit warning', 'buyback'],
-      ['open', 'high', 'low', '*close', 'volume', 'open', 'high', 'low', 'close', '*volume'],
-      ['merger talks', '*downgrade', 'lawsuit', 'new product', 'CEO steps down', '*approval', 'strike', 'dividend'],
-      ['stop loss', '10% rule', '*diversify', 'paper account', 'stop loss', '10% rule', 'diversify', '*paper account'],
-      ['headline', 'headline', '*positive', 'headline', '*negative', 'headline', 'headline', 'neutral'],
-    ],
+    line: 'AI builds a trading bot in minutes. The hard part is tuning it to behave the way I would.',
     href: bot,
     cta: 'Read the case study',
     aiLabel: 'What the AI did',
     me: ['Chose the broker: Alpaca, with one paper account per bot.', 'Chose the AI that reads the news: Jev, through OpenRouter.', 'Kept it to stocks, and to paper money.'],
     ai: ['Wrote the test engine, the bots and their tests.', 'A second AI agent redid the research sums and found 3 bugs in the test code.', "An audit of the bot's code added four safety rules before the pilot."],
     not: ['No proven edge: none of the three ideas reached the bar.', 'No real money. The pilot is reviewed on 11 December 2026.'],
-    proof: {
-      kind: 'bars',
-      cap: 'How sure can we be that the edge is real? The bar, set before the tests: 95%.',
-      goal: 95,
-      rows: [
-        { l: 'Follow the trend', v: 62, t: '62%' },
-        { l: 'Step back when the market is nervous', v: 91, t: '91%' },
-        { l: 'Buy the dip', v: 0.6, t: 'almost 0%' },
-      ],
-    },
+    proof: { kind: 'bars', cap: 'How sure can we be that the edge is real? The bar, set before the tests: 95%.', ...sure },
   },
   {
     id: 'cfo',
     name: 'Personal CFO',
     status: 'Working pipeline · product not built',
-    line: 'My whole financial situation, live: where the money goes, what changed and what comes next.',
-    gate: 'code calculates · AI explains',
+    tag: 'Working pipeline',
+    viz: 'lapse',
     answer: 'a payment lapsed.',
-    means: 'One of five things it found that I had missed.',
-    flood: [
-      ['groceries', 'rent', '*childcare', 'insurance', 'subscription', 'card payment', '*refund', 'utilities'],
-      ['transfer', 'standing order', 'cash', '*duplicate?', 'transfer', 'standing order', 'cash', 'annual fee'],
-      ['salary', 'tax instalment', '*no payee named', 'pharmacy', 'fuel', 'salary', '*tax instalment', 'school'],
-      ['CHF', 'EUR', 'CHF', '*EUR', 'CHF', 'EUR', '*CHF', 'EUR', 'CHF', 'EUR'],
-      ['bank export', 'bank export', '*matched', 'bank export', 'bank export', '*recurring', 'bank export', 'gap'],
-    ],
+    line: 'My whole financial situation, live: where the money goes, what changed and what comes next.',
     aiLabel: 'What the AI did',
     me: ['Set the rule: the AI never calculates. Code does the sums; the AI classifies and explains.', 'Kept a human check on what the AI classifies.', 'Set a commercial version aside, for three reasons that are on record.'],
     ai: ['Profiled the bank exports: formats, duplicates, transfers and gaps.', 'Wrote the pipeline in Python, from raw exports to analytics.', 'Flagged what it did not know instead of filling the gaps.'],
@@ -105,17 +92,10 @@ export const projects: Project[] = [
     id: 'radar',
     name: 'Property Deal Radar',
     status: 'In alpha · first alerts not sent yet',
-    line: 'Brings together the property investments with the best economic viability, and alerts me when a hot deal appears.',
-    gate: 'find · check · run the numbers',
+    tag: 'In alpha',
+    viz: 'radar',
     answer: 'no alert sent yet.',
-    means: 'In alpha. It is built to speak only when a new hot deal appears.',
-    flood: [
-      ['new listing', '*price down', 're-listed', 'needs works', 'rented', 'top floor', '*duplicate', 'garage'],
-      ['portal A', 'portal B', 'portal C', '*portal A', 'portal B', 'portal C', 'portal A', '*portal B'],
-      ['yield ?', 'cash flow ?', '*equity needed', 'yield ?', 'cash flow ?', 'equity needed', '*yield ?', 'vacancy'],
-      ['2 rooms', '3 rooms', 'studio', '*building', '2 rooms', 'land', '3 rooms', '*studio'],
-      ['removed', 'sold?', '*price up', 'no photos', 'auction', 'removed', '*reserved', 'missing data'],
-    ],
+    line: 'Brings together the property investments with the best economic viability, and alerts me when a hot deal appears.',
     aiLabel: 'What the AI is built to do',
     me: ['Set the criteria for a deal that makes economic sense.', 'Keep one list, so the same property is never shown twice.', 'Asked for an alert only when a new hot deal appears.'],
     ai: ['Find listings across portals and remove the duplicates.', 'Run the numbers: yield, cash flow and the equity needed.', 'Rate the risk, and say what information is missing.'],
@@ -126,17 +106,10 @@ export const projects: Project[] = [
     id: 'life',
     name: 'Life HQ',
     status: 'Started November 2026 · app phase one built',
+    tag: 'New',
+    viz: 'orbit',
+    answer: 'six AIs, one brain.',
     line: 'Six AI specialists and one shared folder plan my training, meals and recovery around the week I actually have.',
-    gate: 'six specialists · one shared brain',
-    answer: 'session B, light.',
-    means: 'An example of what it says. Every session comes in three versions, so a tired day still counts.',
-    flood: [
-      ['sleep', 'steps', '*recovery', 'protein', 'energy', 'sleep', 'steps', '*soreness'],
-      ['session A', 'session B', 'walk', '*rest', 'session A', 'session B', '*walk', 'rest'],
-      ['meal photo', 'breakfast', '*lunch out', 'dinner', 'snack', 'meal photo', '*breakfast', 'water'],
-      ['office day', 'home day', '*short night', 'office day', 'home day', 'weekend', '*office day', 'home day'],
-      ['waist', 'weight', 'photos', '*effort', 'waist', 'weight', '*consistency', 'mood'],
-    ],
     aiLabel: 'What the AI does',
     me: ['Designed the structure: one folder as the shared brain, one owner per file.', 'Set the rules: records are only added, never rewritten, and the AI never invents precision.', 'Make the calls. The specialists analyse and propose.'],
     ai: ['Six chats, each with one job: HQ, training, nutrition, progress, the app and recovery.', 'Built the plan, 14 exercise sheets and a phone app that shows today’s session.', 'Rebuilds the Excel report from the raw files, never by hand.'],
@@ -145,18 +118,24 @@ export const projects: Project[] = [
   },
 ];
 
-// ---------- Business Intelligence: the trajectory ----------
+// ---------- Business Intelligence ----------
+// What the role is today, as four things to see. From the four lines of the CV for Corient.
+export const todayTiles: { icon: 'team' | 'layers' | 'spark' | 'compass'; t: string }[] = [
+  { icon: 'team', t: 'A team of six developers' },
+  { icon: 'layers', t: 'The Power BI platform' },
+  { icon: 'spark', t: 'Automation and AI' },
+  { icon: 'compass', t: 'Reporting strategy' },
+];
+
 export interface Role {
   id: string;
   org: string;
   short: string;
   title: string;
-  /** A shorter title for the chart's label, where the full one does not fit. */
-  label?: string;
-  /** [year, month] */
-  from: [number, number];
-  to: [number, number] | null;
   when: string;
+  from: number;
+  /** How high the step stands on the path. */
+  level: number;
   /** main: a BI role; side: alongside one; pre: before BI. */
   kind: 'main' | 'side' | 'pre';
   bullets: string[];
@@ -164,84 +143,89 @@ export interface Role {
   note?: string;
 }
 
-// Top to bottom, latest first, so the bars climb to the right.
+// In the order they happened, so the steps climb to the right.
 export const roles: Role[] = [
   {
-    id: 'corient', org: 'Corient', short: 'Corient', title: 'Business Intelligence Manager', label: 'BI Manager', from: [2025, 1], to: null, when: '01/2025 – today', kind: 'main',
-    bullets: [
-      'Lead a team of 6 BI developers delivering analytical solutions to the whole group.',
-      'Own the Power BI platform, ensuring governance, security and scalability.',
-      'Drive automation and AI adoption to increase business performance.',
-      'Partner with leadership to shape reporting strategy and ensure compliance.',
-    ],
-    tools: ['ssms', 'mage', 'powerbi', 'tableau', 'databricks', 'copilot', 'claude'],
-    note: 'Stonehage Fleming became part of Corient: one continuous path since 2021.',
-  },
-  {
-    id: 'sf', org: 'Stonehage Fleming', short: 'Stonehage F.', title: 'Senior BI Analyst', from: [2021, 12], to: [2024, 12], when: '12/2021 – 12/2024', kind: 'main',
-    bullets: [
-      'Led the implementation and configuration of Power BI Service in the company.',
-      'Responsible for the Dremio and dbt architecture, security and governance.',
-      'Developed several Alteryx processes that support business operations.',
-      'Developed products with SSIS, Visual Studio, MDM and Mage.ai.',
-    ],
-    tools: ['ssms', 'ssis', 'alteryx', 'mage', 'powerbi', 'excel', 'dremio', 'bc', 'copilot'],
-  },
-  {
-    id: 'fl', org: 'Freelance', short: 'Freelance', title: 'BI Consultant', from: [2021, 3], to: [2021, 11], when: '03/2021 – 11/2021', kind: 'main',
-    bullets: [
-      'Developed Power BI reports that delivered management gains for clients.',
-      'Focused on the Power BI user experience, with positive client feedback.',
-      'Managed a SQL database and several SSIS ETL processes.',
-    ],
-    tools: ['ssms', 'ssis', 'powerbi', 'excel'],
-  },
-  {
-    id: 'wv', org: 'WeValue – Consulting', short: 'WeValue', title: 'Co-founder', from: [2019, 11], to: [2021, 1], when: '11/2019 – 01/2021', kind: 'side',
-    bullets: ['Management and client advisory: 9 of the 10 projects I submitted were approved.', 'Responsible for public contracts.'],
-    tools: ['excel'],
-  },
-  {
-    id: 'sl', org: 'Scores & Levels', short: 'Scores & L.', title: 'BI Analyst', from: [2019, 9], to: [2021, 3], when: '09/2019 – 03/2021', kind: 'main',
-    bullets: ['Developed and maintained 10+ advanced Power BI reports.', 'Developed the on-premises (small-scale) data warehouse.'],
-    tools: ['ssms', 'ssis', 'powerbi', 'excel'],
-  },
-  {
-    // The CV gives years only for the end ("10/2016 – 2019"); the bar ends where the next role starts.
-    id: 'hop', org: 'HOP', short: 'HOP', title: 'Business consulting', from: [2016, 10], to: [2019, 9], when: '2016 – 2019', kind: 'pre',
+    // The CV gives years only for the end ("10/2016 – 2019").
+    id: 'hop', org: 'HOP', short: 'HOP', title: 'Business consulting', when: '2016 – 2019', from: 2016, level: 1, kind: 'pre',
     bullets: ['Business consulting, before BI.', 'A few highly technical spreadsheets were the first step towards working with data.'],
     tools: [],
   },
+  {
+    id: 'sl', org: 'Scores & Levels', short: 'Scores & L.', title: 'BI Analyst', when: '09/2019 – 03/2021', from: 2019, level: 2, kind: 'main',
+    bullets: ['Developed and maintained 10+ advanced Power BI reports.', 'Developed the on-premises (small-scale) data warehouse.'],
+    tools: ['SQL Server', 'SSIS', 'Power BI', 'Excel'],
+  },
+  {
+    id: 'wv', org: 'WeValue – Consulting', short: 'WeValue', title: 'Co-founder', when: '11/2019 – 01/2021', from: 2019, level: 2, kind: 'side',
+    bullets: ['Management and client advisory: 9 of the 10 projects I submitted were approved.', 'Responsible for public contracts.'],
+    tools: ['Excel'],
+  },
+  {
+    id: 'fl', org: 'Freelance', short: 'Freelance', title: 'BI Consultant', when: '03/2021 – 11/2021', from: 2021, level: 3, kind: 'main',
+    bullets: ['Developed Power BI reports that delivered management gains for clients.', 'Focused on the Power BI user experience, with positive client feedback.', 'Managed a SQL database and several SSIS ETL processes.'],
+    tools: ['SQL Server', 'SSIS', 'Power BI', 'Excel'],
+  },
+  {
+    id: 'sf', org: 'Stonehage Fleming', short: 'Stonehage F.', title: 'Senior BI Analyst', when: '12/2021 – 12/2024', from: 2021, level: 4, kind: 'main',
+    bullets: ['Led the implementation and configuration of Power BI Service in the company.', 'Responsible for the Dremio and dbt architecture, security and governance.', 'Developed several Alteryx processes that support business operations.', 'Developed products with SSIS, Visual Studio, MDM and Mage.ai.'],
+    tools: ['SQL Server', 'SSIS', 'Alteryx', 'Mage.ai', 'Power BI', 'Excel', 'Dremio', 'Business Central', 'Copilot'],
+  },
+  {
+    id: 'corient', org: 'Corient', short: 'Corient', title: 'Business Intelligence Manager', when: '01/2025 – today', from: 2025, level: 5, kind: 'main',
+    bullets: ['Lead a team of 6 BI developers delivering analytical solutions to the whole group.', 'Own the Power BI platform, ensuring governance, security and scalability.', 'Drive automation and AI adoption to increase business performance.', 'Partner with leadership to shape reporting strategy and ensure compliance.'],
+    tools: ['SQL Server', 'Mage.ai', 'Power BI', 'Tableau', 'Databricks', 'Copilot', 'Claude'],
+    note: 'Stonehage Fleming became part of Corient: one continuous path since 2021.',
+  },
 ];
 
-// Wilson's own table of tools by role (18 Oct 2026). Order: first use, then how long.
-export const tools = [
-  { id: 'excel', name: 'Excel' },
-  { id: 'powerbi', name: 'Power BI' },
-  { id: 'ssms', name: 'SQL Server' },
-  { id: 'ssis', name: 'SSIS' },
-  { id: 'dremio', name: 'Dremio' },
-  { id: 'alteryx', name: 'Alteryx' },
-  { id: 'bc', name: 'Business Central' },
-  { id: 'mage', name: 'Mage.ai' },
-  { id: 'copilot', name: 'Copilot' },
-  { id: 'tableau', name: 'Tableau' },
-  { id: 'databricks', name: 'Databricks' },
-  { id: 'claude', name: 'Claude' },
+export const proofs: Work[] = [
+  {
+    id: 'mcp',
+    name: 'Claude × Power BI',
+    status: 'Live · read-only',
+    tag: 'Live · read-only',
+    live: true,
+    viz: 'term',
+    answer: '7 of 98 measures fail.',
+    line: 'The AI asks the model, under my permissions. It never touches the data. On its first day it ran every measure once.',
+    href: '/work/power-bi-mcp/',
+    cta: 'Read the case study',
+    aiLabel: 'What the AI did',
+    me: ['A live connection, not screenshots: the version an interviewer can watch.', 'Read-only, under a named user, with no secret stored anywhere.', 'The data: my own CRM report, masked.'],
+    ai: ["Planned the four pieces from Microsoft's documentation.", 'Registered the app and set the tenant setting, each step with my permission.', 'Diagnosed why every query failed at first, and found the fix.'],
+    not: ['Not public: a visitor cannot open it. It is shown live in conversation.', 'It runs on a trial licence that ends on 16 December 2026.', "Microsoft's endpoint is in preview and may change."],
+    proof: { kind: 'steps', cap: 'Four pieces, and none of them is custom code.', steps: ['A tenant', 'An app', 'A connector', 'A model'] },
+  },
+  {
+    id: 'crm',
+    name: 'One report, three versions',
+    status: 'Audit done · repair next',
+    tag: 'In progress',
+    viz: 'stack',
+    answer: 'mine, repaired, rebuilt.',
+    line: "My original report, Claude's repair of it, and a dashboard Claude builds on the same model. Recorded, so the comparison can be watched.",
+    aiLabel: 'What the AI did',
+    me: ['Built the original report, and keep it untouched as the reference.', 'Set the rule: improvements are measured, not claimed.'],
+    ai: ['Audited the model through the live connection: 98 measures, 7 failing, 2 root causes.'],
+    not: ['The repair has not started.', 'The recording is still to come.'],
+  },
+  {
+    id: 'dbx',
+    name: 'Databricks Data Analyst',
+    status: 'Certified · 2026',
+    tag: 'Certified · 2026',
+    viz: 'seal',
+    answer: 'verify the credential.',
+    href: 'https://credentials.databricks.com/c63b7e6e-c357-4cc9-9085-9081abb1aeb8#acc.pgCm5w0a',
+    external: true,
+  },
 ];
 
 // ---------- Leadership ----------
-export const today = [
-  { t: 'A team of six', d: 'I lead six BI developers who deliver analytical solutions to the whole group.' },
-  { t: 'One platform', d: 'I own the Power BI platform, with its governance, security and scalability.' },
-  { t: 'Automation and AI', d: "I drive the adoption of automation and AI, to raise the business's performance." },
-  { t: 'Reporting strategy', d: "I shape it with the group's leadership, and keep the reporting compliant." },
-];
-
 // Only recommendations their authors approved. Excerpts are exact cuts, marked with an ellipsis.
 export const quotes = [
   {
-    featured: true,
     text: 'I praise his dedication and sense of ownership, as he took every task as his own and could always be counted on to see a problem through to the end. … Any team would be lucky to have him.',
     name: 'Daniela Gomez',
     role: "Operation Team Manager at HOP, and Wilson's manager",
