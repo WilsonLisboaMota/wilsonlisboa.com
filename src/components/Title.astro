@@ -1,0 +1,11 @@
+---
+// A chapter's title: one sentence, or two with the second one quieter. Each word sits in its own small window, so
+// that it can rise into place from behind its line as the title is scrolled into view (the scroll itself drives it;
+// see the inline style in index.astro). Without that, the title simply stands there.
+interface Props { id: string; a: string; b?: string }
+const { id, a, b } = Astro.props;
+let n = 0;
+const words = (s: string) => s.split(' ').map(w => ({ w, i: n++ }));
+const first = words(a), second = b ? words(b) : [];
+---
+<h2 id={id}>{first.map((x, k) => <>{k > 0 && ' '}<span class="wd"><span style={`--w:${x.i}`}>{x.w}</span></span></>)}{b && <>{' '}<em>{second.map((x, k) => <>{k > 0 && ' '}<span class="wd"><span style={`--w:${x.i}`}>{x.w}</span></span></>)}</em></>}</h2>

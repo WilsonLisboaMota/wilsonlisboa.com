@@ -175,7 +175,7 @@
 }
 
 /* ---------- AI: the relay, two lanes and one line passing between them ---------- */
-#work #ai{padding-bottom:clamp(56px,8vh,96px)}
+#work :is(#ai,.paper,.blue){padding-bottom:calc(clamp(56px,8vh,96px) + var(--sheet))}
 #work .relay{margin-top:clamp(36px,6vh,64px)}
 #work .rl{display:block;width:100%;height:auto;overflow:visible}
 #work .rl-t{display:none;max-width:360px}
@@ -378,17 +378,16 @@
   #work dialog.sheet{width:100%;max-width:100%;max-height:90vh;margin:auto 0 0;border-radius:22px 22px 0 0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 28px)}
 }
 
-/* ---------- where one colour ends and the next begins: the wall's fine lines seen edge-on, drifting, and between
-   them the chart's own line, which is the edge of the colour. The same at every change (see Seam.astro). ---------- */
-#work :is(.paper,.blue).sx{padding-top:0}
-#work .blue.sx{padding-bottom:0}
-#work .seam{height:clamp(56px,7vw,92px);overflow:hidden}
-#work .seam svg{display:block;width:200%;height:100%;animation:seam 70s linear infinite}
-#work .seam .sm-l{fill:none;stroke-width:1;stroke-opacity:.5;vector-effect:non-scaling-stroke}
-#work .seam .sm-c{fill:none;stroke:#1A9AE4;stroke-width:1.6;vector-effect:non-scaling-stroke}
-@keyframes seam{to{transform:translateX(-50%)}}
-#work :is(.paper,.blue) > .w{padding-top:clamp(44px,7vh,84px)}
-#work .blue > .w{padding-bottom:clamp(40px,6vh,72px)}
+/* ---------- one section over another: every change of colour is a sheet with rounded shoulders, laid over the
+   section before it. As it comes into view it is a little narrower, and settles to the full width (the scroll drives
+   that; see the inline style in index.astro). No lines, no waves: the same plain gesture every time. ---------- */
+#work{--sheet:clamp(26px,3.4vw,44px)}
+#work :is(.paper,.blue,.ct){border-radius:var(--sheet) var(--sheet) 0 0;margin-top:calc(var(--sheet) * -1);box-shadow:0 -24px 48px -32px rgba(0,0,0,.5)}
+#work .ct{background:var(--bg)}
+#work .glow{border-radius:inherit}
+/* Titles come in word by word: each word has its own small window and rises into it from below. */
+#work h2 .wd{display:inline-block;overflow:hidden;overflow:clip;vertical-align:top;padding-bottom:.16em;margin-bottom:-.16em}
+#work h2 .wd > span{display:inline-block}
 
 /* ---------- BI: what Wilson is today, then the path, then the proof ---------- */
 #work .today{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:26px 48px;margin-top:clamp(36px,6vh,64px);padding:clamp(22px,3vw,40px);border-radius:22px;background:#fff;box-shadow:0 30px 70px -44px rgba(13,27,36,.45),inset 0 0 0 1px var(--hair2);transform:perspective(1600px) rotateX(calc(var(--rx,0deg) * .28)) rotateY(calc(var(--ry,0deg) * .28));transition:transform .5s var(--ease),box-shadow .3s}
@@ -537,7 +536,7 @@
 #work .ft a{color:var(--fg2);text-decoration:none}
 #work .ft a:hover{color:var(--fg)}
 
-@media (max-width:699px){#work .sx{padding-block:60px 68px}#work :is(.paper,.blue).sx{padding-top:0}#work .blue.sx{padding-bottom:0}}
+@media (max-width:699px){#work .sx{padding-block:60px 68px}#work :is(#ai,.paper,.blue){padding-bottom:calc(60px + var(--sheet))}}
 @media (prefers-reduced-motion:reduce){
   #work *,#work *::before,#work *::after{animation:none!important}
   .js #work .bh,.js #work .bh.open,#work .card,#work .today,#work .arw,#work .vz,#work .vz *{transition:none}

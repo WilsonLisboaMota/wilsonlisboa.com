@@ -6,7 +6,7 @@ import { roles, todayTiles, proofs } from '../data/site';
 import Card from './Card.astro';
 import Sheet from './Sheet.astro';
 import Icon from './Icon.astro';
-import Seam from './Seam.astro';
+import Title from './Title.astro';
 
 // The BI drawing from the hero: tables below, lineage rising to the points of the chart above.
 const pts = [[64, 46], [150, 30], [236, 40]];
@@ -27,11 +27,10 @@ const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-
 ---
 <section class="sx paper" id="bi" data-sec data-glow aria-labelledby="bi-t">
   <div class="glow" aria-hidden="true"><svg><rect width="100%" height="100%" fill="url(#wl-paper)" /></svg></div>
-  <Seam fill="#021C2A" side="above" up="#8FD0FF" down="#00486F" />
   <div class="w">
     <div class="hd">
       <p class="meta kick">Business Intelligence</p>
-      <h2 id="bi-t">Above: the chart. <em>Below: the platform.</em></h2>
+      <Title id="bi-t" a="Data you can trust." b="Built to be audited." />
       <svg class="sig" viewBox="0 0 320 200" aria-hidden="true" set:html={sig}></svg>
       <p class="ld">Seven years in regulated environments, from analyst to manager.</p>
     </div>

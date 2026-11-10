@@ -503,7 +503,7 @@ function init() {
         float isHot = 1.0 - step(0.5, abs(1.0 - uHot));
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
         float ends = smoothstep(0.0, 0.08, t) * smoothstep(0.97, 0.9, t);
-        float seen = (0.34 + 0.4 * t) * ends * dim * (1.0 - 0.7 * uEnergy.y) * (1.0 - 0.45 * uWordP);
+        float seen = (0.34 + 0.4 * t) * ends * dim * (1.0 - 0.7 * uEnergy.y) * (1.0 - 0.8 * uWordP);
         vec4 wp = modelMatrix * vec4(p, 1.0);
         float dc = distance(wp.xyz, cameraPosition);
         vA = mix(glimpse, seen, uBehind) * nearCam(wp.xyz);
@@ -955,6 +955,8 @@ function init() {
   // AI_OUT: how far the word stands back from the point, in its own heights, so that its lines have room to run
   // (wide screens, tall screens).
   const AI_AT = 0.28, AI_FIT = 1.0, AI_UP = 0.25, AI_OUT = [1.15, 0.7];
+  // How often a character of the standing word leaves it for the point: the chance, for each one, in a second.
+  const AI_LEAVE = 0.09;
   const PLACE = {
     wide: [{ dx: -2.45, dy: 0.58, h: 0.11 }, { dx: -1.9, dy: -0.42, h: 0.16 }, { dx: 0.5, dy: 2.45, h: 0.066 }],
     tall: [{ dx: 0.2, dy: 2.3, h: 0.12 }, { dx: -0.92, dy: -1.4, h: 0.15 }, { dx: 0.5, dy: 4.4, h: 0.078 }],
@@ -1181,6 +1183,7 @@ function init() {
     w.ph = 'out'; w.t0 = now;
     w.pts.forEach(p => {
       const r = Math.random();
+      p.lv = 0;
       if (w.k === 1) { p.d0 = now + (1 - p.near) * 0.9 + r * 0.45; p.hopT = 0.18 + Math.min(p.hop, 140) * 0.006; p.ride = 0.65 + (1 - p.ts) * 1.3 + Math.random() * 0.3; }
       if (w.k === 0) { p.d0 = now + (1 - p.near) * 0.7 + r * 0.25; p.hopT = 0.15 + Math.min(p.hop, 160) * 0.004; p.ride = 0.8 + (1 - p.ls) * 0.9 + Math.random() * 0.25; }
     });
@@ -1290,6 +1293,27 @@ function init() {
             for (const q of w.bands) if (p.my >= q.y0 && p.my <= q.y0 + q.h) { b = q; break; }
             // Energised, the edge brightens and the inside steps back, so the mesh shows.
             const a = p.edge ? p.a + (1 - p.a) * 0.4 * w.E : p.a * (1 - 0.45 * w.E);
+            // The word is rooted (Wilson, 10 November 2026): while it stands, its own characters keep leaving it. One
+            // steps onto its nearest line and rides it into the point, and another grows back where it stood.
+            if (w.ph === 'hold' && !p.lv && Math.random() < AI_LEAVE * (1 + 1.5 * w.E) * dt) { p.lv = now; p.lr = 0.75 + (1 - p.ts) * 1.2 + Math.random() * 0.3; p.lc = p.ch; }
+            if (p.lv) {
+              const e = now - p.lv, hop = 0.22, cv = aiCurves[p.ci], trip = hop + p.lr;
+              if (e >= trip || !cv) { p.lv = 0; p.ch = (Math.random() * 64) | 0; }
+              else {
+                // The one that leaves keeps the look it had, and shrinks as it nears the point.
+                if (e < hop) {
+                  const k3 = 1 - (1 - e / hop) ** 3, q = bez3(cv, p.ts);
+                  put(w.off + j, lerp(p.b[0], q[0] + o.x * p.ts, k3), lerp(p.b[1], q[1] + o.y * p.ts, k3), lerp(p.b[2], q[2], k3), (a + 0.2 * k3) * fade, p.size, p.lc, 0);
+                } else {
+                  const uu = (e - hop) / p.lr, tt = p.ts + (1 - p.ts) * uu ** 1.6, q = bez3(cv, tt), sh = (tt - p.ts) / (1 - p.ts);
+                  put(w.off + j, q[0] + o.x * tt, q[1] + o.y * tt, q[2], (a + 0.25) * (1 - uu ** 6) * fade, p.size * (1 - 0.7 * sh), p.lc, 0);
+                }
+                // The one that grows back: nothing for a moment, then it flickers in, whole before the other arrives.
+                const g = clamp((e - 0.2 * trip) / (0.4 * trip), 0, 1);
+                if (g > 0) at(w.off + N + j, p, 0, 0, a * g * fade, p.size, g < 1 ? (Math.random() * 64) | 0 : p.ch, 0);
+                return;
+              }
+            }
             at(w.off + j, p, (jit + (b ? b.dx : 0)) * f.kw, 0, a * fade, p.size, b ? (Math.random() * 64) | 0 : p.ch, 0);
             if (b) at(w.off + N + j, p, (b.dx * 1.4 + 3) * f.kw, 0, 0.55 * fade, p.size, p.ch, 1);
           });
@@ -1303,7 +1327,7 @@ function init() {
             if (e < p.hopT) {
               left++;
               const k3 = 1 - (1 - e / p.hopT) ** 3, q = bez3(cv, p.ts);
-              put(w.off + j, lerp(p.b[0], q[0] + o.x, k3), lerp(p.b[1], q[1] + o.y, k3), lerp(p.b[2], q[2], k3), (p.a + 0.2 * k3) * fade, p.size, p.ch, 0);
+              put(w.off + j, lerp(p.b[0], q[0] + o.x * p.ts, k3), lerp(p.b[1], q[1] + o.y * p.ts, k3), lerp(p.b[2], q[2], k3), (p.a + 0.2 * k3) * fade, p.size, p.ch, 0);
               return;
             }
             const uu = (e - p.hopT) / p.ride;
@@ -1311,7 +1335,7 @@ function init() {
             left++;
             const tt = p.ts + (1 - p.ts) * uu ** 1.8, q = bez3(cv, tt), sh = (tt - p.ts) / (1 - p.ts);
             uniforms.uHeat.value[p.ci] = Math.min(1, uniforms.uHeat.value[p.ci] + 2.1 * dt);
-            put(w.off + j, q[0] + o.x, q[1] + o.y, q[2], (p.a + 0.25) * (1 - uu ** 6) * fade, p.size * (1 - 0.79 * sh), p.ch, 0);
+            put(w.off + j, q[0] + o.x * tt, q[1] + o.y * tt, q[2], (p.a + 0.25) * (1 - uu ** 6) * fade, p.size * (1 - 0.79 * sh), p.ch, 0);
           });
           if (!w.moment && gone > 0.75 * N) { w.moment = true; moment(1, now, false); handedOver(w); }
           if (!left) wordDone(w, now);

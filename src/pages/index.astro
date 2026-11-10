@@ -16,6 +16,18 @@ import '../styles/after.css';
 
     <div id="work">
       <WallDefs />
+      <!-- What the scroll itself drives. Kept out of the stylesheet on purpose: the minifier folds animation-timeline
+           into the animation shorthand, which is invalid. A browser without scroll-driven animations shows the page still. -->
+      <style is:inline>
+        @keyframes sheet-in { from { transform: scale(.955); border-radius: 60px 60px 0 0; } to { transform: none; } }
+        @keyframes wd-in { from { translate: 0 calc(110% + var(--w, 0) * 45%); } to { translate: 0 0; } }
+        @supports (animation-timeline: view()) {
+          @media (prefers-reduced-motion: no-preference) {
+            #work :is(.paper, .blue, .ct) { transform-origin: 50% 0; animation-name: sheet-in; animation-duration: 1ms; animation-timing-function: ease-out; animation-fill-mode: both; animation-timeline: view(); animation-range-start: entry 0%; animation-range-end: entry 40%; }
+            #work h2 .wd > span { animation-name: wd-in; animation-duration: 1ms; animation-timing-function: cubic-bezier(.2, .7, .2, 1); animation-fill-mode: both; animation-timeline: view(); animation-range-start: entry 0%; animation-range-end: cover 28%; }
+          }
+        }
+      </style>
       <Dock />
       <Now />
       <AiChapter />

@@ -4,7 +4,7 @@
 import { relay, projects } from '../data/site';
 import Card from './Card.astro';
 import Sheet from './Sheet.astro';
-import Viz from './Viz.astro';
+import Title from './Title.astro';
 
 // The AI drawing from the hero: about 44 curves that start scattered and converge on one point.
 const fx = 268, fy = 112;
@@ -53,7 +53,7 @@ const wide = track(true), tall = track(false);
   <div class="w">
     <div class="hd">
       <p class="meta kick">Artificial Intelligence</p>
-      <h2 id="ai-t">AI brings speed. <em>We bring judgement.</em></h2>
+      <Title id="ai-t" a="AI brings speed." b="We bring judgement." />
       <svg class="sig" viewBox="0 0 320 200" aria-hidden="true" set:html={sig}></svg>
     </div>
 
@@ -83,11 +83,6 @@ const wide = track(true), tall = track(false);
     <h3 class="sub">Four projects</h3>
     <div class="cards" data-seq>
       {projects.map(p => <Card w={p} />)}
-      <a class="card wide" href="/built-with-ai/" data-tilt="soft" data-play>
-        <span class="card-v"><Viz kind="wall" /></span>
-        <span class="card-b"><span class="card-n">And this site</span><span class="card-a">built with Claude, every decision on record.</span></span>
-        <svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
     </div>
   </div>
   {projects.map(p => <Sheet w={p} />)}
