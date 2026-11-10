@@ -1,26 +1,38 @@
 ---
-// The first thing on the far side: who, the CV, and three numbers, each a way in.
+// The first thing on the far side: who, the CV, and three numbers, each a small button that leads somewhere.
+// Each number carries its own count as marks (seven rising bars, six dots, four dots), so it reads without the words.
 import { person, projects } from '../data/site';
 import Icon from './Icon.astro';
 
 const kpis = [
-  { v: 7, l: 'years in Business Intelligence', href: '#trajectory' },
-  { v: 6, l: 'BI developers in my team', href: '#leadership' },
-  { v: projects.length, l: 'AI projects, from live to alpha', href: '#ai' },
+  { v: 7, l: 'years in Business Intelligence', href: '#trajectory', m: 'm-rise' },
+  { v: 6, l: 'BI developers in my team', href: '#leadership', m: 'm-dots' },
+  { v: projects.length, l: 'AI projects, from live to alpha', href: '#ai', m: 'm-dots m-first' },
 ];
 ---
-<section class="now w" id="now" data-sec aria-label="Now">
-  <div class="now-top">
-    <div class="now-id">
-      <img src="/cv/photo.jpg" alt="Wilson Mota" width="88" height="88" decoding="async">
-      <p><b>{person.name}</b><span>{person.role}</span><span>{person.place}</span></p>
-    </div>
-    <div class="now-cv">
+<section class="now" id="now" data-sec data-glow aria-label="Now">
+  <div class="glow" aria-hidden="true"><svg><rect width="100%" height="100%" fill="url(#wl-dark)" /></svg></div>
+  <div class="w">
+    <div class="now-top">
+      <div class="now-id">
+        <img src="/cv/photo.jpg" alt="Wilson Mota" width="88" height="88" decoding="async">
+        <p><b>{person.name}</b><span>{person.role}</span><span>{person.place}</span></p>
+      </div>
       <a class="cvbtn" href={person.cv}><span>Open the CV</span><Icon name="star" /></a>
-      <a class="pdf" href={person.pdf} aria-label="Download the CV as a PDF"><Icon name="down" /><span>PDF</span></a>
     </div>
+    <ul class="kpi" data-seq>
+      {kpis.map(k => (
+        <li>
+          <a href={k.href} data-play>
+            <b data-count={k.v}>{k.v}</b>
+            <span class="k-t">
+              <span class="k-l">{k.l}</span>
+              <span class={`k-m ${k.m}`} aria-hidden="true">{Array.from({ length: k.v }, (_, i) => <i style={`--k:${i}`}></i>)}</span>
+            </span>
+            <Icon name="arrow" />
+          </a>
+        </li>
+      ))}
+    </ul>
   </div>
-  <ul class="kpi">
-    {kpis.map(k => <li><a href={k.href}><b data-count={k.v}>{k.v}</b><span>{k.l}</span><Icon name="arrow" /></a></li>)}
-  </ul>
 </section>

@@ -224,22 +224,35 @@ export const proofs: Work[] = [
 
 // ---------- Leadership ----------
 // Only recommendations their authors approved. Excerpts are exact cuts, marked with an ellipsis.
+// cut: the few words on the card, an exact cut of the excerpt. text: the excerpt, shown when the card is opened.
 export const quotes = [
   {
+    id: 'dg',
+    cut: 'Any team would be lucky to have him.',
     text: 'I praise his dedication and sense of ownership, as he took every task as his own and could always be counted on to see a problem through to the end. … Any team would be lucky to have him.',
     name: 'Daniela Gomez',
+    job: 'Operation Team Manager',
+    org: "HOP · Wilson's manager",
     role: "Operation Team Manager at HOP, and Wilson's manager",
   },
   {
+    id: 'jm',
+    cut: '…helped us gain clarity of strategic objectives…',
     text: 'Wilson is a hard-working, honest and intelligent person always willing to help the team. … He was able to understand the business needs and helped us gain clarity of strategic objectives…',
     name: 'José Matos',
+    job: 'Program Manager',
+    org: 'Scores & Levels · same team',
     role: 'Program Manager, on the same team at Scores & Levels',
     href: 'https://www.linkedin.com/in/wilson-lisboa-mota/',
     a: 'On LinkedIn',
   },
   {
+    id: 'rt',
+    cut: '…how well he bridged business and technology.',
     text: 'From the IT side, what stood out was how well he bridged business and technology. … He was ambitious, yet careful with data, reliable and easy to work with.',
     name: 'Rodrigo Taveira',
+    job: 'Head of IT',
+    org: 'Scores & Levels',
     role: 'Head of IT at Scores & Levels',
   },
 ];

@@ -1,9 +1,11 @@
-// Below the hero: small behaviours only. Every one of them adds or removes a class or an attribute, or opens a
-// native dialog; none draws, places things by measuring, or runs on every frame. With this script missing the page
-// still reads: the path is open, the three recommendations are all visible, and each card with a page is a link.
+// Below the hero: small behaviours only. Every one of them adds or removes a class or an attribute, sets a custom
+// property when the pointer moves, or opens a native dialog; none draws, or runs on every frame. With this script
+// missing the page still reads: the path is open, every card shows its few words, and each card with a page is a link.
 const root = document.documentElement;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 // ---------- panels that open (the path) ----------
 const pairs = $$('#work .go-b').map(btn => ({ btn, panel: document.getElementById(btn.getAttribute('aria-controls')) })).filter(p => p.panel);
@@ -34,7 +36,7 @@ $$('#work [data-sheet]').forEach(card => {
   // A click on the dimmed page around the sheet closes it.
   sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
 });
-if (!reduced && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+if (!reduced && fine) {
   $$('#work [data-tilt]').forEach(card => {
     card.addEventListener('pointermove', e => {
       const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
@@ -48,29 +50,63 @@ if (!reduced && matchMedia('(hover: hover) and (pointer: fine)').matches) {
   });
 }
 
-// ---------- what colleagues say: one at a time, taking turns ----------
-$$('#work [data-rot]').forEach(rot => {
-  const quotes = $$('.q', rot), tabs = $$('.q-tabs button', rot);
-  let at = 0, timer = 0;
-  const show = i => {
-    at = i;
-    quotes.forEach((q, k) => q.classList.toggle('on', k === i));
-    tabs.forEach((t, k) => t.setAttribute('aria-selected', String(k === i)));
+// ---------- the wall behind the page: it shows where the visitor points ----------
+// Each section carries the hero's fine lines behind its content, hidden. A mouse lights them round itself; a finger
+// lights them where it lands, for a moment. Only the place of the light is set here; the rest is CSS.
+if (!reduced) {
+  let lit = null, out = 0;
+  const light = (sec, e) => {
+    const r = sec.getBoundingClientRect();
+    sec.style.setProperty('--lx', `${Math.round(e.clientX - r.left)}px`);
+    sec.style.setProperty('--ly', `${Math.round(e.clientY - r.top)}px`);
+    if (lit !== sec) { if (lit) lit.classList.remove('lit'); lit = sec; sec.classList.add('lit'); }
   };
-  const play = () => {
-    clearTimeout(timer);
-    if (reduced) return;
-    // Restart the selected tab's timing line, then move on when it is full.
-    rot.classList.remove('auto'); void rot.offsetWidth; rot.classList.add('auto');
-    timer = setTimeout(() => { show((at + 1) % quotes.length); play(); }, 8000);
+  const dark = () => { if (lit) lit.classList.remove('lit'); lit = null; };
+  $$('#work [data-glow]').forEach(sec => {
+    sec.addEventListener('pointermove', e => { if (e.pointerType !== 'touch') light(sec, e); });
+    sec.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch') dark(); });
+    sec.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { light(sec, e); clearTimeout(out); out = setTimeout(dark, 1800); } });
+  });
+}
+
+// ---------- leadership: the formation follows the pointer ----------
+// The one in front flies just ahead of the pointer; the others keep their places behind it, turned the same way, and
+// each takes a little longer to get there than the one before (the timing is in the CSS). Left alone, they go home.
+const aro = document.querySelector('#work .aro');
+if (aro && !reduced) {
+  const sec = aro.closest('section'), birds = $$('.arw', aro);
+  const at = birds.map(b => [parseFloat(b.style.getPropertyValue('--hx')), parseFloat(b.style.getPropertyValue('--hy'))]);
+  let hd = 0, from = null, stamp = -1e9, rest = 0;
+  const follow = e => {
+    if (!aro.classList.contains('drawn') || e.timeStamp - stamp < 40) return;
+    stamp = e.timeStamp;
+    const box = aro.getBoundingClientRect(), s = sec.getBoundingClientRect();
+    const x = clamp(e.clientX, s.left + 24, s.right - 24), y = clamp(e.clientY, s.top + 24, s.bottom - 24);
+    if (!from) from = [x, y];
+    const dx = x - from[0], dy = y - from[1];
+    // The heading turns the short way round, and only once the pointer has really moved.
+    if (dx * dx + dy * dy > 196) { hd += (((Math.atan2(dy, dx) * 180 / Math.PI + 90 - hd) % 360) + 540) % 360 - 180; from = [x, y]; }
+    const r = hd * Math.PI / 180, c = Math.cos(r), n = Math.sin(r);
+    const lx = x - box.left + n * 34, ly = y - box.top - c * 34;
+    birds.forEach((b, i) => {
+      const ox = at[i][0] - at[0][0], oy = at[i][1] - at[0][1];
+      b.style.setProperty('--px', `${(lx + ox * c - oy * n).toFixed(1)}px`);
+      b.style.setProperty('--py', `${(ly + ox * n + oy * c).toFixed(1)}px`);
+      b.style.setProperty('--pr', `${hd.toFixed(1)}deg`);
+    });
+    aro.classList.add('chase');
   };
-  const pause = () => { clearTimeout(timer); rot.classList.remove('auto'); };
-  tabs.forEach((t, i) => t.addEventListener('click', () => { show(i); play(); }));
-  rot.addEventListener('pointerenter', pause);
-  rot.addEventListener('pointerleave', () => { if (rot.classList.contains('seen')) play(); });
-  rot.addEventListener('focusin', pause);
-  rot._play = play;
-});
+  const goHome = () => {
+    from = null;
+    hd = Math.round(hd / 360) * 360;
+    birds.forEach(b => { b.style.removeProperty('--px'); b.style.removeProperty('--py'); b.style.setProperty('--pr', `${hd}deg`); });
+    clearTimeout(rest);
+    rest = setTimeout(() => aro.classList.remove('chase'), 1500);
+  };
+  sec.addEventListener('pointermove', e => { if (e.pointerType !== 'touch') { clearTimeout(rest); follow(e); } });
+  sec.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch') goHome(); });
+  sec.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { stamp = -1e9; follow(e); clearTimeout(rest); rest = setTimeout(goHome, 2600); } });
+}
 
 // ---------- things that start when they are seen ----------
 const countUp = el => {
@@ -87,16 +123,30 @@ if ('IntersectionObserver' in window) {
   const live = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('live', e.isIntersecting)), { rootMargin: '60px 0px' });
   $$('#work .card, #work [data-live], #work .ct').forEach(el => live.observe(el));
 
-  // Once, the first time each is seen: drawings draw themselves, numbers count up, the quotes start their turns.
+  // Once, the first time each is seen: drawings draw themselves, numbers count up, groups come in one after another.
   const once = new IntersectionObserver((es, io) => es.forEach(e => {
     if (!e.isIntersecting) return;
     const el = e.target;
     io.unobserve(el);
     if (el.matches('.sig, .aro')) el.classList.add('drawn');
     else if (el.dataset.count) countUp(el);
-    else if (el._play) { el.classList.add('seen'); el._play(); }
   }), { threshold: 0.5 });
-  $$('#work .sig, #work .aro, #work [data-count], #work [data-rot]').forEach(el => once.observe(el));
+  $$('#work .sig, #work .aro, #work [data-count]').forEach(el => once.observe(el));
+  const seq = new IntersectionObserver((es, io) => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target;
+    io.unobserve(el);
+    el.classList.add('seen');
+    // Once everything is in, the entrance steps aside, so that it never plays again when another animation ends.
+    setTimeout(() => el.classList.add('sat'), 1600);
+  }));
+  $$('#work [data-seq]').forEach(el => seq.observe(el));
+
+  // Without a mouse nothing can be pointed at: whatever is in the middle of the screen plays instead.
+  if (!fine && !reduced) {
+    const mid = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('play', e.isIntersecting)), { rootMargin: '-36% 0px -36% 0px' });
+    $$('#work [data-play]').forEach(el => mid.observe(el));
+  }
 
   // The dock shows which section is in front.
   const links = new Map($$('#work .dock-nav a').map(a => [a.getAttribute('href').slice(1), a]));
@@ -111,6 +161,7 @@ if ('IntersectionObserver' in window) {
 } else {
   // No observer: let the drawings run and stay drawn.
   $$('#work .card, #work [data-live], #work .ct').forEach(el => el.classList.add('live'));
+  $$('#work .sig, #work .aro').forEach(el => el.classList.add('drawn'));
 }
 
 // Lengths for the drawings that draw themselves.

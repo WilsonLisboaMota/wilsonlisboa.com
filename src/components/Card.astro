@@ -1,6 +1,7 @@
 ---
-// One piece of work as a card: a moving drawing, a status, a name and a few words. It tilts under a mouse.
-// Most cards open a sheet with what is behind them; a card marked external leaves the site instead.
+// One piece of work as a card: a moving drawing, a status, a name and a few words. It tilts under a mouse, and its
+// drawing plays when pointed at. Most cards open a sheet with what is behind them; a card marked external leaves the
+// site instead.
 import type { Work } from '../data/site';
 import Viz from './Viz.astro';
 
@@ -10,7 +11,7 @@ const arrow = '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M
 const out = '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 17 7M9 7h8v8"/></svg>';
 ---
 {w.external ? (
-  <a class="card" href={w.href} rel="noopener" data-tilt>
+  <a class="card" href={w.href} rel="noopener" data-tilt data-play>
     <span class="card-v"><Viz kind={w.viz} /></span>
     <span class="card-b">
       <span class:list={['st', { live: w.live }]}>{w.tag}</span>
@@ -20,7 +21,7 @@ const out = '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 
     <Fragment set:html={out} />
   </a>
 ) : (
-  <button class="card" type="button" data-sheet={`sheet-${w.id}`} data-tilt aria-haspopup="dialog">
+  <button class="card" type="button" data-sheet={`sheet-${w.id}`} data-tilt data-play aria-haspopup="dialog">
     <span class="card-v"><Viz kind={w.viz} /></span>
     <span class="card-b">
       <span class:list={['st', { live: w.live }]}>{w.tag}</span>

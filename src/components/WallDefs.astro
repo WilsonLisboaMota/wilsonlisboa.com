@@ -1,0 +1,23 @@
+---
+// The wall behind the page: the hero's fine lines, drawn once as a tile that repeats, in the three inks the page uses.
+// Each section shows it only round the pointer (see .glow in after.css and the light in after.js).
+const TW = 1440, TH = 220, N = 16;
+const f = (v: number) => v.toFixed(1);
+let lines = '';
+for (let i = 0; i < N; i++) {
+  // Each line repeats every tile across, and the phases come round after N lines, so the tile repeats down as well.
+  const y = (i + 0.5) * TH / N, ph = i * 2 * Math.PI / N;
+  let d = '';
+  for (let x = 0; x <= TW; x += 40) d += `${x ? 'L' : 'M'}${x} ${f(y + 4.2 * Math.sin(ph + x / TW * Math.PI * 4) + 2.2 * Math.sin(ph * 2 + x / TW * Math.PI * 6))}`;
+  lines += `<path d="${d}"/>`;
+}
+const inks = { dark: '#8FD0FF', paper: '#00486F', blue: '#CFEAFF' };
+---
+<svg class="wl-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="wl-lines" fill="none" stroke-width="1" set:html={lines} />
+    {Object.entries(inks).map(([k, c]) => (
+      <pattern id={`wl-${k}`} width={TW} height={TH} patternUnits="userSpaceOnUse"><use href="#wl-lines" stroke={c} /></pattern>
+    ))}
+  </defs>
+</svg>

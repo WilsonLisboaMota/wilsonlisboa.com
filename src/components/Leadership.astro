@@ -1,49 +1,61 @@
 ---
-// Leadership, on its own colour: seven arrowheads that fall in behind one, then what colleagues say, one at a time.
+// Leadership, on its own colour. The hero's formation, in the hero's own strokes: seven arrowheads that fall in behind
+// one, then follow the pointer as one (see the flock in after.js). Below, what colleagues say, as three cards side by
+// side; each opens the longer excerpt.
 import { quotes } from '../data/site';
+import Icon from './Icon.astro';
 
-// The drawing: seven arrowheads start scattered, each pointing its own way, and turn to fly together behind the
-// first one. Where they end is the formation in the hero. No tails: only heads, and one direction.
+// Where each arrowhead rests, as in the hero seen from the far side: one in front at the top, six behind in two wings.
+// They start scattered, each pointing its own way. Positions are in pixels inside the formation's box (240 by 130).
 let seed = 19;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-const end: [number, number][] = [[262, 100]];
-for (let k = 1; k <= 3; k++) { end.push([262 - 58 * k, 100 - 28 * k]); end.push([262 - 58 * k, 100 + 28 * k]); }
-const arrows = end.map(([x, y], i) => ({
+const home: [number, number][] = [[120, 12]];
+for (let k = 1; k <= 3; k++) { home.push([120 - 36 * k, 12 + 34 * k]); home.push([120 + 36 * k, 12 + 34 * k]); }
+const birds = home.map(([x, y], i) => ({
   x, y,
-  x0: Math.round(30 + rnd() * 250), y0: Math.round(24 + rnd() * 152), r0: Math.round(rnd() * 300 - 150),
-  dl: (i ? 0.25 + rnd() * 0.7 : 0).toFixed(2),
-  lead: i === 0,
+  x0: Math.round(12 + rnd() * 216), y0: Math.round(6 + rnd() * 112), r0: Math.round(rnd() * 300 - 150),
+  dl: (i ? 0.2 + rnd() * 0.6 : 0).toFixed(2),
 }));
+const initials = (n: string) => n.split(' ').map(s => s[0]).join('').slice(0, 2);
 ---
-<section class="sx blue" id="leadership" data-sec aria-labelledby="ld-t">
+<section class="sx blue" id="leadership" data-sec data-glow aria-labelledby="ld-t">
+  <div class="glow" aria-hidden="true"><svg><rect width="100%" height="100%" fill="url(#wl-blue)" /></svg></div>
   <div class="w">
     <div class="hd">
       <p class="meta kick">Leadership</p>
       <h2 id="ld-t">Analyst by trade. <em>Manager by choice.</em></h2>
-      <svg class="aro" viewBox="0 0 320 200" aria-hidden="true">
-        <g class="fly">
-          {arrows.map(a => (
-            <g class:list={['arw', { lead: a.lead }]} style={`--x:${a.x}px;--y:${a.y}px;--x0:${a.x0}px;--y0:${a.y0}px;--r0:${a.r0}deg;--dl:${a.dl}s`}>
-              <path d={a.lead ? 'M-13 -11 L11 0 L-13 11 L-6 0 Z' : 'M-10 -8.500 L8 0 L-10 8.500 L-5 0 Z'} />
-            </g>
+      <div class="aro" aria-hidden="true">
+        <div class="fly">
+          {birds.map((b, i) => (
+            <svg class:list={['arw', { lead: i === 0 }]} viewBox="-14 -4 28 26" style={`--hx:${b.x}px;--hy:${b.y}px;--x0:${b.x0}px;--y0:${b.y0}px;--r0:${b.r0}deg;--dl:${b.dl}s;--i:${i}`}>
+              <path class="o" d="M-11 15 0 0 11 15" /><path class="n" d="M-6 8.2 0 0 6 8.2" /><circle r="2" />
+            </svg>
           ))}
-        </g>
-      </svg>
+        </div>
+      </div>
       <p class="ld">From BI analyst in 2019 to leading a team of six BI developers today.</p>
     </div>
 
-    <div class="qr" data-rot>
-      <div class="q-stage">
-        {quotes.map((q, i) => (
-          <figure class:list={['q', { on: i === 0 }]} data-i={i}>
-            <blockquote><p>“{q.text}”</p></blockquote>
-            <figcaption class="who"><b>{q.name}</b>{q.role}{q.href && <> · <a class="lk" href={q.href} rel="noopener">{q.a}</a></>}</figcaption>
-          </figure>
-        ))}
-      </div>
-      <div class="q-tabs" role="tablist" aria-label="Who says it">
-        {quotes.map((q, i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-i={i}><i></i>{q.name}</button>)}
-      </div>
+    <div class="cards three qs" data-seq>
+      {quotes.map(q => (
+        <button class="card qc" type="button" data-sheet={`sheet-q-${q.id}`} data-tilt data-play aria-haspopup="dialog">
+          <Icon name="quote" />
+          <span class="qc-t">{q.cut}</span>
+          <span class="qc-w">
+            <span class="av">{initials(q.name)}</span>
+            <span class="qc-n"><b>{q.name}</b><span>{q.job}</span><span>{q.org}</span></span>
+          </span>
+          <svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      ))}
     </div>
   </div>
+  {quotes.map(q => (
+    <dialog class="sheet qsh" id={`sheet-q-${q.id}`} aria-labelledby={`qh-${q.id}`}>
+      <form method="dialog"><button class="x" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
+      <Icon name="quote" />
+      <blockquote><p>“{q.text}”</p></blockquote>
+      <p class="who" id={`qh-${q.id}`}><b>{q.name}</b>{q.role}{q.href && <> · <a class="lk" href={q.href} rel="noopener">{q.a}</a></>}</p>
+    </dialog>
+  ))}
 </section>

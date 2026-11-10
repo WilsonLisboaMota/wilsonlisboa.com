@@ -1,18 +1,20 @@
 ---
 // Line icons, drawn in the same thin stroke as the rest of the site. Decorative: the text beside each says what it is.
-interface Props { name: 'team' | 'layers' | 'spark' | 'compass' | 'mail' | 'in' | 'doc' | 'down' | 'star' | 'arrow' }
+// Some are drawn in parts (p0, p1, …) so that a part can move on its own: layers that come apart, a needle that turns.
+interface Props { name: 'team' | 'layers' | 'spark' | 'compass' | 'mail' | 'in' | 'doc' | 'down' | 'star' | 'arrow' | 'quote' }
 const { name } = Astro.props;
-const d: Record<string, string> = {
-  team: 'M8.5 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 19c.6-3 2.7-4.6 5.5-4.6S13.4 16 14 19M16.2 10.8a2.6 2.6 0 1 0-.9-5M16.8 14.5c2.2.4 3.7 1.9 4.2 4.5',
-  layers: 'M12 3.5 3.5 8 12 12.5 20.5 8 12 3.5ZM3.5 12 12 16.5 20.5 12M3.5 16 12 20.5 20.5 16',
-  spark: 'M12 3v4.5M12 16.5V21M3 12h4.5M16.5 12H21M5.8 5.8 8.9 8.9M15.1 15.1l3.1 3.1M18.2 5.8l-3.1 3.1M8.9 15.1l-3.1 3.1M12 9.8a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4Z',
-  compass: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM15.6 8.4l-2 5.2-5.2 2 2-5.2 5.2-2Z',
-  mail: 'M3.5 6.5h17v11h-17zM3.5 7.2 12 13l8.5-5.8',
-  in: 'M5.5 9.5V19M5.5 5.4v.2M10 19V9.5M10 13.2c.2-2.4 1.6-3.8 3.6-3.8 2.2 0 3.4 1.4 3.4 4V19',
-  doc: 'M7 3.5h7l4 4v13H7zM14 3.5v4h4M12 11v6M9.6 14.8 12 17.2l2.4-2.4',
+const d: Record<string, string | string[]> = {
+  team: ['M8.5 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 19c.6-3 2.7-4.6 5.5-4.6S13.4 16 14 19', 'M16.2 10.8a2.6 2.6 0 1 0-.9-5M16.8 14.5c2.2.4 3.7 1.9 4.2 4.5'],
+  layers: ['M12 3.5 3.5 8 12 12.5 20.5 8 12 3.5Z', 'M3.5 12 12 16.5 20.5 12', 'M3.5 16 12 20.5 20.5 16'],
+  spark: ['M12 3v4.5M12 16.5V21M3 12h4.5M16.5 12H21M5.8 5.8 8.9 8.9M15.1 15.1l3.1 3.1M18.2 5.8l-3.1 3.1M8.9 15.1l-3.1 3.1', 'M12 9.8a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4Z'],
+  compass: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z', 'M15.6 8.4l-2 5.2-5.2 2 2-5.2 5.2-2Z'],
+  mail: ['M3.5 6.5h17v11h-17z', 'M3.5 7.2 12 13l8.5-5.8'],
+  in: ['M5.5 9.5V19M10 19V9.5M10 13.2c.2-2.4 1.6-3.8 3.6-3.8 2.2 0 3.4 1.4 3.4 4V19', 'M5.5 5.4v.2'],
+  doc: ['M7 3.5h7l4 4v13H7zM14 3.5v4h4', 'M10 12h5', 'M10 15.5h5'],
   down: 'M12 4v11M7.5 11 12 15.5 16.5 11M5 19.5h14',
-  star: 'M12 2.5c.5 5 2.5 7 7.5 7.5-5 .5-7 2.500-7.5 7.500-.5-5-2.500-7-7.500-7.500 5-.5 7-2.500 7.500-7.500Z',
+  star: 'M12 2.5c.5 5 2.5 7 7.5 7.5-5 .5-7 2.5-7.5 7.5-.5-5-2.5-7-7.5-7.5 5-.5 7-2.5 7.5-7.5Z',
   arrow: 'M5 12h14M13 6l6 6-6 6',
+  quote: ['M9.5 7C6.6 8.1 5 10.3 5 13.6V17h4.6v-4.5H7.3c.1-1.6 1-2.7 2.7-3.4L9.5 7Z', 'M18.5 7c-2.9 1.1-4.5 3.3-4.5 6.6V17h4.6v-4.5h-2.3c.1-1.6 1-2.7 2.7-3.4L18.5 7Z'],
 };
 ---
-<svg class={`ic ic-${name}`} viewBox="0 0 24 24" aria-hidden="true"><path d={d[name]} /></svg>
+<svg class={`ic ic-${name}`} viewBox="0 0 24 24" aria-hidden="true">{[d[name]].flat().map((p, i) => <path class={`p${i}`} d={p} />)}</svg>

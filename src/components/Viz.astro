@@ -1,6 +1,7 @@
 ---
 // The small moving drawing on each card: one per piece of work, each showing what that piece does.
-// All of them move with CSS only, and only while their card is on screen (see .live in after.css).
+// All of them move with CSS only, and only while their card is on screen (see .live in after.css). Pointed at
+// (or, on a phone, in the middle of the screen) each one does its own thing faster: see "play" in after.css.
 import { sure } from '../data/site';
 
 interface Props { kind: 'bars' | 'lapse' | 'radar' | 'orbit' | 'term' | 'stack' | 'seal' | 'wall' }
@@ -10,8 +11,12 @@ const f = (v: number) => v.toFixed(1);
 // Radar: where each blip sits, by angle (clockwise from the right) and distance; it lights as the sweep passes it.
 const blips = [[40, 60], [115, 38], [200, 70], [250, 30], [320, 50]].map(([a, r]) => ({ x: 160 + r * Math.cos(a * Math.PI / 180), y: 92 + r * Math.sin(a * Math.PI / 180), d: a / 360 * 4 }));
 const six = [0, 1, 2, 3, 4, 5].map(k => ({ x: 160 + 62 * Math.cos(k * Math.PI / 3), y: 90 + 62 * Math.sin(k * Math.PI / 3) }));
-// The wall: the hero's fine lines, seen small.
-const wave = (y: number, ph: number) => { let d = `M-20 ${y}`; for (let x = 0; x <= 680; x += 40) d += ` Q${x - 20} ${f(y + 9 * Math.sin(ph + x / 70))} ${x} ${f(y + 5 * Math.sin(ph + 1 + x / 90))}`; return d; };
+// The wall: the hero's fine lines, seen small, with the chart's own line through the middle and its points on it.
+const wy = (y: number, ph: number, x: number) => y + 5 * Math.sin(ph + x / 62) + 2.5 * Math.sin(ph * 2 + x / 37);
+const wave = (y: number, ph: number) => { let d = ''; for (let x = -12; x <= 732; x += 12) d += `${d ? 'L' : 'M'}${x} ${f(wy(y, ph, x))}`; return d; };
+const hot = (x: number) => 60 + 9 * Math.sin(2.2 + x / 58) + 4 * Math.sin(1 + x / 23);
+let hotD = ''; for (let x = -12; x <= 732; x += 6) hotD += `${hotD ? 'L' : 'M'}${x} ${f(hot(x))}`;
+const marks = Array.from({ length: 11 }, (_, k) => 50 + k * 62);
 ---
 {kind === 'bars' && (
   <svg class="vz vz-bars" viewBox="0 0 320 180" aria-hidden="true">
@@ -31,7 +36,7 @@ const wave = (y: number, ph: number) => { let d = `M-20 ${y}`; for (let x = 0; x
     {[0, 1, 2].flatMap(row => Array.from({ length: 12 }, (_, i) => {
       const x = f(30 + i * 23.6), y = 50 + row * 40;
       const on = row === 0 || (row === 1 && i % 3 === 0) || (row === 2 && i < 8);
-      if (row === 2 && i === 8) return <circle class="gone" cx={x} cy={y} r="7" />;
+      if (row === 2 && i === 8) return <><circle class="gone" cx={x} cy={y} r="7" /><circle class="gone echo" cx={x} cy={y} r="7" /></>;
       return <circle class:list={[on ? 'on' : 'off']} cx={x} cy={y} r={on ? 4.5 : 2} style={`--d:${(i * 0.3).toFixed(2)}s`} />;
     }))}
     <line class="scan" x1="0" x2="0" y1="28" y2="152" />
@@ -41,17 +46,17 @@ const wave = (y: number, ph: number) => { let d = `M-20 ${y}`; for (let x = 0; x
   <svg class="vz vz-radar" viewBox="0 0 320 180" aria-hidden="true">
     <circle class="r" cx="160" cy="92" r="28" /><circle class="r" cx="160" cy="92" r="54" /><circle class="r" cx="160" cy="92" r="80" />
     <path class="r" d="M80 92h160M160 12v160" />
-    <g class="sweep"><path class="w" d="M160 92L240 92A80 80 0 0 0 200 22.7Z" /><path class="e" d="M160 92L240 92" /></g>
-    {blips.map(b => <circle class="blip" cx={f(b.x)} cy={f(b.y)} r="3.5" style={`--d:${b.d.toFixed(2)}s`} />)}
+    <g class="fast"><g class="sweep"><path class="w" d="M160 92L240 92A80 80 0 0 0 200 22.7Z" /><path class="e" d="M160 92L240 92" /></g></g>
+    {blips.map((b, k) => <circle class="blip" cx={f(b.x)} cy={f(b.y)} r="3.5" style={`--d:${b.d.toFixed(2)}s;--k:${k}`} />)}
   </svg>
 )}
 {kind === 'orbit' && (
   <svg class="vz vz-orbit" viewBox="0 0 320 180" aria-hidden="true">
-    <g class="spin">
+    <g class="fast"><g class="spin">
       <circle class="r" cx="160" cy="90" r="62" />
       {six.map(p => <path class="r" d={`M160 90L${f(p.x)} ${f(p.y)}`} />)}
-      {six.map(p => <circle class="n" cx={f(p.x)} cy={f(p.y)} r="5.5" />)}
-    </g>
+      {six.map((p, k) => <circle class="n" cx={f(p.x)} cy={f(p.y)} r="5.5" style={`--k:${k}`} />)}
+    </g></g>
     <path class="core" d="M143 77h11l4 4h19v22h-34z" />
   </svg>
 )}
@@ -75,14 +80,20 @@ const wave = (y: number, ph: number) => { let d = `M-20 ${y}`; for (let x = 0; x
 )}
 {kind === 'seal' && (
   <svg class="vz vz-seal" viewBox="0 0 320 180" aria-hidden="true">
-    <circle class="ticks" cx="160" cy="90" r="56" />
+    <g class="fast"><circle class="ticks" cx="160" cy="90" r="56" /></g>
+    <circle class="echo" cx="160" cy="90" r="42" />
     <circle class="ring" cx="160" cy="90" r="42" />
     <path class="ok" pathLength="1" d="M141 91l13 13 26-28" />
   </svg>
 )}
 {kind === 'wall' && (
-  <svg class="vz vz-wall" viewBox="0 0 640 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <g class="drift">{[18, 30, 42, 54, 66, 78, 90, 102].map((y, i) => <path class="r" d={wave(y, i * 0.7)} />)}</g>
-    <path class="hot" d={wave(60, 2.2)} />
+  <svg class="vz vz-wall" viewBox="0 0 720 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g class="drift">
+      <g class="up">{[8, 20, 32, 44].map((y, i) => <path class="r" d={wave(y, i * 0.7)} />)}</g>
+      <g class="dn">{[76, 88, 100, 112].map((y, i) => <path class="r" d={wave(y, 2.8 + i * 0.7)} />)}</g>
+    </g>
+    <path class="hot" d={hotD} />
+    <path class="run" pathLength="1000" d={hotD} />
+    <g class="log">{marks.map((x, k) => <circle cx={x} cy={f(hot(x))} r="3.6" style={`--k:${k}`} />)}</g>
   </svg>
 )}

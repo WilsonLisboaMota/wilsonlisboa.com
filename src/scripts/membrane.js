@@ -33,14 +33,20 @@ function rng(seed) {
 }
 
 // Illustrative series. Not real data.
+// Past its two ends (t below 0 or above 1) the rise levels off and the ripples go on, so the wall can run on to the
+// sides without the chart itself changing: the scale is always taken from the chart alone.
+const seriesAt = t => {
+  const rise = t > 1 ? 1 + 0.25 * (1 - Math.exp(-(t - 1) / 0.25)) : t < 0 ? -0.25 * (1 - Math.exp(t / 0.25)) : t;
+  return 0.42 + 0.30 * rise + 0.10 * Math.sin(t * 9.4 + 0.5) + 0.06 * Math.sin(t * 23.1 + 1.7) + 0.035 * Math.sin(t * 57 + 0.3);
+};
+function seriesScale(n) {
+  let mn = Infinity, mx = -Infinity;
+  for (let i = 0; i < n; i++) { const y = seriesAt(i / (n - 1)); mn = Math.min(mn, y); mx = Math.max(mx, y); }
+  return t => (seriesAt(t) - mn) / (mx - mn);
+}
 function series(n) {
-  const v = [];
-  for (let i = 0; i < n; i++) {
-    const t = i / (n - 1);
-    v.push(0.42 + 0.30 * t + 0.10 * Math.sin(t * 9.4 + 0.5) + 0.06 * Math.sin(t * 23.1 + 1.7) + 0.035 * Math.sin(t * 57 + 0.3));
-  }
-  const mn = Math.min(...v), mx = Math.max(...v);
-  return v.map(y => (y - mn) / (mx - mn));
+  const at = seriesScale(n);
+  return Array.from({ length: n }, (_, i) => at(i / (n - 1)));
 }
 
 // Three forces behind the membrane: x, y, strength, width.
@@ -113,6 +119,9 @@ function init() {
     uLitAmt: { value: new Array(6).fill(0) },
     uSpeed: { value: SPEED },
     uSize: { value: new THREE.Vector3(W, H, 0) },
+    // Seen from behind, how far the wall's lines run to the sides, in wall widths from its centre: where they end, and
+    // where they start to fade. From the front they always end with the chart.
+    uWing: { value: new THREE.Vector2(0.5, 0.34) },
     uNearest: { value: -1 },
     uDpr: { value: 1 },
     uBlue: { value: new THREE.Color(0x00486F) },
@@ -133,6 +142,7 @@ function init() {
     uniform float uRipSeed[${RIPPLES}];
     uniform vec4 uYield;
     uniform vec3 uSize;
+    uniform vec2 uWing;
 
     float gWave, gGlyph;
     vec2 gOff;
@@ -274,11 +284,12 @@ function init() {
         vec3 L = ${LIGHT};
         float diff = clamp(dot(N, L), 0.0, 1.0);
         float spec = pow(max(dot(reflect(-L, N), V), 0.0), 22.0);
-        float edge = smoothstep(0.5, 0.34, abs(position.x) / uSize.x) * smoothstep(0.5, 0.28, abs(position.y - uSize.z) / uSize.y);
+        float ax = abs(position.x) / uSize.x;
+        float edge = mix(smoothstep(0.5, 0.34, ax), smoothstep(uWing.x, uWing.y, ax), uBehind) * smoothstep(0.5, 0.28, abs(position.y - uSize.z) / uSize.y);
         float energy = pow(0.5 + 0.5 * sin(position.x * 0.9 - uTime * 0.5 + aRow * 7.3), 16.0) * (1.0 - uReduced);
         float cur = cursorNear(position.xy, 0.9);
         float crest = clamp(gWave, 0.0, 1.0);
-        vA = edge * (0.14 + 0.2 * diff + 0.75 * spec + 0.12 * energy + 0.3 * crest) * (1.0 - 0.88 * clamp(ring + 0.5 * crest, 0.0, 1.0)) * (1.0 - 0.5 * cur) * introAt(position.x);
+        vA = edge * (0.14 + 0.2 * diff + 0.75 * spec + 0.12 * energy + 0.3 * crest) * (1.0 - 0.88 * clamp(ring + 0.5 * crest, 0.0, 1.0)) * (1.0 - 0.5 * cur) * introAt(clamp(position.x, -0.5 * uSize.x, 0.5 * uSize.x));
         vA *= nearCam(wp.xyz) * mix(1.0, 0.72, uBehind);
         vCol = mix(uBlue + vec3(0.06, 0.16, 0.22), uMist, clamp(0.45 * spec + 0.08 * diff + 0.25 * crest, 0.0, 1.0));
         gl_Position = projectionMatrix * viewMatrix * wp;
@@ -634,15 +645,25 @@ function init() {
     const xs = [], dy = [];
     for (let j = 0; j < COLS; j++) { xs.push(-W / 2 + j * W / (COLS - 1)); dy.push(CHART_A * (v[j] - 0.5)); }
 
-    // Rows bend around the chart: the closer to it, the more they follow it.
+    // Rows bend around the chart: the closer to it, the more they follow it. On a wide screen the rows run on past the
+    // chart on both sides (the wings), so that from behind the wall reaches the sides of the window; the lines' shader
+    // shows the wings only from there.
+    // The wings are in coarser steps, and calmer the further out they go: the chart's shape settles into a ripple.
+    const WING = mobile ? 0 : Math.round(COLS * 0.7), step = W / (COLS - 1), at = seriesScale(COLS);
+    const calm = d => 0.5 + (at(d < 0 ? d : 1 + d) - 0.5) * (0.28 + 0.72 * Math.exp(-Math.pow(d / 0.16, 2)));
+    const cx = [], cy = [];
+    for (let k = WING; k >= 1; k--) { const d = -2 * k / (COLS - 1); cx.push(-W / 2 - 2 * k * step); cy.push(CHART_A * (calm(d) - 0.5)); }
+    for (let j = 0; j < COLS; j++) { cx.push(xs[j]); cy.push(dy[j]); }
+    for (let k = 1; k <= WING; k++) { const d = 2 * k / (COLS - 1); cx.push(W / 2 + 2 * k * step); cy.push(CHART_A * (calm(d) - 0.5)); }
+    const NC = cx.length;
     const pos = [], row = [], idx = [];
     for (let i = 0; i < ROWS; i++) {
       const y0 = CHART_Y + (i - ic) * sp;
       const g = Math.exp(-Math.pow((y0 - CHART_Y) / LAMBDA, 2));
-      for (let j = 0; j < COLS; j++) {
-        pos.push(xs[j], y0 + dy[j] * g, 0);
+      for (let j = 0; j < NC; j++) {
+        pos.push(cx[j], y0 + cy[j] * g, 0);
         row.push(i);
-        if (j < COLS - 1) idx.push(i * COLS + j, i * COLS + j + 1);
+        if (j < NC - 1) idx.push(i * NC + j, i * NC + j + 1);
       }
     }
     const lg = new THREE.BufferGeometry();
@@ -1932,6 +1953,13 @@ function init() {
     const wide = smooth(1.75, 2.4, w / h);
     L.fovEnd = fit(L.rEnd, 11, 7.5, lerp(0.98, 0.76, t), lerp(0.5, lerp(0.85, 1.0, wide), t));
     L.fovMid = Math.max(L.fov, 52);
+    // The wall runs on to the sides of the window (Wilson, 10 November 2026: "a big space in the edges"). The camera
+    // cannot come closer on a wide window, the height already rules, so the wall's lines go on instead.
+    const seenW = 2 * L.rEnd * Math.tan(THREE.MathUtils.degToRad(L.fovEnd) / 2) * camera.aspect;
+    // The wall is seen at an angle, so its far half looks shorter: the reach is generous, and what is not needed is
+    // simply outside the window.
+    const wing = mobile ? 0.5 : clamp(seenW / 2 / W + 0.75, 0.5, 1.9);
+    uniforms.uWing.value.set(wing, wing > 0.5 ? wing - 0.26 : 0.34);
     L.cx = lerp(0.5, 0.6, t) * w;
     L.cy = lerp(0.33, 0.42, t) * h;
     L.ex = lerp(0.5, 0.56, t) * w;
