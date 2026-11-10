@@ -23,7 +23,7 @@ const initials = (n: string) => n.split(' ').map(s => s[0]).join('').slice(0, 2)
   <div class="w">
     <div class="hd">
       <p class="meta kick">Leadership</p>
-      <h2 id="ld-t">Analyst by trade. <em>Manager by choice.</em></h2>
+      <h2 id="ld-t">Six BI developers. <em>I lead the team.</em></h2>
       <div class="aro" aria-hidden="true">
         <div class="fly">
           {birds.map((b, i) => (
@@ -33,9 +33,9 @@ const initials = (n: string) => n.split(' ').map(s => s[0]).join('').slice(0, 2)
           ))}
         </div>
       </div>
-      <p class="ld">From BI analyst in 2019 to leading a team of six BI developers today.</p>
     </div>
 
+    <h3 class="sub">What colleagues say</h3>
     <div class="cards three qs" data-seq>
       {quotes.map(q => (
         <button class="card qc" type="button" data-sheet={`sheet-q-${q.id}`} data-tilt data-play aria-haspopup="dialog">

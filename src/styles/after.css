@@ -401,6 +401,19 @@
 @keyframes t-turn{0%{transform:none}32%,100%{transform:rotate(90deg)}}
 @keyframes t-find{0%{transform:none}32%,100%{transform:rotate(360deg)}}
 #work .path-w{margin-top:20px;scroll-margin-top:76px}
+/* The way into the path hangs from the middle of the Today card's bottom edge: solid, with the six steps in small,
+   an arrow that nudges down, and now and then the ring the CV button calls with. */
+.js #work .path-w{position:relative;z-index:2;margin-top:-26px;text-align:center}
+#work .path-w .bh{text-align:left}
+#work .go-path{position:relative;gap:12px;padding:16px 22px 16px 20px;background:var(--solid);color:var(--on-solid);box-shadow:0 16px 32px -16px rgba(13,27,36,.6);font-size:16px}
+#work .go-path:hover{box-shadow:0 20px 36px -16px rgba(13,27,36,.7)}
+#work .go-path .pm{display:inline-flex;align-items:flex-end;gap:2.5px;height:17px}
+#work .go-path .pm i{width:4px;height:calc(3px + var(--h) * 2.8px);border-radius:1px;background:currentColor}
+#work .go-path:is(:hover,:focus-visible) .pm i{animation:mark 1.1s var(--ease) infinite;animation-delay:calc(var(--k) * 90ms)}
+#work .go-path[aria-expanded="false"] svg{animation:nudge 1.8s var(--ease) infinite}
+#work .go-path[aria-expanded="false"]::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 0 1.5px var(--acc);opacity:0;pointer-events:none;animation:ring 4.4s ease-out 1.4s infinite}
+#work .go-path[aria-expanded="true"]{background:var(--card);color:var(--fg);box-shadow:inset 0 0 0 1px var(--hair)}
+@keyframes nudge{0%,55%,100%{transform:none}28%{transform:translateY(3.5px)}}
 #work .path{padding:26px 0 4px}
 #work .steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(4px,1vw,10px);align-items:end}
 #work .step{all:unset;box-sizing:border-box;display:flex;flex-direction:column;cursor:pointer;min-width:0}
@@ -445,7 +458,6 @@
   #work .aro.drawn:not(.chase) .fly{animation:bob 5s ease-in-out 1.8s infinite}
 }
 @keyframes bob{50%{transform:translateY(-6px)}}
-#work .qs{margin-top:clamp(36px,6vh,64px)}
 #work .qc{gap:16px;padding:22px 24px 22px}
 #work .qc .ic-quote{width:42px;height:42px;margin:-4px 0 0 -6px;overflow:visible;transition:transform .5s var(--ease)}
 #work .qc .ic-quote path{transform-box:fill-box;transform-origin:center;transition:transform .5s var(--ease)}

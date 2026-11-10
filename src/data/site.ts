@@ -5,7 +5,7 @@
 export const person = {
   name: 'Wilson Mota',
   role: 'Business Intelligence Manager at Corient',
-  place: 'Fribourg, Switzerland',
+  place: 'Switzerland',
   email: 'wilson.lisboa@wilsonlisboa.com',
   linkedin: 'https://www.linkedin.com/in/wilson-lisboa-mota/',
   cv: '/cv/',

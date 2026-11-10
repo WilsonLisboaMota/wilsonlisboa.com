@@ -1,5 +1,6 @@
 ---
-// Business Intelligence: what Wilson is today, first. The path that led there opens on request, as steps that climb.
+// Business Intelligence: what Wilson is today, first. The path that led there opens on request, as steps that climb;
+// the button that opens it hangs from the middle of the Today card's bottom edge and carries the steps in small.
 // Then the proof, as cards. The section starts where the dark ends, at a seam of the hero's own fine lines.
 import { roles, todayTiles, proofs } from '../data/site';
 import Card from './Card.astro';
@@ -55,7 +56,11 @@ const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-
     </div>
 
     <div class="path-w" id="trajectory">
-      <button class="go-b" type="button" aria-expanded="false" aria-controls="bh-path"><span class="x">The path here, from 2016</span><span class="y">Close the path</span><Fragment set:html={chev} /></button>
+      <button class="go-b go-path" type="button" aria-expanded="false" aria-controls="bh-path">
+        <span class="pm" aria-hidden="true">{roles.map((r, k) => <i style={`--h:${r.level};--k:${k}`}></i>)}</span>
+        <span class="x">See my full career path</span><span class="y">Hide my career path</span>
+        <Fragment set:html={chev} />
+      </button>
       <div class="bh" id="bh-path">
         <div class="bh-in">
           <div class="path" data-pick={first}>
@@ -82,7 +87,7 @@ const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-
       </div>
     </div>
 
-    <h3 class="sub">The proof</h3>
+    <h3 class="sub">Projects and certification</h3>
     <div class="cards three" data-seq>
       {proofs.map(p => <Card w={p} />)}
     </div>

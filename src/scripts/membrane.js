@@ -990,14 +990,16 @@ function init() {
   let wordPts = null, aiCurves = [];
 
   // The word AI is rooted in the field it sits in, as in the sketch of 1 November: the lines of the fan that start
-  // nearest to it are moved to start inside its letters and run from there to the point. The rest stay as they are.
+  // nearest to it are moved to start inside its letters and run from there to the point. Since 10 November 2026 every
+  // other line starts in a letter too, and keeps its sweep: no end is left loose.
   function rootAI(w) {
     const R = rng(41), f = w.frame, ap = STRUCT.keys[1], O = STRUCT.aiOrig;
-    const NR = L.mobile ? 7 : 12, NW = L.mobile ? 3 : 6, NT = L.mobile ? 6 : 10, hc = (w.y1 - w.y0) * f.kw;
+    const NR = L.mobile ? 7 : 12, NW = L.mobile ? 3 : 6, hc = (w.y1 - w.y0) * f.kw;
     O.forEach((c, i) => STRUCT.rerootAI(i, c[0], c[1], c[2], 0));
     const onPlane = (mx, my) => { const lx = (mx - w.cx) * f.kw, ly = -(my - w.cy) * f.kw; return [f.centre.x + f.r.x * lx + f.u.x * ly, f.centre.y + f.r.y * lx + f.u.y * ly, f.centre.z + f.r.z * lx + f.u.z * ly]; };
     const inLetter = () => { for (let k = 0; k < 2000; k++) { const x = w.x0 + R() * (w.x1 - w.x0), y = w.y0 + R() * (w.y1 - w.y0); if (onMask(w, x, y)) return [x, y]; } return [w.cx, w.cy]; };
-    const px = p => { wv.set(p[0], p[1], p[2]).project(endCam); return [(wv.x * 0.5 + 0.5) * L.w, (-wv.y * 0.5 + 0.5) * L.h]; };
+    const SX = L.spread, OX = OPEN_X0 * (1 - SX);
+    const px = p => { wv.set(p[0] * SX + OX, p[1], p[2]).project(endCam); return [(wv.x * 0.5 + 0.5) * L.w, (-wv.y * 0.5 + 0.5) * L.h]; };
     const add = (a, b, k) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k];
     const apx = px(ap), dw = Math.hypot(f.sx - apx[0], f.sy - apx[1]) || 1;
     // Away from the point, along the word's plane.
@@ -1019,18 +1021,15 @@ function init() {
         STRUCT.rerootAI(i, s, add(e, away, 0.3 * hc), add(O[i][2], up, side * 0.4 * hc), 1);
       }
     });
-    // Lines that start beyond the word and pass near it are bent to run through a letter on their way to the point.
-    const cand = O.map((c, i) => {
-      if (used.has(i)) return null;
-      const q0 = px(c[0]); if (Math.hypot(q0[0] - apx[0], q0[1] - apx[1]) < 1.15 * dw) return null;
-      let best = 1e9, bt = 0.3;
-      for (let t = 0.15; t <= 0.6; t += 0.025) { const q = px(bez3(c, t)), d = Math.hypot(q[0] - f.sx, q[1] - f.sy); if (d < best) { best = d; bt = t; } }
-      return [best, i, bt];
-    }).filter(Boolean).sort((a, b) => a[0] - b[0]).slice(0, NT);
-    cand.forEach(([, i, t]) => {
-      const c = O[i], target = onPlane(...inLetter()), at = bez3(c, t), k = 1 / (3 * t * (1 - t));
-      const d = [target[0] - at[0], target[1] - at[1], target[2] - at[2]];
-      STRUCT.rerootAI(i, c[0], add(c[1], d, k), add(c[2], d, k), 0.5);
+    // Every other line is connected to the word as well (Wilson: the more of them, the better; it is part of the
+    // story). It starts inside a letter, swings out towards where it used to start, further than before, and comes
+    // back into the point the way it always did. The sweep stays, and is wider; the loose end is gone.
+    O.forEach((c, i) => {
+      if (used.has(i)) return;
+      const s = onPlane(...inLetter()), d = [0, 1, 2].map(k => c[0][k] - s[k]), far = Math.hypot(d[0], d[1], d[2]) || 1;
+      // No sweep reaches further than the fan itself did.
+      const g = Math.min(far, 2.4) * (1.5 + R() * 0.8) / far;
+      STRUCT.rerootAI(i, s, [0, 1, 2].map(k => s[k] + d[k] * g), c[2], 0.5);
     });
     aiCurves = STRUCT.curves;
   }
@@ -1051,7 +1050,11 @@ function init() {
     wr.setFromMatrixColumn(endCam.matrixWorld, 0).normalize();
     wu.setFromMatrixColumn(endCam.matrixWorld, 1).normalize();
     endCam.getWorldDirection(wf);
-    const toPx = p => { wv.set(p[0], p[1], p[2]).project(endCam); return [(wv.x * 0.5 + 0.5) * L.w, (-wv.y * 0.5 + 0.5) * L.h]; };
+    // The far side as it is seen at the end: opened out sideways (see L.spread). A point of the structures goes
+    // through this on its way to the screen; a word's frame comes back through it, into the structures' own space,
+    // where its particles and its lines live.
+    const SX = L.spread, OX = OPEN_X0 * (1 - SX);
+    const toPx = p => { wv.set(p[0] * SX + OX, p[1], p[2]).project(endCam); return [(wv.x * 0.5 + 0.5) * L.w, (-wv.y * 0.5 + 0.5) * L.h]; };
     const t = smooth(0.7, 1.55, L.w / L.h), short = Math.min(L.w, L.h);
     // What each word's material can carry it along, as seen from the far side.
     const linPx = STRUCT.lineage.map(pl => pl.pts.map(p => toPx(p)));
@@ -1067,19 +1070,19 @@ function init() {
       // formation, kept inside the screen.
       if (k === 2) {
         const a5 = toPx(STRUCT.form[5]), a6 = toPx(STRUCT.form[6]), asp = (w.x1 - w.x0) / (w.y1 - w.y0);
-        const hv = 0.92 * Math.abs(a5[0] - a6[0]) / asp, sxv = (a5[0] + a6[0]) / 2, syv = (a5[1] + a6[1]) / 2 - 0.15 * hv;
+        const hv = 0.92 * Math.abs(a5[0] - a6[0]) / SX / asp, sxv = (a5[0] + a6[0]) / 2, syv = (a5[1] + a6[1]) / 2 - 0.15 * hv;
         const ht = 0.075 * short, half = 16 + ht * asp / 2, sxt = clamp(key[0] + 0.5 * ht, half, L.w - half), syt = Math.max(a5[1], a6[1]) + 1.1 * ht;
         hc = lerp(ht, hv, t); sx = lerp(sxt, sxv, t); sy = lerp(syt, syv, t);
       }
       // The word lies on a plane through that point of the screen, at the depth of its force, facing the visitor.
-      wv.set(...STRUCT.keys[k]).sub(endCam.position);
+      wv.set(STRUCT.keys[k][0] * SX + OX, STRUCT.keys[k][1], STRUCT.keys[k][2]).sub(endCam.position);
       let depth = wv.dot(wf);
       // AI sits inside its own field, as in the sketch: half-way along the lines from the point to where they start,
       // where they are still close together, and no taller than the fan is there.
       if (k === 1) {
         const mids = STRUCT.aiOrig.map(c => bez3(c, AI_AT)), px = mids.map(p => toPx(p)), n = mids.length;
         sx = px.reduce((a, q) => a + q[0], 0) / n; sy = px.reduce((a, q) => a + q[1], 0) / n;
-        depth = mids.reduce((a, p) => { wv.set(...p).sub(endCam.position); return a + wv.dot(wf); }, 0) / n;
+        depth = mids.reduce((a, p) => { wv.set(p[0] * SX + OX, p[1], p[2]).sub(endCam.position); return a + wv.dot(wf); }, 0) / n;
         const ys = px.map(q => q[1]).sort((a, b) => a - b), span = ys[Math.floor(n * 0.85)] - ys[Math.floor(n * 0.15)];
         // Never smaller than can be read: on a phone the fan is small, and the word spills a little past it instead.
         hc = Math.max(Math.min(hc, AI_FIT * span), 0.1 * short);
@@ -1088,7 +1091,10 @@ function init() {
       wv.set(sx / L.w * 2 - 1, -sy / L.h * 2 + 1, 0.5).unproject(endCam).sub(endCam.position).normalize();
       const centre = endCam.position.clone().addScaledVector(wv, depth / wv.dot(wf));
       const ppm = hc / (w.y1 - w.y0), kw = ppm * 2 * depth * Math.tan(THREE.MathUtils.degToRad(L.fovEnd) / 2) / L.h;
-      w.frame = { centre, r: wr.clone(), u: wu.clone(), sx, sy, ppm, kw, hw: (w.x1 - w.x0) * ppm / 2, hh: (w.y1 - w.y0) * ppm / 2 };
+      centre.x = (centre.x - OX) / SX;
+      const rl = wr.clone(), ul = wu.clone();
+      rl.x /= SX; ul.x /= SX;
+      w.frame = { centre, r: rl, u: ul, sx, sy, ppm, kw, hw: (w.x1 - w.x0) * ppm / 2, hh: (w.y1 - w.y0) * ppm / 2 };
       w.lift = hc * kw / ppm;
       if (k === 1) rootAI(w);
       const curvePx = k === 1 ? aiCurves.map(c => Array.from({ length: 45 }, (_, j) => toPx(bez3(c, j / 64)))) : [];
@@ -1104,7 +1110,7 @@ function init() {
         const lx = (x - w.cx) * kw, ly = -(y - w.cy) * kw;
         w.pts.push({
           mx: x, my: y, row: r, col: c, edge, R: R(), ch: (R() * 64) | 0,
-          b: [centre.x + wr.x * lx + wu.x * ly, centre.y + wr.y * lx + wu.y * ly, centre.z + wr.z * lx + wu.z * ly],
+          b: [centre.x + rl.x * lx + ul.x * ly, centre.y + rl.y * lx + ul.y * ly, centre.z + rl.z * lx + ul.z * ly],
           px: [sx + (x - w.cx) * ppm, sy + (y - w.cy) * ppm],
           a: w.shape === 0 ? (edge ? 0.88 + R() * 0.12 : 0.42 + R() * 0.3) : w.shape === 1 ? (edge ? 0.85 : 0.5) : 0.9,
           size: Math.max(w.shape === 2 ? 2.2 : 3.2, size),
@@ -1926,8 +1932,11 @@ function init() {
     hotPointer: -1, hotLabel: -1, hotTouch: -1, hot: -1, hotAmt: 0,
     arrivedAt: -1, arrivals: 0,
   };
-  const L = { w: 1, h: 1, mobile: null, cx: 0, cy: 0, ex: 0, ey: 0, fov: 30, fovMid: 50, fovEnd: 40, rEnd: 13 };
+  const L = { w: 1, h: 1, mobile: null, cx: 0, cy: 0, ex: 0, ey: 0, fov: 30, fovMid: 50, fovEnd: 40, rEnd: 13, spread: 1 };
   const BASE_RY = -0.3, BASE_RX = 0.06;
+  // On a wide window the far side opens out sideways (L.spread), about this point of the wall, which lies between the
+  // three forces: Leadership moves one way about as far as BI moves the other, and the AI hardly moves.
+  const OPEN_X0 = -0.3;
 
   function layout() {
     const w = stage.clientWidth, h = stage.clientHeight;
@@ -1960,6 +1969,10 @@ function init() {
     // simply outside the window.
     const wing = mobile ? 0.5 : clamp(seenW / 2 / W + 0.75, 0.5, 1.9);
     uniforms.uWing.value.set(wing, wing > 0.5 ? wing - 0.26 : 0.34);
+    // Room for the three forces to breathe (Wilson, 10 November 2026: "fica tudo apertado, apesar de não haver
+    // necessidade"). Seen from behind, the whole scene opens out sideways, the wall with it, so every structure stays
+    // attached to the wall where it was. From the front nothing changes. See the frame loop and placeWords.
+    L.spread = mobile ? 1 : clamp(seenW * 0.86 / 11, 1, 1.45);
     L.cx = lerp(0.5, 0.6, t) * w;
     L.cy = lerp(0.33, 0.42, t) * h;
     L.ex = lerp(0.5, 0.56, t) * w;
@@ -2036,6 +2049,10 @@ function init() {
     }
     const face = smooth(0, 0.3, u);
     group.rotation.set(lerp(BASE_RX - S.tilt.y * 0.035, 0, face), lerp(BASE_RY + S.tilt.x * 0.06, 0, face), 0);
+    // Past the wall, the scene opens out sideways on a wide window (see L.spread).
+    const open = 1 + (L.spread - 1) * smooth(0.5, 0.9, u);
+    group.scale.x = open;
+    group.position.x = OPEN_X0 * (1 - open);
     group.updateMatrixWorld();
 
     rig(u);
