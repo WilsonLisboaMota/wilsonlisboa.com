@@ -23,8 +23,7 @@ const initials = (n: string) => n.split(' ').map(s => s[0]).join('').slice(0, 2)
   <div class="glow" aria-hidden="true"><svg><rect width="100%" height="100%" fill="url(#wl-blue)" /></svg></div>
   <div class="w">
     <div class="hd">
-      <p class="meta kick">Leadership</p>
-      <Title id="ld-t" a="From analyst in 2019" b="to AI-empowered manager." />
+      <div class="ent">
       <div class="aro" aria-hidden="true">
         <div class="fly">
           {birds.map((b, i) => (
@@ -34,6 +33,8 @@ const initials = (n: string) => n.split(' ').map(s => s[0]).join('').slice(0, 2)
           ))}
         </div>
       </div>
+      <p class="ent-n">Leadership</p></div>
+      <Title id="ld-t" a="From analyst in 2019" b="to AI-empowered manager." />
     </div>
 
     <h3 class="sub">What colleagues say</h3>

@@ -9,7 +9,7 @@
   --mist-45:rgba(228,236,233,.48);
   --mist-15:rgba(228,236,233,.16);
   --sans:'Mona Sans','Helvetica Neue',Arial,sans-serif;
-  --mono:'Martian Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --mono:'Mona Sans','Helvetica Neue',Arial,sans-serif; /* one typeface (10 Nov 2026): Wilson is not fond of the mono */
   --gutter:clamp(16px,3.4vw,48px);
   --base:clamp(28px,7vh,72px);
   --ease:cubic-bezier(.2,.7,.2,1);

@@ -17,14 +17,16 @@ export const person = {
 const bot = '/work/ai-trading-bot/';
 
 // How the work passes between Wilson and the AI, in order. The four rules approved on 19 Oct 2026, as one drawing.
-export const relay: { who: 'me' | 'ai'; t: string }[] = [
-  { who: 'me', t: 'choose the tools' },
-  { who: 'ai', t: 'builds' },
-  { who: 'me', t: 'set the bar first' },
-  { who: 'ai', t: 'runs the tests' },
-  { who: 'ai', t: 'a second AI re-checks' },
-  { who: 'me', t: 'decide' },
-  { who: 'me', t: 'show what failed' },
+// e: what that step was in one real case, the AI Trading Bot (from its record below).
+export const relayCase = 'AI Trading Bot';
+export const relay: { who: 'me' | 'ai'; t: string; e: string }[] = [
+  { who: 'me', t: 'choose the tools', e: 'Alpaca as the broker, with one paper account per bot.' },
+  { who: 'ai', t: 'builds', e: 'The test engine, the bots and their tests.' },
+  { who: 'me', t: 'set the bar first', e: '95% sure the edge is real, written down before the tests.' },
+  { who: 'ai', t: 'runs the tests', e: 'Three ideas tested: 62%, 91% and almost 0%.' },
+  { who: 'ai', t: 'a second AI re-checks', e: 'It redid the sums and found 3 bugs in the test code.' },
+  { who: 'me', t: 'decide', e: 'None reached the bar, so no real money.' },
+  { who: 'me', t: 'show what failed', e: 'The three results are on the card below, as they are.' },
 ];
 
 export interface Work {

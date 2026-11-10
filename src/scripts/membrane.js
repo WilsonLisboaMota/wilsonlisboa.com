@@ -2163,7 +2163,7 @@ function init() {
     // The front needs no instructions: the surface shows it reacts. Only the far side gets a hint.
     const side = u > 0.5;
     if (side !== lastSide) { lastSide = side; hintEl.hidden = !side; }
-    const hint = mqFine.matches ? 'Point at a word' : S.hotTouch >= 0 ? 'Tap again to open' : 'Tap a word';
+    const hint = mqFine.matches ? 'Choose a word to explore' : S.hotTouch >= 0 ? 'Tap again to open' : 'Tap a word to explore';
     if (hint !== lastHint) { hintEl.textContent = hint; lastHint = hint; }
   }
 
@@ -2278,8 +2278,11 @@ function init() {
     const target = document.querySelector(labels[k].getAttribute('href'));
     if (!target) return;
     const toY = () => target.getBoundingClientRect().top + scrollY - 24;
-    if (reduced) { stopJourney(); scrollTo(0, toY()); }
-    else travel([{ to: toY, ms: d => clamp(d * 0.7, 700, 1600), ease: cubicInOut }]);
+    // A word is a door (10 November 2026): the page cuts to its chapter, with a short dissolve where the browser
+    // can do one, instead of scrolling all the way down there.
+    stopJourney();
+    const jump = () => scrollTo({ top: toY(), behavior: 'instant' });
+    if (!reduced && document.startViewTransition) document.startViewTransition(jump); else jump();
     kick();
   }
 
@@ -2346,9 +2349,9 @@ function init() {
 
   document.querySelector('.cta').addEventListener('click', e => {
     e.preventDefault();
-    if (reduced) { scrollTo(0, workY()); return; }
-    // Through the wall, a moment on the other side, then down to the work.
-    travel([toBehind, { pause: 1700 }, { to: workY, ms: () => 1500, ease: cubicInOut }]);
+    if (reduced) { scrollTo(0, behindY()); return; }
+    // Through the wall, and there it stops (10 November 2026): the far side is where the visitor chooses a word.
+    travel([toBehind]);
   });
 
   // ---------- the far side holds on ----------
@@ -2357,7 +2360,9 @@ function init() {
   // with reduced motion. After HOLD_MS the visitor has had the time, and the next scroll simply goes on.
   const HOLD_MS = 4200, HELD = { passive: false, capture: true };
   const cueEl = document.getElementById('cue');
-  const gate = { state: reduced ? 'open' : 'ahead', at: 0, lastWheel: 0, tugAt: 0, timer: 0 };
+  // Since 10 November 2026 the far side no longer holds the scroll (it could feel stuck): the gate starts open. The
+  // hero's own still zone (DWELL) and the button that stops there give the words their time.
+  const gate = { state: 'open', at: 0, lastWheel: 0, tugAt: 0, timer: 0 };
   // Overlay scrollbars (phones, trackpads): the page itself can be stopped with no change of layout.
   const overlayBars = () => innerWidth - document.documentElement.clientWidth < 1;
   const onFarSide = () => scrollY >= behindY() - 1 && scrollY <= heroTop() + hero.offsetHeight - innerHeight + 1;

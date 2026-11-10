@@ -542,3 +542,76 @@
   .js #work .bh,.js #work .bh.open,#work .card,#work .today,#work .arw,#work .vz,#work .vz *{transition:none}
   #work .glow{display:none}
 }
+
+/* ================= Round 7 (10 November 2026) ================= */
+
+/* ---------- chapter headers, third form: the entity's drawing with the chapter's name under it, then the title.
+   The name sits with the drawing, so the visitor sees at once which chapter this is. ---------- */
+#work .hd{grid-template-columns:minmax(0,1fr);gap:22px 48px}
+@media (min-width:980px){#work .hd{grid-template-columns:minmax(0,2.8fr) minmax(0,9.2fr);align-items:center}}
+#work .hd .ent{display:flex;flex-direction:column;align-items:flex-start;gap:14px;min-width:0}
+#work .hd .ent .sig{order:0;align-self:flex-start;max-width:min(230px,100%);margin:0}
+#work .ent-n{display:flex;align-items:center;gap:10px;font:640 clamp(17px,1.45vw,21px)/1.2 var(--sans);letter-spacing:-.01em;white-space:nowrap}
+#work .ent-n::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;background:var(--signal)}
+@media (min-width:980px){
+  #work .hd .ld{grid-column:2}
+  #work #leadership .hd h2{grid-column:auto;grid-row:auto}
+  #work #leadership .hd .aro{grid-column:auto;grid-row:auto;align-self:flex-start;margin:0}
+}
+@media (max-width:979px){
+  #work .hd .ent{flex-direction:row;align-items:center;gap:18px}
+  #work .hd .ent .sig{max-width:120px}
+  #work .hd .ent .aro{order:0}
+}
+
+/* ---------- the relay, interactive: one real case, a step at a time (the walk is in after.js) ---------- */
+#work .relay.live .run,#work .relay.live .nd circle{animation:none}
+#work .rl .run{opacity:1;stroke-dasharray:70 1000;stroke-dashoffset:calc(35px - 1000px * var(--at,0));transition:stroke-dashoffset .9s var(--ease)}
+#work .rl .nd{cursor:pointer;outline:none;pointer-events:bounding-box}
+#work .rl .nd circle{transition:transform .4s var(--ease),fill .3s}
+#work .rl .nd text{fill:var(--fg2);transition:fill .3s}
+#work .rl .nd:is(:hover,:focus-visible) circle{transform:scale(1.4)}
+#work .rl .nd:is(:hover,:focus-visible) text{fill:var(--fg)}
+#work .rl .nd.on circle{transform:scale(1.8)}
+#work .rl .nd.me.on circle{fill:#E0952F}
+#work .rl .nd.ai.on circle{fill:#1A9AE4}
+#work .rl .nd.on text{fill:var(--fg);font-weight:680}
+#work .rl-cap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;min-height:2.9em;margin-top:20px;padding:14px 18px;border-radius:16px;background:var(--card);box-shadow:inset 0 0 0 1px var(--hair);font-size:clamp(16px,1.4vw,19px);line-height:1.4;color:var(--fg2)}
+#work .rl-cap .rl-k{flex:none;font:680 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;border-radius:999px;background:var(--signal);color:#021C2A}
+#work .rl-cap .rl-k.ai{background:var(--acc);color:#fff}
+#work .rl-cap b{color:var(--fg);font-weight:640}
+#work .rl-cap .rl-n{margin-left:auto;font-size:13.5px;color:var(--fg3);white-space:nowrap}
+@media (max-width:759px){#work .rl-cap .rl-n{margin-left:0;flex-basis:100%}}
+
+/* ---------- contact, rebuilt: the title on one side, four ways in as rows of large type on the other.
+   A row fills from the left when it is pointed at; its icon does what it stands for. ---------- */
+#work .ct > .w{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(24px,4vw,56px)}
+@media (min-width:980px){#work .ct > .w{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:start}}
+#work .ct h2{font-size:clamp(46px,7vw,112px)}
+#work .ct-g{display:block;margin-top:0;border-top:1px solid var(--hair)}
+#work .ct-i{position:relative;isolation:isolate;display:flex;flex-direction:row;align-items:center;gap:clamp(14px,1.6vw,22px);padding:clamp(18px,2.2vw,26px) clamp(6px,1vw,14px);border-radius:0;background:none;box-shadow:none;border-bottom:1px solid var(--hair);overflow:hidden;transition:padding .35s var(--ease),color .3s}
+#work .ct-i::before{content:"";position:absolute;inset:0;background:var(--card);transform:scaleX(0);transform-origin:0 50%;transition:transform .45s var(--ease);z-index:-1}
+#work .ct-i:is(:hover,:focus-visible,.play)::before{transform:none}
+#work .ct-i:hover{transform:none;box-shadow:none}
+#work .ct-i:is(:hover,:focus-visible){padding-left:clamp(16px,2vw,28px)}
+#work .ct-i .ic{width:clamp(30px,2.6vw,38px);height:clamp(30px,2.6vw,38px);stroke-width:1.2}
+#work .ct-i span{font-size:clamp(18px,2.1vw,30px);font-weight:620;letter-spacing:-.015em;line-height:1.2}
+#work .ct-i .go{flex:none;margin-left:auto;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.45;transition:opacity .25s,transform .35s var(--ease)}
+#work .ct-i:is(:hover,:focus-visible,.play) .go{opacity:1;transform:translate(3px,-3px)}
+#work .ct.live .ct-i .ic{animation:none}
+
+/* ---------- small things ---------- */
+#work .card-a{font:450 15px/1.4 var(--sans)}
+
+/* Contact has its drawing too, like the other chapters: a point that calls, and a line out to the four ways in. */
+#work .ct-h .ent{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:clamp(18px,3vh,30px)}
+#work .sig-c{display:block;width:150px;height:auto;overflow:visible}
+#work .sig-c .rg{fill:none;stroke:var(--acc);stroke-width:1.2;opacity:0;transform-box:fill-box;transform-origin:center}
+#work .sig-c .dt{fill:var(--fg)}
+#work .sig-c .ln{fill:none;stroke:var(--acc);stroke-opacity:.7;stroke-width:1.2;stroke-dasharray:3 6}
+#work .ct.live .sig-c .rg{animation:ping-c 3s ease-out infinite}
+#work .ct.live .sig-c .rg:nth-of-type(2){animation-delay:1s}
+#work .ct.live .sig-c .rg:nth-of-type(3){animation-delay:2s}
+#work .ct.live .sig-c .ln{animation:dash-c 1.1s linear infinite}
+@keyframes ping-c{0%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(3.4)}}
+@keyframes dash-c{to{stroke-dashoffset:-9}}

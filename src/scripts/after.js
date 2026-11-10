@@ -9,7 +9,12 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 // ---------- panels that open (the path) ----------
 const pairs = $$('#work .go-b').map(btn => ({ btn, panel: document.getElementById(btn.getAttribute('aria-controls')) })).filter(p => p.panel);
-const setOpen = (p, open) => { p.btn.setAttribute('aria-expanded', String(open)); p.panel.classList.toggle('open', open); };
+const setOpen = (p, open) => {
+  p.btn.setAttribute('aria-expanded', String(open));
+  p.panel.classList.toggle('open', open);
+  // What opened is brought into view, so that pressing the button is seen to do something.
+  if (open) setTimeout(() => p.panel.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' }), 460);
+};
 pairs.forEach(p => p.btn.addEventListener('click', () => setOpen(p, p.btn.getAttribute('aria-expanded') !== 'true')));
 // Any link to the trajectory opens the path on arrival.
 const pathPair = pairs.find(p => p.panel.id === 'bh-path');
@@ -107,6 +112,44 @@ if (aro && !reduced) {
   sec.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch') goHome(); });
   sec.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { stamp = -1e9; follow(e); clearTimeout(rest); rest = setTimeout(goHome, 2600); } });
 }
+
+// ---------- the relay: one real case, a step at a time ----------
+// The seven steps are things to press. Pointing at one, or tabbing to it, shows what that step was in the trading
+// bot's case; left alone, the relay walks through them by itself. Only classes and one custom property change here:
+// the light slides along the line with a CSS transition.
+$$('#work .relay').forEach(fig => {
+  let steps = [];
+  try { steps = JSON.parse(fig.dataset.steps || '[]'); } catch { /* no steps, no walk */ }
+  const cap = fig.querySelector('.rl-cap'), svgs = $$('.rl', fig);
+  if (!steps.length || !cap) return;
+  let at = -1, timer = 0, until = 0;
+  const show = i => {
+    at = i;
+    svgs.forEach(svg => {
+      const nds = $$('.nd', svg);
+      nds.forEach((g, k) => g.classList.toggle('on', k === i));
+      if (nds[i]) svg.style.setProperty('--at', nds[i].dataset.f);
+    });
+    const s = steps[i], el = (tag, cls, text) => { const x = document.createElement(tag); if (cls) x.className = cls; x.textContent = text; return x; };
+    cap.replaceChildren(el('span', 'rl-k ' + s.who, s.who === 'me' ? 'Me' : 'AI'), el('b', '', s.t), el('span', '', s.e), el('span', 'rl-n', fig.dataset.case + ' · ' + (i + 1) + ' of ' + steps.length));
+  };
+  const walk = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { if (!reduced && fig.classList.contains('live') && performance.now() > until) show((at + 1) % steps.length); walk(); }, 3200);
+  };
+  const pick = (target, hold) => { const g = target.closest && target.closest('.nd'); if (!g) return; if (+g.dataset.i !== at) show(+g.dataset.i); until = performance.now() + hold; };
+  fig.addEventListener('pointerover', e => pick(e.target, 7000));
+  fig.addEventListener('click', e => pick(e.target, 14000));
+  fig.addEventListener('focusin', e => pick(e.target, 14000));
+  fig.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    show((at + (e.key === 'ArrowRight' ? 1 : steps.length - 1)) % steps.length);
+    until = performance.now() + 14000;
+  });
+  show(0);
+  walk();
+});
 
 // ---------- things that start when they are seen ----------
 const countUp = el => {
