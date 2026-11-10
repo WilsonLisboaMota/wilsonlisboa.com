@@ -1,0 +1,22 @@
+---
+// Where one colour of the page ends and the next begins: the hero's wall, seen edge-on. Fine lines above and below,
+// drifting, and between them the chart's own line, which is also the edge of the colour. The same threshold at every
+// change of colour (dark to paper, paper to blue, blue to dark), so the page changes key the same way each time.
+// One half is filled with the colour of the section next door; the other half shows the section the seam sits in.
+interface Props { fill: string; side: 'above' | 'below'; up: string; down: string }
+const { fill, side, up, down } = Astro.props;
+const f = (v: number) => v.toFixed(1);
+const H = 90, N = 9, MID = 4;
+// Each line repeats every 1440 units, so the strip can drift for ever; neighbours differ a little, and never cross.
+const y = (i: number, x: number) => 9 + i * 9 + 5.5 * Math.sin(x / 1440 * Math.PI * 4 + 0.6 + i * 0.2) + 2.8 * Math.sin(x / 1440 * Math.PI * 6 + 1.9 + i * 0.3);
+const line = (i: number) => { let d = ''; for (let x = 0; x <= 2880; x += 48) d += `${d ? 'L' : 'M'}${x} ${f(y(i, x))}`; return d; };
+const mid = line(MID);
+const area = side === 'above' ? `${mid}L2880 -2L0 -2Z` : `${mid}L2880 ${H + 2}L0 ${H + 2}Z`;
+---
+<div class="seam" aria-hidden="true">
+  <svg viewBox={`0 0 2880 ${H}`} preserveAspectRatio="none">
+    <path d={area} fill={fill} />
+    {Array.from({ length: N }, (_, i) => i !== MID && <path class="sm-l" d={line(i)} stroke={i < MID ? up : down} />)}
+    <path class="sm-c" d={mid} />
+  </svg>
+</div>

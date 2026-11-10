@@ -6,15 +6,7 @@ import { roles, todayTiles, proofs } from '../data/site';
 import Card from './Card.astro';
 import Sheet from './Sheet.astro';
 import Icon from './Icon.astro';
-
-const f = (v: number) => v.toFixed(1);
-// The seam: the wall's fine lines, seen edge-on. Each line repeats every 1440 units, so the strip can drift for ever.
-const seam = (y: number, ph: number) => {
-  let d = `M0 ${f(y + 5 * Math.sin(ph))}`;
-  for (let x = 60; x <= 2880; x += 60) d += `L${x} ${f(y + 5 * Math.sin(ph + x / 1440 * Math.PI * 4) + 2.5 * Math.sin(ph * 2 + x / 1440 * Math.PI * 6))}`;
-  return d;
-};
-const lines = Array.from({ length: 10 }, (_, i) => ({ d: seam(12 + i * 7.4, i * 0.55), low: i >= 5 }));
+import Seam from './Seam.astro';
 
 // The BI drawing from the hero: tables below, lineage rising to the points of the chart above.
 const pts = [[64, 46], [150, 30], [236, 40]];
@@ -24,8 +16,10 @@ tables.forEach(([x, y, w, h], i) => {
   sig += `<path d="M${x} ${y}h${w}v${h}h${-w}zM${x} ${y + 11}h${w}M${x} ${y + 22}h${w}M${x} ${y + 33}h${w}M${x + w / 3} ${y + 11}v${h - 11}M${x + (2 * w) / 3} ${y + 11}v${h - 11}" style="--dl:${(i * 0.12).toFixed(2)}s"/>`;
   const [px, py] = pts[i], cx = x + w / 2;
   sig += `<path d="M${cx} ${y}C${cx} ${y - 46} ${px} ${py + 58} ${px} ${py}" style="--dl:${(0.45 + i * 0.12).toFixed(2)}s"/>`;
+  // Once drawn, a light rises from each table to its point on the chart, and the point answers.
+  sig += `<path class="pl" pathLength="100" d="M${cx} ${y}C${cx} ${y - 46} ${px} ${py + 58} ${px} ${py}" style="--pd:${(i * 0.8).toFixed(1)}s"/>`;
 });
-sig += pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5"/>`).join('');
+sig += pts.map(([x, y], i) => `<circle class="ring" cx="${x}" cy="${y}" r="3.5" style="--pd:${(i * 0.8).toFixed(1)}s"/><circle cx="${x}" cy="${y}" r="3.5"/>`).join('');
 
 const now = roles[roles.length - 1];
 const first = roles[0].id;
@@ -33,9 +27,7 @@ const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-
 ---
 <section class="sx paper" id="bi" data-sec data-glow aria-labelledby="bi-t">
   <div class="glow" aria-hidden="true"><svg><rect width="100%" height="100%" fill="url(#wl-paper)" /></svg></div>
-  <div class="seam" aria-hidden="true">
-    <svg viewBox="0 0 2880 90" preserveAspectRatio="none">{lines.map(l => <path class:list={[{ low: l.low }]} d={l.d} />)}</svg>
-  </div>
+  <Seam fill="#021C2A" side="above" up="#8FD0FF" down="#00486F" />
   <div class="w">
     <div class="hd">
       <p class="meta kick">Business Intelligence</p>

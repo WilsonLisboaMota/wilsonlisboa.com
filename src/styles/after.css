@@ -56,7 +56,13 @@
 @keyframes rise{from{opacity:0;translate:0 26px}}
 
 /* ---------- the dock: where you are, and the CV always one tap away ---------- */
-#work .dock{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:clamp(12px,2vw,28px);height:54px;padding:0 var(--gutter);background:rgba(2,28,42,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid rgba(228,236,233,.1);color:#E4ECE9}
+#work .dock{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:clamp(12px,2vw,28px);height:54px;padding:0 var(--gutter);background:rgba(2,28,42,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#E4ECE9}
+/* Under the bar, the hero's chart line: faint all the way across, and bright as far as the visitor has come (the
+   bright copy is revealed by the scroll itself; see the inline style in Dock.astro). */
+#work .dock-line{position:absolute;left:0;bottom:-7px;width:100%;height:13px;overflow:visible;pointer-events:none}
+#work .dock-line path{fill:none;stroke:rgba(228,236,233,.17);stroke-width:1.2}
+#work .dock-line.dl-p{display:none}
+#work .dock-line.dl-p path{stroke:#E4ECE9;stroke-width:1.6}
 #work .dock-name{flex:none;font-weight:600;font-size:15px;text-decoration:none;white-space:nowrap}
 #work .dock-nav{display:flex;gap:clamp(16px,2.2vw,30px);margin-left:auto;min-width:0;overflow-x:auto;scrollbar-width:none}
 #work .dock-nav::-webkit-scrollbar{display:none}
@@ -112,11 +118,21 @@
 @media (min-width:980px){#work .hd .ld{grid-column:2/-1}}
 @media (min-width:1100px){#work .hd .ld{white-space:nowrap}}
 @media (prefers-reduced-motion:no-preference){
-  .io #work .sig path{stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
-  .io #work .sig circle{opacity:0;transition:opacity .6s 1.5s}
-  .io #work .sig.drawn path{transition:stroke-dashoffset 1.7s cubic-bezier(.3,.1,.2,1) var(--dl,0s);stroke-dashoffset:0}
-  .io #work .sig.drawn circle{opacity:1}
+  .io #work .sig path:not(.pl){stroke-dasharray:var(--len);stroke-dashoffset:var(--len)}
+  .io #work .sig circle:not(.ring){opacity:0;transition:opacity .6s 1.5s}
+  .io #work .sig.drawn path:not(.pl){transition:stroke-dashoffset 1.7s cubic-bezier(.3,.1,.2,1) var(--dl,0s);stroke-dashoffset:0}
+  .io #work .sig.drawn circle:not(.ring){opacity:1}
+  /* Once drawn, each stays alive while it is on screen: lights run along a few of its lines, and its points answer. */
+  #work .sig.drawn.live .pl{opacity:1;animation:sig-run 3.4s linear infinite;animation-delay:calc(2s + var(--pd,0s))}
+  #work .sig.drawn.live .ring{animation:sig-ring 3.4s ease-out infinite;animation-delay:calc(2s + var(--pd,0s))}
+  #work .hd:hover .sig.drawn.live :is(.pl,.ring){animation-duration:1.5s;animation-delay:calc(var(--pd,0s) * .35)}
 }
+#work .sig{transition:transform .6s var(--ease)}
+#work .hd:hover .sig{transform:scale(1.06)}
+#work .sig .pl{fill:none;stroke:var(--fg);stroke-width:1.7;stroke-linecap:round;stroke-opacity:.95;stroke-dasharray:8 100;stroke-dashoffset:8;opacity:0}
+#work .sig .ring{fill:none;stroke:var(--fg);stroke-width:1.2;opacity:0;transform-box:fill-box;transform-origin:center}
+@keyframes sig-run{0%{stroke-dashoffset:8}66%,100%{stroke-dashoffset:-100}}
+@keyframes sig-ring{0%,60%{opacity:0;transform:none}66%{opacity:.9}100%{opacity:0;transform:scale(3.6)}}
 
 /* ---------- now: who, the CV, and three numbers ---------- */
 #work .now{padding-block:clamp(40px,6vh,72px) clamp(12px,2.4vh,28px)}
@@ -362,14 +378,17 @@
   #work dialog.sheet{width:100%;max-width:100%;max-height:90vh;margin:auto 0 0;border-radius:22px 22px 0 0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 28px)}
 }
 
-/* ---------- where the dark meets the paper: the wall's own fine lines, seen edge-on, drifting ---------- */
-#work .paper.sx{padding-top:0}
-#work .seam{height:clamp(56px,7vw,92px);background:linear-gradient(#021C2A 50%,var(--bg) 50%);overflow:hidden}
+/* ---------- where one colour ends and the next begins: the wall's fine lines seen edge-on, drifting, and between
+   them the chart's own line, which is the edge of the colour. The same at every change (see Seam.astro). ---------- */
+#work :is(.paper,.blue).sx{padding-top:0}
+#work .blue.sx{padding-bottom:0}
+#work .seam{height:clamp(56px,7vw,92px);overflow:hidden}
 #work .seam svg{display:block;width:200%;height:100%;animation:seam 70s linear infinite}
-#work .seam path{fill:none;stroke:#8FD0FF;stroke-opacity:.55;stroke-width:1;vector-effect:non-scaling-stroke}
-#work .seam path.low{stroke:#00486F;stroke-opacity:.5}
+#work .seam .sm-l{fill:none;stroke-width:1;stroke-opacity:.5;vector-effect:non-scaling-stroke}
+#work .seam .sm-c{fill:none;stroke:#1A9AE4;stroke-width:1.6;vector-effect:non-scaling-stroke}
 @keyframes seam{to{transform:translateX(-50%)}}
-#work .paper > .w{padding-top:clamp(44px,7vh,84px)}
+#work :is(.paper,.blue) > .w{padding-top:clamp(44px,7vh,84px)}
+#work .blue > .w{padding-bottom:clamp(40px,6vh,72px)}
 
 /* ---------- BI: what Wilson is today, then the path, then the proof ---------- */
 #work .today{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:26px 48px;margin-top:clamp(36px,6vh,64px);padding:clamp(22px,3vw,40px);border-radius:22px;background:#fff;box-shadow:0 30px 70px -44px rgba(13,27,36,.45),inset 0 0 0 1px var(--hair2);transform:perspective(1600px) rotateX(calc(var(--rx,0deg) * .28)) rotateY(calc(var(--ry,0deg) * .28));transition:transform .5s var(--ease),box-shadow .3s}
@@ -441,9 +460,14 @@
 /* ---------- leadership: the hero's formation, then what colleagues say, as three cards ---------- */
 /* The formation, in the hero's own strokes: an open arrowhead, brighter at its point. Seven of them start scattered
    and fall in behind the first; after that they follow the pointer (after.js sets where; the lag is in the timing). */
-#work .aro{position:relative;z-index:0;width:240px;height:130px;justify-self:end;pointer-events:none}
+#work .aro{position:relative;z-index:0;width:204px;height:124px;justify-self:end;pointer-events:none}
 @media (max-width:979px){#work .aro{order:-1;justify-self:start}}
 @media (min-width:980px){#work .hd .aro{align-self:center;margin:-10px 0}}
+/* The title here is longer than the others: it takes the whole row, and the formation flies above its first line. */
+@media (min-width:980px){
+  #work #leadership .hd h2{grid-column:2/-1;grid-row:1}
+  #work #leadership .hd .aro{grid-column:3;grid-row:1;align-self:start;margin:-66px 0 0}
+}
 #work #leadership :is(.hd > :not(.aro),.cards){position:relative;z-index:1}
 #work .arw{position:absolute;left:0;top:0;width:22px;height:20.4px;overflow:visible;transform-origin:50% 15.4%;transform:translate(calc(var(--px,var(--hx)) - 50%),calc(var(--py,var(--hy)) - 15.4%)) rotate(var(--pr,0deg));transition:transform 1.5s cubic-bezier(.25,.9,.3,1) var(--dl)}
 #work .arw.lead{width:30px;height:27.9px}
@@ -456,7 +480,10 @@
 @media (prefers-reduced-motion:no-preference){
   .io #work .aro:not(.drawn) .arw{transform:translate(calc(var(--x0) - 50%),calc(var(--y0) - 15.4%)) rotate(var(--r0))}
   #work .aro.drawn:not(.chase) .fly{animation:bob 5s ease-in-out 1.8s infinite}
+  /* At rest, a signal passes down the formation, from the one in front to the last. */
+  #work .aro.drawn.live:not(.chase) .arw{animation:arw-wave 4.4s ease-in-out infinite;animation-delay:calc(2.2s + var(--i) * .14s)}
 }
+@keyframes arw-wave{0%,22%,100%{opacity:1}10%{opacity:.25}}
 @keyframes bob{50%{transform:translateY(-6px)}}
 #work .qc{gap:16px;padding:22px 24px 22px}
 #work .qc .ic-quote{width:42px;height:42px;margin:-4px 0 0 -6px;overflow:visible;transition:transform .5s var(--ease)}
@@ -476,25 +503,32 @@
 #work .ct{padding-bottom:clamp(36px,6vh,64px)}
 #work .ct h2{font-size:clamp(46px,8vw,124px);line-height:.95;font-weight:640;font-stretch:106%;letter-spacing:-.045em}
 #work .ct-g{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:clamp(28px,5vh,56px)}
-@media (min-width:760px){#work .ct-g{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:640px){#work .ct-g{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1000px){#work .ct-g{grid-template-columns:minmax(0,1.7fr) repeat(3,minmax(0,1fr))}}
 #work .ct-i{display:flex;align-items:center;gap:18px;padding:22px;border-radius:18px;background:var(--card);box-shadow:inset 0 0 0 1px var(--hair);color:inherit;text-decoration:none;transition:box-shadow .3s,background-color .3s,transform .3s var(--ease)}
-@media (min-width:760px){#work .ct-i{flex-direction:column;align-items:flex-start;gap:26px;padding:26px 24px 24px}}
+@media (min-width:640px){#work .ct-i{flex-direction:column;align-items:flex-start;gap:26px;padding:26px 24px 24px}}
 #work .ct-i .ic{width:46px;height:46px;stroke-width:1.15;color:#8FD0FF;overflow:visible;transition:transform .45s var(--ease),color .3s}
 #work .ct-i .ic path{transform-box:fill-box;transition:transform .45s var(--ease)}
 #work .ct-i .ic-mail .p1{transform-origin:50% 0}
 #work .ct-i .ic-doc :is(.p1,.p2){transform-origin:0 50%}
+#work .ct-i .ic-git path{transform-origin:center}
 #work .ct-i span{font-size:clamp(15px,1.25vw,18px);line-height:1.3;font-weight:580;overflow-wrap:anywhere}
 #work .ct-i:hover{transform:translateY(-4px);box-shadow:inset 0 0 0 1px var(--fg3),0 24px 44px -28px rgba(0,0,0,.7)}
 #work .ct-i:is(:hover,.play) .ic{color:#fff;transform:translateY(-5px) rotate(-7deg)}
 /* the envelope opens, the dot of the "in" jumps, the page is written on */
 #work .ct-i:is(:hover,.play) .ic-mail .p1{transform:scaleY(-1)}
 #work .ct-i:is(:hover,.play) .ic-in .p1{transform:translateY(-4px)}
+#work .ct-i:is(:hover,.play) .ic-git :is(.p1,.p2,.p3){animation:gnode .9s var(--ease) both}
+#work .ct-i:is(:hover,.play) .ic-git .p2{animation-delay:.14s}
+#work .ct-i:is(:hover,.play) .ic-git .p3{animation-delay:.28s}
 #work .ct-i:is(:hover,.play) .ic-doc .p1{animation:write .9s var(--ease) both}
 #work .ct-i:is(:hover,.play) .ic-doc .p2{animation:write .9s var(--ease) .18s both}
 @keyframes write{0%{transform:scaleX(0)}100%{transform:none}}
+@keyframes gnode{0%,100%{transform:none}45%{transform:scale(1.5)}}
 #work .ct.live .ct-i .ic{animation:float 5s ease-in-out infinite}
 #work .ct.live .ct-i:nth-child(2) .ic{animation-delay:-1.6s}
 #work .ct.live .ct-i:nth-child(3) .ic{animation-delay:-3.2s}
+#work .ct.live .ct-i:nth-child(4) .ic{animation-delay:-4.4s}
 #work .ct.live .ct-i:is(:hover,.play) .ic{animation:none}
 @keyframes float{50%{transform:translateY(-5px)}}
 #work .ft{padding:22px 0 calc(env(safe-area-inset-bottom,0px) + 36px)}
@@ -503,7 +537,7 @@
 #work .ft a{color:var(--fg2);text-decoration:none}
 #work .ft a:hover{color:var(--fg)}
 
-@media (max-width:699px){#work .sx{padding-block:60px 68px}#work .paper.sx{padding-top:0}}
+@media (max-width:699px){#work .sx{padding-block:60px 68px}#work :is(.paper,.blue).sx{padding-top:0}#work .blue.sx{padding-bottom:0}}
 @media (prefers-reduced-motion:reduce){
   #work *,#work *::before,#work *::after{animation:none!important}
   .js #work .bh,.js #work .bh.open,#work .card,#work .today,#work .arw,#work .vz,#work .vz *{transition:none}

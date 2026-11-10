@@ -4,26 +4,28 @@
 // side; each opens the longer excerpt.
 import { quotes } from '../data/site';
 import Icon from './Icon.astro';
+import Seam from './Seam.astro';
 
 // Where each arrowhead rests, as in the hero seen from the far side: one in front at the top, six behind in two wings.
-// They start scattered, each pointing its own way. Positions are in pixels inside the formation's box (240 by 130).
+// They start scattered, each pointing its own way. Positions are in pixels inside the formation's box (204 by 124).
 let seed = 19;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-const home: [number, number][] = [[120, 12]];
-for (let k = 1; k <= 3; k++) { home.push([120 - 36 * k, 12 + 34 * k]); home.push([120 + 36 * k, 12 + 34 * k]); }
+const home: [number, number][] = [[102, 12]];
+for (let k = 1; k <= 3; k++) { home.push([102 - 30 * k, 12 + 32 * k]); home.push([102 + 30 * k, 12 + 32 * k]); }
 const birds = home.map(([x, y], i) => ({
   x, y,
-  x0: Math.round(12 + rnd() * 216), y0: Math.round(6 + rnd() * 112), r0: Math.round(rnd() * 300 - 150),
+  x0: Math.round(10 + rnd() * 184), y0: Math.round(6 + rnd() * 108), r0: Math.round(rnd() * 300 - 150),
   dl: (i ? 0.2 + rnd() * 0.6 : 0).toFixed(2),
 }));
 const initials = (n: string) => n.split(' ').map(s => s[0]).join('').slice(0, 2);
 ---
 <section class="sx blue" id="leadership" data-sec data-glow aria-labelledby="ld-t">
   <div class="glow" aria-hidden="true"><svg><rect width="100%" height="100%" fill="url(#wl-blue)" /></svg></div>
+  <Seam fill="#F2F5F3" side="above" up="#00486F" down="#CFEAFF" />
   <div class="w">
     <div class="hd">
       <p class="meta kick">Leadership</p>
-      <h2 id="ld-t">Six BI developers. <em>I lead the team.</em></h2>
+      <h2 id="ld-t">From analyst in 2019 <em>to AI-empowered manager.</em></h2>
       <div class="aro" aria-hidden="true">
         <div class="fly">
           {birds.map((b, i) => (
@@ -50,6 +52,7 @@ const initials = (n: string) => n.split(' ').map(s => s[0]).join('').slice(0, 2)
       ))}
     </div>
   </div>
+  <Seam fill="#021C2A" side="below" up="#CFEAFF" down="#8FD0FF" />
   {quotes.map(q => (
     <dialog class="sheet qsh" id={`sheet-q-${q.id}`} aria-labelledby={`qh-${q.id}`}>
       <form method="dialog"><button class="x" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>

@@ -10,13 +10,16 @@ import Viz from './Viz.astro';
 const fx = 268, fy = 112;
 let seed = 7;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-let sig = '';
+let sig = '', pulses = '', np = 0;
 for (let i = 0; i < 44; i++) {
   const sx = rnd() * 150, sy = 10 + rnd() * 180;
   const c1x = sx + 60 + rnd() * 60, c1y = sy + (rnd() - .5) * 60, c2x = fx - 70 - rnd() * 40, c2y = fy + (sy - fy) * (0.25 + rnd() * 0.3);
-  sig += `<path d="M${sx.toFixed(1)} ${sy.toFixed(1)}C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${fx} ${fy}" style="--dl:${(rnd() * 0.5).toFixed(2)}s"/>`;
+  const d = `M${sx.toFixed(1)} ${sy.toFixed(1)}C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${fx} ${fy}`;
+  sig += `<path d="${d}" style="--dl:${(rnd() * 0.5).toFixed(2)}s"/>`;
+  // Once drawn, a light runs down a few of the lines into the point, one after another, and the point answers.
+  if (i % 7 === 3) pulses += `<path class="pl" pathLength="100" d="${d}" style="--pd:${(np++ * 0.55).toFixed(2)}s"/>`;
 }
-sig += `<circle cx="${fx}" cy="${fy}" r="3.5"/>`;
+sig += pulses + `<circle class="ring" cx="${fx}" cy="${fy}" r="3.5"/><circle cx="${fx}" cy="${fy}" r="3.5"/>`;
 
 // The relay, drawn twice from the same steps: across on a wide screen, down on a phone. Two lanes, one line passing
 // between them; each step lights as the line's bright stretch reaches it (its share of the line's length).

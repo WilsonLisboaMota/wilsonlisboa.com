@@ -1,5 +1,5 @@
 ---
-// The end of the page: three ways to reach Wilson, as three things to press, and the last line.
+// The end of the page: four ways to reach Wilson, as four things to press, and the last line.
 import { person } from '../data/site';
 import Icon from './Icon.astro';
 ---
@@ -10,6 +10,7 @@ import Icon from './Icon.astro';
     <div class="ct-g" data-seq>
       <a class="ct-i" href={`mailto:${person.email}`} data-play><Icon name="mail" /><span>{person.email}</span></a>
       <a class="ct-i" href={person.linkedin} rel="noopener" data-play><Icon name="in" /><span>LinkedIn</span></a>
+      <a class="ct-i" href={person.github} rel="noopener" data-play><Icon name="git" /><span>GitHub</span></a>
       <a class="ct-i" href={person.cv} data-play><Icon name="doc" /><span>The CV</span></a>
     </div>
   </div>

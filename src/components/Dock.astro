@@ -2,6 +2,12 @@
 // The bar that stays with the visitor below the hero: where they are, and the CV always one tap away.
 // Sticky inside #work, so it only exists on the far side of the wall, with no script.
 import { person } from '../data/site';
+
+// The line under the bar is the hero's chart line. It draws itself from left to right as the visitor goes down the
+// page: where it has reached is how far they have come. Driven by the scroll itself (a scroll-driven animation, no
+// script); a browser without them shows the faint line only.
+let line = '';
+for (let x = 0; x <= 1440; x += 16) line += `${line ? 'L' : 'M'}${x} ${(6.5 + 2.6 * Math.sin(x / 1440 * Math.PI * 3 + 0.4) + 1.1 * Math.sin(x / 1440 * Math.PI * 7 + 1)).toFixed(1)}`;
 ---
 <nav class="dock" aria-label="Sections">
   <a class="dock-name" href="#top">Wilson Mota</a>
@@ -12,4 +18,15 @@ import { person } from '../data/site';
     <a href="#contact">Contact</a>
   </div>
   <a class="dock-cv" href={person.cv}>CV</a>
+  <svg class="dock-line" viewBox="0 0 1440 13" preserveAspectRatio="none" aria-hidden="true"><path d={line} /></svg>
+  <svg class="dock-line dl-p" viewBox="0 0 1440 13" preserveAspectRatio="none" aria-hidden="true"><path d={line} /></svg>
 </nav>
+
+<!-- Kept out of the stylesheet on purpose: the minifier folds animation-timeline into the animation shorthand, which is invalid. -->
+<style is:inline>
+@keyframes dock-line { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@supports (animation-timeline: view()) {
+  #work { view-timeline-name: --work; view-timeline-axis: block; }
+  #work .dock-line.dl-p { display: block; animation-name: dock-line; animation-duration: 1ms; animation-timing-function: linear; animation-fill-mode: both; animation-timeline: --work; animation-range-start: contain 0%; animation-range-end: contain 100%; }
+}
+</style>

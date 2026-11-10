@@ -121,7 +121,7 @@ if ('IntersectionObserver' in window) {
 
   // Drawings only move while they are on screen.
   const live = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('live', e.isIntersecting)), { rootMargin: '60px 0px' });
-  $$('#work .card, #work [data-live], #work .ct').forEach(el => live.observe(el));
+  $$('#work .card, #work [data-live], #work .ct, #work .sig, #work .aro').forEach(el => live.observe(el));
 
   // Once, the first time each is seen: drawings draw themselves, numbers count up, groups come in one after another.
   const once = new IntersectionObserver((es, io) => es.forEach(e => {
@@ -130,7 +130,8 @@ if ('IntersectionObserver' in window) {
     io.unobserve(el);
     if (el.matches('.sig, .aro')) el.classList.add('drawn');
     else if (el.dataset.count) countUp(el);
-  }), { threshold: 0.5 });
+    // Not at the first sight of it, at the very bottom of the screen, but once it is well inside: an entrance is to be seen.
+  }), { threshold: 0.6, rootMargin: '0px 0px -16% 0px' });
   $$('#work .sig, #work .aro, #work [data-count]').forEach(el => once.observe(el));
   const seq = new IntersectionObserver((es, io) => es.forEach(e => {
     if (!e.isIntersecting) return;
@@ -160,7 +161,7 @@ if ('IntersectionObserver' in window) {
   $$('#work [data-sec]').forEach(s => where.observe(s));
 } else {
   // No observer: let the drawings run and stay drawn.
-  $$('#work .card, #work [data-live], #work .ct').forEach(el => el.classList.add('live'));
+  $$('#work .card, #work [data-live], #work .ct, #work .sig, #work .aro').forEach(el => el.classList.add('live'));
   $$('#work .sig, #work .aro').forEach(el => el.classList.add('drawn'));
 }
 

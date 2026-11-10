@@ -8,6 +8,7 @@ export const person = {
   place: 'Switzerland',
   email: 'wilson.lisboa@wilsonlisboa.com',
   linkedin: 'https://www.linkedin.com/in/wilson-lisboa-mota/',
+  github: 'https://github.com/WilsonLisboaMota',
   cv: '/cv/',
   pdf: '/cv/wilson-lisboa-mota-cv.pdf',
 };
