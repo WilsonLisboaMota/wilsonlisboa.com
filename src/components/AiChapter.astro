@@ -1,77 +1,97 @@
 ---
-// The Artificial Intelligence chapter of the home page: how I work with AI, then the three projects as evidence.
-import '../styles/ai-chapter.css';
+// Artificial Intelligence: four rules, closed until asked, and each project as an exhibit:
+// a flood of data on the left, one answer on the right, and what is behind it one button away.
+import { rules, projects } from '../data/site';
 
-const bot = '/work/ai-trading-bot/';
+// The AI drawing from the hero: about 44 curves that start scattered and converge on one point.
+const fx = 268, fy = 112;
+let seed = 7;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+let sig = '';
+for (let i = 0; i < 44; i++) {
+  const sx = rnd() * 150, sy = 10 + rnd() * 180;
+  const c1x = sx + 60 + rnd() * 60, c1y = sy + (rnd() - .5) * 60, c2x = fx - 70 - rnd() * 40, c2y = fy + (sy - fy) * (0.25 + rnd() * 0.3);
+  sig += `<path d="M${sx.toFixed(1)} ${sy.toFixed(1)}C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${fx} ${fy}" style="--dl:${(rnd() * 0.5).toFixed(2)}s"/>`;
+}
+sig += `<circle cx="${fx}" cy="${fy}" r="3.5"/>`;
+
+// Each row of the flood drifts at its own pace.
+const pace = [64, 92, 74, 100, 82];
+const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-3.8"/></svg>';
 ---
-<section class="ch" id="ai" aria-labelledby="ai-t">
-  <div class="open">
-    <p class="meta kick">Artificial Intelligence</p>
-    <h2 id="ai-t">AI brings speed. <em>We bring judgement.</em></h2>
-    <svg class="sig" id="sig" viewBox="0 0 320 200" aria-hidden="true"></svg>
-    <p class="ch-lede">Three AI projects, each turning a flood of data into one clear answer.</p>
-  </div>
+<section class="sx" id="ai" data-sec aria-labelledby="ai-t">
+  <div class="w">
+    <div class="hd">
+      <p class="meta kick">Artificial Intelligence</p>
+      <h2 id="ai-t">AI brings speed. <em>We bring judgement.</em></h2>
+      <svg class="sig" viewBox="0 0 320 200" aria-hidden="true" set:html={sig}></svg>
+      <p class="ld">Four AI projects, each turning a flood of data into one clear answer.</p>
+    </div>
 
-  <div class="rules">
-    <div class="rule">
-      <h3>I choose the tools. The AI builds.</h3>
-      <p>In the trading bot, I picked the broker and the AI models that read the news. Claude wrote the code and the tests.</p>
-      <a href={`${bot}#who`}>Who did what</a>
+    <div class="rules">
+      {rules.map(r => (
+        <details class="rule">
+          <summary>{r.t}</summary>
+          <p>{r.d}</p>
+          <a class="lk" href={r.href}>{r.a}</a>
+        </details>
+      ))}
     </div>
-    <div class="rule">
-      <h3>The bar is set before the results.</h3>
-      <p>The pass marks were written down before the first test. No idea reached them, and the page says so.</p>
-      <a href={`${bot}#research`}>The research</a>
-    </div>
-    <div class="rule">
-      <h3>Results are checked twice.</h3>
-      <p>A second AI agent redid the bot's calculations on its own. The Bitcoin figures were rebuilt from raw prices.</p>
-      <a href={`${bot}bitcoin-study/`}>The Bitcoin study</a>
-    </div>
-    <div class="rule">
-      <h3>What fails stays on the page.</h3>
-      <p>Every case study ends with its limits, down to a leaked API key that had to be revoked.</p>
-      <a href={`${bot}#limits`}>The trading bot's limits</a>
-    </div>
-  </div>
 
-  <div class="ev">
-    <p class="meta">The evidence</p>
-    <a class="proj" href={bot}>
-      <p class="meta st live">Live on paper trading</p>
-      <div><h3>AI Trading Bot</h3><p class="hl">AI builds a trading bot in minutes. The hard part is tuning it to behave the way I would.</p></div>
-      <p class="fact">Three bots trade US stocks on paper. The question: does AI reading the news beat a simple list of words?<span class="go">Read the case study</span></p>
-    </a>
-    <div class="proj" id="cfo">
-      <p class="meta st idle">Working pipeline · product not built</p>
-      <div><h3>Personal CFO</h3><p class="hl">My whole financial situation, live: where the money goes, what changed and what comes next.</p></div>
-      <p class="fact">Built from about 2,400 real transactions. Every number traces back to one of them.<span>Case study to follow</span></p>
-    </div>
-    <div class="proj" id="radar">
-      <p class="meta st idle">In alpha · first alerts not sent yet</p>
-      <div><h3>Property Deal Radar</h3><p class="hl">Brings together the property investments with the best economic viability, and alerts me when a hot deal appears.</p></div>
-      <p class="fact">Built for my own investments, and the kind of tool an estate agent would want. It may become a product.<span>Case study to follow</span></p>
+    <div class="exs">
+      <p class="meta"><span>The evidence</span><span>The words in each flood are illustrative</span></p>
+      {projects.map(p => (
+        <article class="ex" id={p.id}>
+          <div class="ex-g">
+            <div>
+              <p class:list={['st', { live: p.live }]}>{p.status}</p>
+              <h3>{p.name}</h3>
+              <p class="ln">{p.line}</p>
+              <div class="ex-act">
+                <button class="go-b" type="button" aria-expanded="false" aria-controls={`bh-${p.id}`}><span class="x">Go behind</span><span class="y">Back to the surface</span><Fragment set:html={chev} /></button>
+                {p.href && <a class="btn" href={p.href}>{p.cta}</a>}
+              </div>
+            </div>
+            <div class="inst">
+              <div class="fl" aria-hidden="true">
+                <div class="fl-p">
+                  {p.flood.map((row, i) => (
+                    <div class="fl-r" style={`--d:${pace[i % pace.length]}s`}>
+                      {[0, 1, 2, 3, 4, 5].flatMap(() => row).map(t => t.startsWith('*') ? <b>{t.slice(1)}</b> : <span>{t}</span>)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div class="out">
+                <p class="gate">{p.gate}</p>
+                <p class="ans"><span class="ty" data-text={p.answer}>{p.answer}</span><i class="car" aria-hidden="true"></i></p>
+                <p class="means">{p.means}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bh" id={`bh-${p.id}`}>
+            <div class="bh-in">
+              <div class="bh-g">
+                <div class="bh-c me"><h4>What I decided</h4><ul>{p.me.map(t => <li>{t}</li>)}</ul></div>
+                <div class="bh-c ai"><h4>{p.aiLabel}</h4><ul>{p.ai.map(t => <li>{t}</li>)}</ul></div>
+                <div class="bh-c no"><h4>Not there yet</h4><ul>{p.not.map(t => <li>{t}</li>)}</ul></div>
+                <div class="bh-c pf">
+                  {p.proof.kind === 'bars' && (
+                    <div class="bars" role="img" aria-label={`${p.proof.rows.map(r => `${r.l}: ${r.t}`).join('. ')}. The bar: ${p.proof.goal}%.`}>
+                      {p.proof.rows.map(r => <div class="r"><p><span>{r.l}</span><b>{r.t}</b></p><div class="t"><i style={`width:${r.v}%`}></i></div></div>)}
+                      <span class="goal"><em>The bar: {p.proof.goal}%</em></span>
+                    </div>
+                  )}
+                  {p.proof.kind === 'steps' && <ol class="steps">{p.proof.steps.map(s => <li>{s}</li>)}</ol>}
+                  {p.proof.kind === 'phone' && <span class="phone"><img src={p.proof.src} alt={p.proof.alt} width="390" height="560" loading="lazy" decoding="async" /></span>}
+                  <p class="pf-cap">{p.proof.cap}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      ))}
     </div>
   </div>
 </section>
-
-<script>
-  document.documentElement.classList.add('js');
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // The AI signature: about 44 curves that start scattered and converge on one point,
-  // "a lot of information turned into knowledge", as in the hero.
-  const svg = document.getElementById('sig')!, fx = 268, fy = 112;
-  let seed = 7;
-  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  let html = '';
-  for (let i = 0; i < 44; i++) {
-    const sx = rnd() * 150, sy = 10 + rnd() * 180;
-    const c1x = sx + 60 + rnd() * 60, c1y = sy + (rnd() - .5) * 60, c2x = fx - 70 - rnd() * 40, c2y = fy + (sy - fy) * (0.25 + rnd() * 0.3);
-    html += `<path d="M${sx.toFixed(1)} ${sy.toFixed(1)}C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${fx} ${fy}" style="--dl:${(rnd() * 0.5).toFixed(2)}s"/>`;
-  }
-  html += `<circle cx="${fx}" cy="${fy}" r="3.5"/>`;
-  svg.innerHTML = html;
-  svg.querySelectorAll('path').forEach(p => p.style.setProperty('--len', String(Math.ceil(p.getTotalLength()))));
-  if (reduced) svg.classList.add('drawn');
-  else new IntersectionObserver((es, io) => es.forEach(e => { if (e.isIntersecting) { requestAnimationFrame(() => svg.classList.add('drawn')); io.disconnect(); } }), { threshold: 0.3 }).observe(svg);
-</script>

@@ -1,0 +1,24 @@
+---
+// The first thing on the far side: who, where, and four numbers, each a way in. The commit count is read from Git.
+import { execSync } from 'node:child_process';
+import { person, projects } from '../data/site';
+
+let commits = 0;
+try { commits = +execSync('git rev-list --count HEAD', { cwd: new URL('../../', import.meta.url) }).toString().trim(); } catch {}
+
+const kpis = [
+  { v: '7', l: 'years in Business Intelligence', a: 'The trajectory', href: '#trajectory' },
+  { v: '6', l: 'BI developers in the team I lead', a: 'Leadership', href: '#leadership' },
+  { v: String(projects.length), l: 'AI projects, from live to alpha', a: 'The projects', href: '#ai' },
+  { v: commits ? String(commits) : '—', l: 'commits building this site with AI', a: 'How it was built', href: '#built' },
+];
+---
+<section class="now w" id="now" data-sec aria-label="Now">
+  <div class="now-id">
+    <img src="/cv/photo.jpg" alt="Wilson Mota" width="76" height="76" loading="lazy" decoding="async">
+    <p><b>{person.name}</b><span>{person.role} · {person.place}</span></p>
+  </div>
+  <ul class="kpi">
+    {kpis.map(k => <li><a href={k.href}><b>{k.v}</b><span>{k.l}</span><i>{k.a} ↓</i></a></li>)}
+  </ul>
+</section>

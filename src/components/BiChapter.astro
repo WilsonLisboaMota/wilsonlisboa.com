@@ -1,0 +1,176 @@
+---
+// Business Intelligence: the career as one chart the visitor can cross-filter (roles above, the tools that fed them below),
+// then the evidence. The chart is built here, at compile time; the script only switches classes.
+import { roles, tools } from '../data/site';
+
+const ym = ([y, m]: [number, number]) => y + (m - 1) / 12;
+const d = new Date();
+const nowT = d.getFullYear() + d.getMonth() / 12 + d.getDate() / 365;
+const T0 = 2016.6, T1 = nowT + 0.14;
+const pct = (t: number) => (t - T0) / (T1 - T0) * 100;
+const span = (r: (typeof roles)[number]) => {
+  const a = pct(ym(r.from)), b = pct(r.to ? ym(r.to) + 1 / 12 : nowT);
+  return `left:${a.toFixed(2)}%;width:${(b - a).toFixed(2)}%`;
+};
+const years = Array.from({ length: Math.floor(nowT) - 2016 }, (_, i) => 2017 + i);
+const byId = Object.fromEntries(roles.map(r => [r.id, r]));
+const toolName = Object.fromEntries(tools.map(t => [t.id, t.name]));
+const usedIn = (id: string) => roles.filter(r => r.tools.includes(id));
+const period = (id: string) => {
+  const rs = usedIn(id);
+  const first = Math.min(...rs.map(r => r.from[0]));
+  const last = rs.some(r => !r.to) ? 'today' : String(Math.max(...rs.map(r => r.to![0])));
+  return `${first} → ${last}`;
+};
+const pick = 'role:corient';
+
+// The BI drawing from the hero: tables below, lineage rising to the points of the chart above.
+const pts = [[64, 46], [150, 30], [236, 40]];
+const tables = [[20, 138, 78, 44], [121, 150, 78, 44], [222, 138, 78, 44]];
+let sig = `<path d="M10 58C40 30 52 60 ${pts[0][0]} ${pts[0][1]}S118 20 ${pts[1][0]} ${pts[1][1]} 208 54 ${pts[2][0]} ${pts[2][1]} 296 18 310 26" style="--dl:.9s"/>`;
+tables.forEach(([x, y, w, h], i) => {
+  sig += `<path d="M${x} ${y}h${w}v${h}h${-w}zM${x} ${y + 11}h${w}M${x} ${y + 22}h${w}M${x} ${y + 33}h${w}M${x + w / 3} ${y + 11}v${h - 11}M${x + (2 * w) / 3} ${y + 11}v${h - 11}" style="--dl:${(i * 0.12).toFixed(2)}s"/>`;
+  const [px, py] = pts[i], cx = x + w / 2;
+  sig += `<path d="M${cx} ${y}C${cx} ${y - 46} ${px} ${py + 58} ${px} ${py}" style="--dl:${(0.45 + i * 0.12).toFixed(2)}s"/>`;
+});
+sig += pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5"/>`).join('');
+const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-3.8"/></svg>';
+---
+<section class="sx paper" id="bi" data-sec aria-labelledby="bi-t">
+  <svg class="edge" viewBox="0 0 1440 96" preserveAspectRatio="none" aria-hidden="true">
+    <path class="f" d="M0 0H1440V40C1340 78 1250 24 1140 36S930 92 800 62 600 10 470 30 240 84 120 62 40 40 0 52Z"/>
+    <path class="l" d="M1440 40C1340 78 1250 24 1140 36S930 92 800 62 600 10 470 30 240 84 120 62 40 40 0 52"/>
+  </svg>
+  <div class="w">
+    <div class="hd">
+      <p class="meta kick">Business Intelligence</p>
+      <h2 id="bi-t">Above: the chart. <em>Below: the platform.</em></h2>
+      <svg class="sig" viewBox="0 0 320 200" aria-hidden="true" set:html={sig}></svg>
+      <p class="ld">Seven years in regulated environments, from analyst to manager.</p>
+    </div>
+
+    <div class="tj" id="trajectory" data-pick={pick}>
+      <p class="tj-hint">
+        <span><b>Pick a role or a tool.</b> The rest filters, the way a Power BI report does.</span>
+        <span class="tj-key"><span><i></i>BI role</span><span><i class="h"></i>Before or beside BI</span></span>
+      </p>
+
+      <div class="tj-chart">
+        <p class="tj-cap">Above · the roles</p>
+        <div class="tj-body">
+          <div class="tj-grid" aria-hidden="true">
+            {years.map(y => <i style={`left:${pct(y).toFixed(2)}%`}></i>)}
+            <i class="now" style={`left:${pct(nowT).toFixed(2)}%`}></i>
+          </div>
+          <div class="roles">
+            {roles.map(r => (
+              <div class="tj-row">
+                <button class="tj-lbl" type="button" data-role={r.id} data-uses={r.tools.join(' ')} aria-pressed="false">
+                  <b class="lg">{r.org}</b><b class="sh">{r.short}</b><span>{r.label ?? r.title}</span>
+                </button>
+                <div class="tj-track">
+                  <button class:list={['tj-bar', { hollow: r.kind !== 'main' }]} type="button" style={span(r)} data-role={r.id} data-uses={r.tools.join(' ')} aria-pressed="false" aria-label={`${r.title}, ${r.org}, ${r.when}`}></button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p class="tj-cap low">Below · the platform</p>
+          <div class="toolz">
+            {tools.map(t => (
+              <div class="tj-row">
+                <button class="tj-lbl" type="button" data-tool={t.id} data-uses={usedIn(t.id).map(r => r.id).join(' ')} aria-pressed="false">{t.name}</button>
+                <div class="tj-track" aria-hidden="true">
+                  {usedIn(t.id).map(r => <i class="tj-seg" style={span(r)} data-tool={t.id} data-by={r.id}></i>)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div class="tj-axis" aria-hidden="true">
+          {years.map(y => <span style={`left:${pct(y).toFixed(2)}%`}>{y}</span>)}
+        </div>
+      </div>
+
+      <div class="tj-read" aria-live="polite">
+        {roles.map(r => (
+          <div class:list={['tj-p', { on: `role:${r.id}` === pick }]} data-for={`role:${r.id}`}>
+            <p class="meta">{r.when}</p>
+            <h3>{r.title}</h3>
+            <p class="org">{r.org}</p>
+            <ul>{r.bullets.map(b => <li>{b}</li>)}</ul>
+            {r.note && <p class="nt">{r.note}</p>}
+            {r.tools.length > 0 && <p class="chips">{r.tools.map(t => <span>{toolName[t]}</span>)}</p>}
+          </div>
+        ))}
+        {tools.map(t => (
+          <div class="tj-p" data-for={`tool:${t.id}`}>
+            <p class="meta">{period(t.id)}</p>
+            <h3>{t.name}</h3>
+            <p class="org">Used in {usedIn(t.id).length === 1 ? 'one role' : `${usedIn(t.id).length} roles`}</p>
+            <ul>{usedIn(t.id).map(r => <li>{r.title}, {byId[r.id].org}</li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="feat" id="mcp">
+      <div>
+        <p class="st live">Live · read-only</p>
+        <h3>Claude, with governed access to Power BI</h3>
+        <p class="ln">The AI asks the model, under my permissions. It never touches the data.</p>
+        <div class="ex-act">
+          <button class="go-b" type="button" aria-expanded="false" aria-controls="bh-mcp"><span class="x">Go behind</span><span class="y">Back to the surface</span><Fragment set:html={chev} /></button>
+          <a class="btn" href="/work/power-bi-mcp/">Read the case study</a>
+        </div>
+      </div>
+      <div class="term">
+        <div class="tb" aria-hidden="true"><i></i><i></i><i></i></div>
+        <p><span>ask ›</span><span>run every measure in the model, once</span></p>
+        <p class="a"><span>←</span><span>98 measures: 91 answer, <span class="bad">7 fail</span></span></p>
+        <p><span>ask ›</span><span>why do they fail?</span></p>
+        <p class="a"><span>←</span><span>2 root causes: columns loaded as text, compared with numbers</span></p>
+        <p><span>ask ›</span><span>does revenue by product add up?</span></p>
+        <p class="a"><span>←</span><span>yes: it equals [Overall Revenue], to the cent</span></p>
+        <span class="nt">What Claude found on 17 October 2026, in my words. Masked data.</span>
+      </div>
+    </div>
+    <div class="bh" id="bh-mcp">
+      <div class="bh-in">
+        <div class="bh-g">
+          <div class="bh-c me"><h4>What I decided</h4><ul>
+            <li>A live connection, not screenshots: the version an interviewer can watch.</li>
+            <li>Read-only, under a named user, with no secret stored anywhere.</li>
+            <li>The data: my own CRM report, masked.</li>
+          </ul></div>
+          <div class="bh-c ai"><h4>What the AI did</h4><ul>
+            <li>Planned the four pieces from Microsoft's documentation.</li>
+            <li>Registered the app and set the tenant setting, each step with my permission.</li>
+            <li>Diagnosed why every query failed at first, and found the fix.</li>
+          </ul></div>
+          <div class="bh-c no"><h4>Not there yet</h4><ul>
+            <li>Not public: a visitor cannot open it. It is shown live in conversation.</li>
+            <li>It runs on a trial licence that ends on 16 December 2026.</li>
+            <li>Microsoft's endpoint is in preview and may change.</li>
+          </ul></div>
+          <div class="bh-c pf">
+            <ol class="steps"><li>A tenant</li><li>An app</li><li>A connector</li><li>A model</li></ol>
+            <p class="pf-cap">Four pieces, and none of them is custom code.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rows">
+      <div class="row3">
+        <p class="st">Audit done · repair next</p>
+        <div><h3>One report, three versions</h3><p class="d">My original, Claude's repair, and a dashboard Claude builds on the same model.</p></div>
+        <p class="f">Recorded, so the comparison can be watched.</p>
+      </div>
+      <div class="row3">
+        <p class="st">Certified · 2026</p>
+        <div><h3>Databricks Data Analyst</h3><p class="d">The newest step on the platform side.</p></div>
+        <p class="f"><a class="lk" href="https://credentials.databricks.com/c63b7e6e-c357-4cc9-9085-9081abb1aeb8#acc.pgCm5w0a" rel="noopener">Verify the credential</a></p>
+      </div>
+    </div>
+  </div>
+</section>

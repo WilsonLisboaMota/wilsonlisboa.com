@@ -1,24 +1,29 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import Dock from '../components/Dock.astro';
+import Now from '../components/Now.astro';
 import AiChapter from '../components/AiChapter.astro';
+import BiChapter from '../components/BiChapter.astro';
+import Leadership from '../components/Leadership.astro';
+import Closing from '../components/Closing.astro';
+import '../styles/after.css';
 ---
 <Base>
   <main>
     <Hero />
 
     <div id="work">
+      <Dock />
+      <Now />
       <AiChapter />
-
-      <section class="next" aria-labelledby="next-title">
-        <p class="meta">Still being built</p>
-        <h2 id="next-title">The other forces</h2>
-        <p>Each force opens its own section. Artificial Intelligence is the first one built.</p>
-        <ul class="todo">
-          <li id="bi">Business Intelligence <span class="mono">Not built</span></li>
-          <li id="leadership">Leadership <span class="mono">Not built</span></li>
-        </ul>
-      </section>
+      <BiChapter />
+      <Leadership />
+      <Closing />
     </div>
   </main>
 </Base>
+
+<script>
+  import '../scripts/after.js';
+</script>
