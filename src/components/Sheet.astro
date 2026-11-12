@@ -1,10 +1,12 @@
 ---
 // What is behind a card: who decided what, what the AI did, what is not there yet, and one piece of proof.
 // A native dialog, opened by the card (see after.js); on a phone it rises from the bottom.
+// Every column says what it is: the proof used to stand there without a title, and nobody could tell what it meant.
 import type { Work } from '../data/site';
 
 interface Props { w: Work }
 const { w } = Astro.props;
+const proofTitle = { bars: 'The result so far', steps: 'How it works', stats: 'In numbers', phone: 'The app' };
 ---
 <dialog class="sheet" id={`sheet-${w.id}`} aria-labelledby={`sh-${w.id}`}>
   <form method="dialog"><button class="x" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></form>
@@ -19,6 +21,7 @@ const { w } = Astro.props;
     {w.not && <div class="bh-c no"><h4>Not there yet</h4><ul>{w.not.map(t => <li>{t}</li>)}</ul></div>}
     {w.proof && (
       <div class="bh-c pf">
+        <h4>{proofTitle[w.proof.kind]}</h4>
         {w.proof.kind === 'bars' && (
           <div class="bars" role="img" aria-label={`${w.proof.rows.map(r => `${r.l}: ${r.t}`).join('. ')}. The bar: ${w.proof.goal}%.`}>
             {w.proof.rows.map(r => <div class="r"><p><span>{r.l}</span><b>{r.t}</b></p><div class="t"><i style={`width:${r.v}%`}></i></div></div>)}
@@ -26,7 +29,8 @@ const { w } = Astro.props;
           </div>
         )}
         {w.proof.kind === 'steps' && <ol class="steps">{w.proof.steps.map(s => <li>{s}</li>)}</ol>}
-        {w.proof.kind === 'phone' && <span class="phone"><img src={w.proof.src} alt={w.proof.alt} width="390" height="560" loading="lazy" decoding="async" /></span>}
+        {w.proof.kind === 'stats' && <ul class="stats">{w.proof.stats.map(s => <li><b>{s.v}</b><span>{s.l}</span></li>)}</ul>}
+        {w.proof.kind === 'phone' && <span class="phone"><img src={w.proof.src} alt={w.proof.alt} width="390" height="800" loading="lazy" decoding="async" /></span>}
         <p class="pf-cap">{w.proof.cap}</p>
       </div>
     )}

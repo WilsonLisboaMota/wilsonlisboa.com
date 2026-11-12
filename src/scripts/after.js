@@ -113,15 +113,11 @@ if (aro && !reduced) {
   sec.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { stamp = -1e9; follow(e); clearTimeout(rest); rest = setTimeout(goHome, 2600); } });
 }
 
-// ---------- the relay: one real case, a step at a time ----------
-// The seven steps are things to press. Pointing at one, or tabbing to it, shows what that step was in the trading
-// bot's case; left alone, the relay walks through them by itself. Only classes and one custom property change here:
-// the light slides along the line with a CSS transition.
+// ---------- the relay: the light walks from step to step, and goes to the one that is pointed at ----------
+// Only classes and one custom property change here: the light slides along the line with a CSS transition.
 $$('#work .relay').forEach(fig => {
-  let steps = [];
-  try { steps = JSON.parse(fig.dataset.steps || '[]'); } catch { /* no steps, no walk */ }
-  const cap = fig.querySelector('.rl-cap'), svgs = $$('.rl', fig);
-  if (!steps.length || !cap) return;
+  const svgs = $$('.rl', fig), count = svgs.length ? $$('.nd', svgs[0]).length : 0;
+  if (!count) return;
   let at = -1, timer = 0, until = 0;
   const show = i => {
     at = i;
@@ -130,25 +126,16 @@ $$('#work .relay').forEach(fig => {
       nds.forEach((g, k) => g.classList.toggle('on', k === i));
       if (nds[i]) svg.style.setProperty('--at', nds[i].dataset.f);
     });
-    const s = steps[i], el = (tag, cls, text) => { const x = document.createElement(tag); if (cls) x.className = cls; x.textContent = text; return x; };
-    const top = el('span', 'rl-top', '');
-    top.append(el('span', 'rl-k ' + s.who, s.who === 'me' ? 'Me' : 'AI'), el('span', 'rl-s', s.t), el('span', 'rl-n', fig.dataset.case + ' · ' + (i + 1) + ' of ' + steps.length));
-    cap.className = 'rl-cap ' + s.who;
-    cap.replaceChildren(top, el('strong', 'rl-h', s.h), el('span', 'rl-e', s.e));
   };
   const walk = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => { if (!reduced && fig.classList.contains('live') && performance.now() > until) show((at + 1) % steps.length); walk(); }, 4200);
+    timer = setTimeout(() => { if (!reduced && fig.classList.contains('live') && performance.now() > until) show((at + 1) % count); walk(); }, 2200);
   };
-  const pick = (target, hold) => { const g = target.closest && target.closest('.nd'); if (!g) return; if (+g.dataset.i !== at) show(+g.dataset.i); until = performance.now() + hold; };
-  fig.addEventListener('pointerover', e => pick(e.target, 7000));
-  fig.addEventListener('click', e => pick(e.target, 14000));
-  fig.addEventListener('focusin', e => pick(e.target, 14000));
-  fig.addEventListener('keydown', e => {
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-    e.preventDefault();
-    show((at + (e.key === 'ArrowRight' ? 1 : steps.length - 1)) % steps.length);
-    until = performance.now() + 14000;
+  fig.addEventListener('pointerover', e => {
+    const g = e.target.closest && e.target.closest('.nd');
+    if (!g) return;
+    if (+g.dataset.i !== at) show(+g.dataset.i);
+    until = performance.now() + 5000;
   });
   show(0);
   walk();

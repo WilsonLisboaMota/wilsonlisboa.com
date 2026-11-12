@@ -17,17 +17,14 @@ export const person = {
 const bot = '/work/ai-trading-bot/';
 
 // How the work passes between Wilson and the AI, in order. The four rules approved on 19 Oct 2026, as one drawing.
-// One real case, the AI Trading Bot, told step by step (from its record below). h: the headline of the step, a few
-// words; e: one line under it. Nothing here is new: every number and fact is on the bot's card.
-export const relayCase = 'AI Trading Bot';
-export const relay: { who: 'me' | 'ai'; t: string; h: string; e: string }[] = [
-  { who: 'me', t: 'choose the tools', h: 'Paper money only.', e: 'My rules before any code: one broker, one paper account per bot, stocks only.' },
-  { who: 'ai', t: 'builds', h: 'Built in minutes.', e: 'The AI wrote the test engine, the bots and their tests. That was the easy part.' },
-  { who: 'me', t: 'set the bar first', h: '95%, or nothing.', e: 'I wrote the bar down before a single test ran: 95% sure the edge is real.' },
-  { who: 'ai', t: 'runs the tests', h: '91%.', e: 'Three ideas tested. One came close. The other two: 62% and almost 0%.' },
-  { who: 'ai', t: 'a second AI re-checks', h: '3 bugs.', e: 'A second AI redid the sums and found them in the test code.' },
-  { who: 'me', t: 'decide', h: 'Close is not 95%.', e: 'None of the three reached the bar. So: no real money.' },
-  { who: 'me', t: 'show what failed', h: 'No edge yet.', e: 'That is the result, and it is the one I publish. It is on the card below.' },
+export const relay: { who: 'me' | 'ai'; t: string }[] = [
+  { who: 'me', t: 'choose the tools' },
+  { who: 'ai', t: 'builds' },
+  { who: 'me', t: 'set the bar first' },
+  { who: 'ai', t: 'runs the tests' },
+  { who: 'ai', t: 'a second AI re-checks' },
+  { who: 'me', t: 'decide' },
+  { who: 'me', t: 'show what failed' },
 ];
 
 export interface Work {
@@ -38,9 +35,16 @@ export interface Work {
   tag: string;
   live?: boolean;
   /** Which small drawing the card carries. */
-  viz: 'bars' | 'lapse' | 'radar' | 'orbit' | 'term' | 'stack' | 'seal';
-  /** The few words on the card. */
-  answer: string;
+  viz: 'radar' | 'orbit' | 'stack' | 'seal' | 'house' | 'flow' | 'trade' | 'matrix';
+  /** AI projects: the part of Wilson's life it is for, its icon, and what it does there, in a few words. */
+  area?: string;
+  icon?: 'heart' | 'home' | 'coins' | 'pin' | 'trend';
+  benefit?: string;
+  /** The large tile, with the app on a phone, and the names of its parts. */
+  big?: boolean;
+  parts?: string[];
+  /** Proof cards (Business Intelligence): the few words on the card. */
+  answer?: string;
   /** One sentence, shown when the card is opened. */
   line?: string;
   href?: string;
@@ -54,21 +58,94 @@ export interface Work {
   proof?:
     | { kind: 'bars'; cap: string; goal: number; rows: { l: string; v: number; t: string }[] }
     | { kind: 'steps'; cap: string; steps: string[] }
+    | { kind: 'stats'; cap: string; stats: { v: string; l: string }[] }
     | { kind: 'phone'; cap: string; src: string; alt: string };
 }
 
 // The trading bot's research results: how sure the edge is real, against the bar set before the tests.
 export const sure = { goal: 95, rows: [{ l: 'Follow the trend', v: 62, t: '62%' }, { l: 'Step back when the market is nervous', v: 91, t: '91%' }, { l: 'Buy the dip', v: 0.6, t: 'almost 0%' }] };
 
+// What the AI does in Wilson's life, one project per part of it (12 Nov 2026). Each says what it is for first.
+// The smart home comes from that project's own handover file; nothing about the house itself is given here
+// (no place, no names, no routines).
 export const projects: Work[] = [
+  {
+    id: 'life',
+    name: 'Life HQ',
+    status: 'Started November 2026 · app at version 3',
+    tag: 'Version 3',
+    viz: 'orbit',
+    area: 'Health',
+    icon: 'heart',
+    big: true,
+    benefit: 'Six AI specialists plan my training, meals and recovery.',
+    parts: ['Training', 'Nutrition', 'Recovery', 'Progress', 'The app', 'HQ'],
+    line: 'Six AI specialists and one shared folder plan my training, meals and recovery around the week I actually have.',
+    aiLabel: 'What the AI does',
+    me: ['Designed the structure: one folder as the shared brain, one owner per file.', 'Set the rules: records are only added, never rewritten, and the AI never invents precision.', 'Make the calls. The specialists analyse and propose.'],
+    ai: ['Six chats, each with one job: HQ, training, nutrition, progress, the app and recovery.', 'Built the plan, 14 exercise sheets and a phone app with a 3D figure.', 'Rebuilds the Excel report from the raw files, never by hand.'],
+    not: ['Early days: no trend is read before week three.', 'The app has not been tested on a real phone yet.'],
+    proof: { kind: 'phone', cap: 'A walking day. Shown in English here; the app itself is in Portuguese.', src: '/work/life-hq-app.jpg', alt: 'The phone app on a walking day: today asks only for a walk, 20 to 30 minutes on the treadmill, shown by a small 3D figure.' },
+  },
+  {
+    id: 'home',
+    name: 'Smart home',
+    status: 'Running at home since autumn 2026',
+    tag: 'Running at home',
+    live: true,
+    viz: 'house',
+    area: 'Home',
+    icon: 'home',
+    benefit: 'Runs the blinds and watches the energy.',
+    line: 'A Home Assistant system that runs the blinds through the day, shows the house’s energy on a wall display and suggests each morning what to wear for the weather.',
+    aiLabel: 'What the AI does',
+    me: ['Set the rules: check first, simulate before changing, back up before every change.', 'An automation never overrides something done by hand.', 'The AI only suggests. Nothing physical moves without my consent.'],
+    ai: ['Writes the configuration and the dashboards.', 'Simulated 25 cases with fake sensors before one set of rules went live.', 'Reads the energy data and explains what the house makes and uses.'],
+    not: ['The lighting routine is written, but not yet seen live.', 'Knowing which room is in use is still to come.'],
+    proof: { kind: 'stats', cap: 'From the project’s own record.', stats: [{ v: '10', l: 'blinds under its routines' }, { v: '25', l: 'cases simulated before going live' }] },
+  },
+  {
+    id: 'cfo',
+    name: 'Personal CFO',
+    status: 'Working pipeline · product not built',
+    tag: 'Working pipeline',
+    viz: 'flow',
+    area: 'Money',
+    icon: 'coins',
+    benefit: 'Traces where the money goes.',
+    line: 'My whole financial situation, live: where the money goes, what changed and what comes next.',
+    aiLabel: 'What the AI did',
+    me: ['Set the rule: the AI never calculates. Code does the sums; the AI classifies and explains.', 'Kept a human check on what the AI classifies.', 'Set a commercial version aside, for three reasons that are on record.'],
+    ai: ['Profiled the bank exports: formats, duplicates, transfers and gaps.', 'Wrote the pipeline in Python, from raw exports to analytics.', 'Flagged what it did not know instead of filling the gaps.'],
+    not: ['The product itself: phase one is not built.', 'About 29% of spending had no named payee on the statement.', 'The rules were written by hand for these banks. A second user would need new ones.'],
+    proof: { kind: 'steps', cap: 'About 2,400 real transactions. Every number traces back to one of them.', steps: ['Bank exports come in', 'They are cleaned', 'They become one ledger', 'The ledger is analysed'] },
+  },
+  {
+    id: 'radar',
+    name: 'Property Deal Radar',
+    status: 'In alpha · first alerts not sent yet',
+    tag: 'In alpha',
+    viz: 'radar',
+    area: 'Property',
+    icon: 'pin',
+    benefit: 'Looks for property deals that add up.',
+    line: 'Brings together the property investments with the best economic viability, and alerts me when a hot deal appears.',
+    aiLabel: 'What the AI is built to do',
+    me: ['Set the criteria for a deal that makes economic sense.', 'Keep one list, so the same property is never shown twice.', 'Asked for an alert only when a new hot deal appears.'],
+    ai: ['Find listings across portals and remove the duplicates.', 'Run the numbers: yield, cash flow and the equity needed.', 'Rate the risk, and say what information is missing.'],
+    not: ['In alpha: no alert has been sent yet.', 'Not every portal allows automated collection.', 'Rents are estimates, not income.'],
+    proof: { kind: 'steps', cap: 'Built for my own investments, and the kind of tool an estate agent would want.', steps: ['Find the listings', 'Remove the duplicates', 'Run the numbers', 'Rate the risk', 'Alert me'] },
+  },
   {
     id: 'bot',
     name: 'AI Trading Bot',
     status: 'Live on paper trading',
-    tag: 'Live',
+    tag: 'Live on paper',
     live: true,
-    viz: 'bars',
-    answer: 'no edge yet.',
+    viz: 'trade',
+    area: 'Investing',
+    icon: 'trend',
+    benefit: 'Tests trading ideas on paper first.',
     line: 'AI builds a trading bot in minutes. The hard part is tuning it to behave the way I would.',
     href: bot,
     cta: 'Read the case study',
@@ -77,48 +154,6 @@ export const projects: Work[] = [
     ai: ['Wrote the test engine, the bots and their tests.', 'A second AI agent redid the research sums and found 3 bugs in the test code.', "An audit of the bot's code added four safety rules before the pilot."],
     not: ['No proven edge: none of the three ideas reached the bar.', 'No real money. The pilot is reviewed on 11 December 2026.'],
     proof: { kind: 'bars', cap: 'How sure can we be that the edge is real? The bar, set before the tests: 95%.', ...sure },
-  },
-  {
-    id: 'cfo',
-    name: 'Personal CFO',
-    status: 'Working pipeline · product not built',
-    tag: 'Working pipeline',
-    viz: 'lapse',
-    answer: 'a payment lapsed.',
-    line: 'My whole financial situation, live: where the money goes, what changed and what comes next.',
-    aiLabel: 'What the AI did',
-    me: ['Set the rule: the AI never calculates. Code does the sums; the AI classifies and explains.', 'Kept a human check on what the AI classifies.', 'Set a commercial version aside, for three reasons that are on record.'],
-    ai: ['Profiled the bank exports: formats, duplicates, transfers and gaps.', 'Wrote the pipeline in Python, from raw exports to analytics.', 'Flagged what it did not know instead of filling the gaps.'],
-    not: ['The product itself: phase one is not built.', 'About 29% of spending had no named payee on the statement.', 'The rules were written by hand for these banks. A second user would need new ones.'],
-    proof: { kind: 'steps', cap: 'About 2,400 real transactions. Every number traces back to one of them.', steps: ['Raw', 'Standardised', 'Canonical', 'Analytics'] },
-  },
-  {
-    id: 'radar',
-    name: 'Property Deal Radar',
-    status: 'In alpha · first alerts not sent yet',
-    tag: 'In alpha',
-    viz: 'radar',
-    answer: 'no alert sent yet.',
-    line: 'Brings together the property investments with the best economic viability, and alerts me when a hot deal appears.',
-    aiLabel: 'What the AI is built to do',
-    me: ['Set the criteria for a deal that makes economic sense.', 'Keep one list, so the same property is never shown twice.', 'Asked for an alert only when a new hot deal appears.'],
-    ai: ['Find listings across portals and remove the duplicates.', 'Run the numbers: yield, cash flow and the equity needed.', 'Rate the risk, and say what information is missing.'],
-    not: ['In alpha: no alert has been sent yet.', 'Not every portal allows automated collection.', 'Rents are estimates, not income.'],
-    proof: { kind: 'steps', cap: 'Built for my own investments, and the kind of tool an estate agent would want.', steps: ['Find', 'De-duplicate', 'Run the numbers', 'Rate the risk', 'Alert'] },
-  },
-  {
-    id: 'life',
-    name: 'Life HQ',
-    status: 'Started November 2026 · app phase one built',
-    tag: 'New',
-    viz: 'orbit',
-    answer: 'six AIs, one brain.',
-    line: 'Six AI specialists and one shared folder plan my training, meals and recovery around the week I actually have.',
-    aiLabel: 'What the AI does',
-    me: ['Designed the structure: one folder as the shared brain, one owner per file.', 'Set the rules: records are only added, never rewritten, and the AI never invents precision.', 'Make the calls. The specialists analyse and propose.'],
-    ai: ['Six chats, each with one job: HQ, training, nutrition, progress, the app and recovery.', 'Built the plan, 14 exercise sheets and a phone app that shows today’s session.', 'Rebuilds the Excel report from the raw files, never by hand.'],
-    not: ['Early days: no trend is read before week three.', 'The app is phase one. Reminders and the 3D figure are still to come.'],
-    proof: { kind: 'phone', cap: 'The app, phase one: today’s session, in three versions.', src: '/work/life-hq-app.png', alt: 'The phone app, in Portuguese: Tuesday, session B, with a quick, a normal and a light version.' },
   },
 ];
 
@@ -190,7 +225,7 @@ export const proofs: Work[] = [
     status: 'Live · read-only',
     tag: 'Live · read-only',
     live: true,
-    viz: 'term',
+    viz: 'matrix',
     answer: '7 of 98 measures fail.',
     line: 'The AI asks the model, under my permissions. It never touches the data. On its first day it ran every measure once.',
     href: '/work/power-bi-mcp/',

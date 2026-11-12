@@ -947,7 +947,9 @@ function init() {
   // Pointing at a force (or the first tap) energises it, as in the sketches of 1 and 2 November 2026: its word comes in
   // if it is away and stays; the AI's outline draws itself and its inside becomes a lit mesh, BI's cells close into one
   // table and feed the chart, LEADER's filaments brighten and the formation's lines show. No gold, save at the points.
-  const ANSWERS = ['no edge yet.', '62% sure. Bar: 95%.', 'a payment lapsed.'];
+  // What comes out of the AI's point: four things it has done in Wilson's life (12 November 2026). Each is on record
+  // in its project: Life HQ, the smart home, the Power BI audit and the Personal CFO.
+  const ANSWERS = ['a week of training, planned.', 'the blinds, timed to the sunset.', '7 broken measures, found.', 'some 2,400 transactions, traced.'];
   const MF = 200, WORD_FONT = `800 ${MF}px "Mona Sans", "Arial Black", Arial, sans-serif`;
   const WORDS = [
     { text: 'BI', shape: 1, rows: [9, 14], inT: 0.95, holdT: 0.9 },

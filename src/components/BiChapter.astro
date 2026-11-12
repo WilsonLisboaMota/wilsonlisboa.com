@@ -56,7 +56,7 @@ const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-
           <div class="path" data-pick={first}>
             <div class="steps" role="tablist" aria-label="The path, step by step">
               {roles.map(r => (
-                <button class:list={['step', { hollow: r.kind !== 'main', on: r.id === first }]} type="button" role="tab" aria-selected={r.id === first ? 'true' : 'false'} data-role={r.id} style={`--h:${r.level}`}>
+                <button class:list={['step', { on: r.id === first }]} type="button" role="tab" aria-selected={r.id === first ? 'true' : 'false'} data-role={r.id} style={`--h:${r.level}`}>
                   <span class="bar"></span><span class="yr">{r.from}</span><span class="nm">{r.short}</span>
                 </button>
               ))}

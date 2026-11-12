@@ -1,7 +1,7 @@
 ---
 // Line icons, drawn in the same thin stroke as the rest of the site. Decorative: the text beside each says what it is.
 // Some are drawn in parts (p0, p1, …) so that a part can move on its own: layers that come apart, a needle that turns.
-interface Props { name: 'team' | 'layers' | 'spark' | 'compass' | 'mail' | 'in' | 'doc' | 'down' | 'star' | 'arrow' | 'quote' | 'git' }
+interface Props { name: 'team' | 'layers' | 'spark' | 'compass' | 'mail' | 'in' | 'doc' | 'down' | 'star' | 'arrow' | 'quote' | 'git' | 'heart' | 'home' | 'coins' | 'pin' | 'trend' }
 const { name } = Astro.props;
 const d: Record<string, string | string[]> = {
   team: ['M8.5 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 19c.6-3 2.7-4.6 5.5-4.6S13.4 16 14 19', 'M16.2 10.8a2.6 2.6 0 1 0-.9-5M16.8 14.5c2.2.4 3.7 1.9 4.2 4.5'],
@@ -11,6 +11,11 @@ const d: Record<string, string | string[]> = {
   mail: ['M3.5 6.5h17v11h-17z', 'M3.5 7.2 12 13l8.5-5.8'],
   in: ['M5.5 9.5V19M10 19V9.5M10 13.2c.2-2.4 1.6-3.8 3.6-3.8 2.2 0 3.4 1.4 3.4 4V19', 'M5.5 5.4v.2'],
   doc: ['M7 3.5h7l4 4v13H7zM14 3.5v4h4', 'M10 12h5', 'M10 15.5h5'],
+  heart: 'M12 20s-7.5-4.6-7.5-10.2A4.1 4.1 0 0 1 12 7.4a4.1 4.1 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20Z',
+  home: ['M4 11.5 12 4.5l8 7', 'M6.5 10v9.5h11V10', 'M10.5 19.5v-5h3v5'],
+  coins: ['M5 8.5C5 7.1 8.1 6 12 6s7 1.1 7 2.5-3.1 2.5-7 2.5-7-1.1-7-2.5Z', 'M5 8.5V12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V8.5', 'M5 12v3.5c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V12'],
+  pin: ['M12 21s6-6.2 6-11a6 6 0 1 0-12 0c0 4.8 6 11 6 11Z', 'M12 12.2a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z'],
+  trend: ['M4 17l5-5 3.5 3.5L20 8', 'M15 8h5v5'],
   // A branch that comes back: three commits and the lines between them.
   git: ['M7 8.5v7M17 10.5c0 3.8-4.6 3-7.6 5.3', 'M7 8.5a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z', 'M17 10.5a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z', 'M7 19.9a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z'],
   down: 'M12 4v11M7.5 11 12 15.5 16.5 11M5 19.5h14',

@@ -1,8 +1,8 @@
 ---
 // Artificial Intelligence: how the work passes between Wilson and the AI, as one drawing (the relay), then each
 // project as a card with its own small moving drawing. What is behind a card opens in a sheet.
-import { relay, relayCase, projects } from '../data/site';
-import Card from './Card.astro';
+import { relay, projects } from '../data/site';
+import Tile from './Tile.astro';
 import Sheet from './Sheet.astro';
 import Title from './Title.astro';
 
@@ -56,12 +56,12 @@ const wide = track(true), tall = track(false);
       <Title id="ai-t" a="AI brings speed." b="We bring judgement." />
     </div>
 
-    <figure class="relay" data-live data-case={relayCase} data-steps={JSON.stringify(relay)} aria-label={`How the work passes between me and the AI: ${relay.map(s => `${s.who === 'me' ? 'I' : 'the AI'} ${s.t}`).join(', ')}.`}>
+    <figure class="relay" data-live aria-label={`How the work passes between me and the AI: ${relay.map(s => `${s.who === 'me' ? 'I' : 'the AI'} ${s.t}`).join(', ')}.`}>
       <svg class="rl rl-w" viewBox="0 0 1200 208" aria-hidden="true">
         <text class="lane me" x="0" y="67">ME</text><text class="lane ai" x="0" y="151">AI</text>
         <path class="ln" d={wide.d} /><path class="run" pathLength="1000" d={wide.d} />
         {wide.pts.map((p, i) => (
-          <g class:list={['nd', p.who]} style={`--f:${p.f.toFixed(3)}`} data-i={i} data-f={p.f.toFixed(3)} tabindex="0" role="button" aria-label={`${p.who === 'me' ? 'Me' : 'The AI'}: ${p.t}`}>
+          <g class:list={['nd', p.who]} style={`--f:${p.f.toFixed(3)}`} data-i={i} data-f={p.f.toFixed(3)}>
             <circle cx={p.x.toFixed(1)} cy={p.y} r="7" />
             <text x={p.x.toFixed(1)} y={p.who === 'me' ? p.y - 22 : p.y + 34} text-anchor="middle">{p.t}</text>
           </g>
@@ -71,18 +71,17 @@ const wide = track(true), tall = track(false);
         <text class="lane me" x="40" y="16" text-anchor="middle">ME</text><text class="lane ai" x="190" y="16" text-anchor="middle">AI</text>
         <path class="ln" d={tall.d} /><path class="run" pathLength="1000" d={tall.d} />
         {tall.pts.map((p, i) => (
-          <g class:list={['nd', p.who]} style={`--f:${p.f.toFixed(3)}`} data-i={i} data-f={p.f.toFixed(3)} tabindex="0" role="button" aria-label={`${p.who === 'me' ? 'Me' : 'The AI'}: ${p.t}`}>
+          <g class:list={['nd', p.who]} style={`--f:${p.f.toFixed(3)}`} data-i={i} data-f={p.f.toFixed(3)}>
             <circle cx={p.x} cy={p.y} r="7" />
             <text x={p.x + 18} y={p.y + 5}>{p.t}</text>
           </g>
         ))}
       </svg>
-      <figcaption class="rl-cap" aria-live="polite"></figcaption>
     </figure>
 
     <h3 class="sub">My AI projects</h3>
-    <div class="cards" data-seq>
-      {projects.map(p => <Card w={p} />)}
+    <div class="bento" data-seq>
+      {projects.map(p => <Tile w={p} />)}
     </div>
   </div>
   {projects.map(p => <Sheet w={p} />)}

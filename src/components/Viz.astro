@@ -1,47 +1,25 @@
 ---
-// The small moving drawing on each card: one per piece of work, each showing what that piece does.
+// The small moving drawing on each card or tile: one per piece of work, each showing what that piece does.
 // All of them move with CSS only, and only while their card is on screen (see .live in after.css). Pointed at
 // (or, on a phone, in the middle of the screen) each one does its own thing faster: see "play" in after.css.
-import { sure } from '../data/site';
-
-interface Props { kind: 'bars' | 'lapse' | 'radar' | 'orbit' | 'term' | 'stack' | 'seal' | 'wall' }
+// They are illustrations, with one exception: the matrix shows a real count, 98 measures and the 7 that fail.
+interface Props { kind: 'radar' | 'orbit' | 'stack' | 'seal' | 'house' | 'flow' | 'trade' | 'matrix' }
 const { kind } = Astro.props;
 
 const f = (v: number) => v.toFixed(1);
 // Radar: where each blip sits, by angle (clockwise from the right) and distance; it lights as the sweep passes it.
 const blips = [[40, 60], [115, 38], [200, 70], [250, 30], [320, 50]].map(([a, r]) => ({ x: 160 + r * Math.cos(a * Math.PI / 180), y: 92 + r * Math.sin(a * Math.PI / 180), d: a / 360 * 4 }));
 const six = [0, 1, 2, 3, 4, 5].map(k => ({ x: 160 + 62 * Math.cos(k * Math.PI / 3), y: 90 + 62 * Math.sin(k * Math.PI / 3) }));
-// The wall: the hero's fine lines, seen small, with the chart's own line through the middle and its points on it.
-const wy = (y: number, ph: number, x: number) => y + 5 * Math.sin(ph + x / 62) + 2.5 * Math.sin(ph * 2 + x / 37);
-const wave = (y: number, ph: number) => { let d = ''; for (let x = -12; x <= 732; x += 12) d += `${d ? 'L' : 'M'}${x} ${f(wy(y, ph, x))}`; return d; };
-const hot = (x: number) => 60 + 9 * Math.sin(2.2 + x / 58) + 4 * Math.sin(1 + x / 23);
-let hotD = ''; for (let x = -12; x <= 732; x += 6) hotD += `${hotD ? 'L' : 'M'}${x} ${f(hot(x))}`;
-const marks = Array.from({ length: 11 }, (_, k) => 50 + k * 62);
+// The matrix: 98 measures in 14 columns of 7, and the seven that fail.
+const failing = new Set([9, 23, 31, 47, 58, 76, 90]);
+const cells = Array.from({ length: 98 }, (_, i) => ({ x: 34 + (i % 14) * 19.4, y: 30 + Math.floor(i / 14) * 20, bad: failing.has(i), c: i % 14 }));
+// Trading on paper: a price line, and where a bot would buy (below it) and sell (above it).
+const price = [[20, 122], [48, 106], [72, 114], [100, 86], [126, 98], [152, 68], [178, 82], [206, 54], [232, 72], [262, 46], [300, 60]];
+const priceD = price.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join('');
+const trades = [{ x: 72, y: 114, buy: true }, { x: 152, y: 68, buy: false }, { x: 178, y: 82, buy: true }, { x: 262, y: 46, buy: false }];
+// Where the money goes: one stream in, four out, each as wide as its share.
+const outs = [{ y: 34, w: 15 }, { y: 78, w: 10 }, { y: 114, w: 6 }, { y: 144, w: 3.5 }];
 ---
-{kind === 'bars' && (
-  <svg class="vz vz-bars" viewBox="0 0 320 180" aria-hidden="true">
-    {sure.rows.map((r, i) => (
-      <g>
-        <text class="t" x="24" y={40 + i * 44}>{r.t}</text>
-        <rect class="tr" x="24" y={46 + i * 44} width="272" height="12" rx="3" />
-        <rect class="b" x="24" y={46 + i * 44} width={f(Math.max(3, 272 * r.v / 100))} height="12" rx="3" style={`--d:${i * 0.2}s`} />
-      </g>
-    ))}
-    <line class="goal" x1={f(24 + 272 * sure.goal / 100)} x2={f(24 + 272 * sure.goal / 100)} y1="26" y2="150" />
-    <text class="t g" x={f(24 + 272 * sure.goal / 100 - 6)} y="24" text-anchor="end">the bar: {sure.goal}%</text>
-  </svg>
-)}
-{kind === 'lapse' && (
-  <svg class="vz vz-lapse" viewBox="0 0 320 180" aria-hidden="true">
-    {[0, 1, 2].flatMap(row => Array.from({ length: 12 }, (_, i) => {
-      const x = f(30 + i * 23.6), y = 50 + row * 40;
-      const on = row === 0 || (row === 1 && i % 3 === 0) || (row === 2 && i < 8);
-      if (row === 2 && i === 8) return <><circle class="gone" cx={x} cy={y} r="7" /><circle class="gone echo" cx={x} cy={y} r="7" /></>;
-      return <circle class:list={[on ? 'on' : 'off']} cx={x} cy={y} r={on ? 4.5 : 2} style={`--d:${(i * 0.3).toFixed(2)}s`} />;
-    }))}
-    <line class="scan" x1="0" x2="0" y1="28" y2="152" />
-  </svg>
-)}
 {kind === 'radar' && (
   <svg class="vz vz-radar" viewBox="0 0 320 180" aria-hidden="true">
     <circle class="r" cx="160" cy="92" r="28" /><circle class="r" cx="160" cy="92" r="54" /><circle class="r" cx="160" cy="92" r="80" />
@@ -59,14 +37,6 @@ const marks = Array.from({ length: 11 }, (_, k) => 50 + k * 62);
     </g></g>
     <path class="core" d="M143 77h11l4 4h19v22h-34z" />
   </svg>
-)}
-{kind === 'term' && (
-  <span class="vz vz-term" aria-hidden="true">
-    <i style="--d:0s">› run every measure, once</i>
-    <b style="--d:1.2s">← 91 answer · <u>7 fail</u></b>
-    <i style="--d:2.6s">› why do they fail?</i>
-    <b style="--d:3.8s">← 2 root causes</b>
-  </span>
 )}
 {kind === 'stack' && (
   <svg class="vz vz-stack" viewBox="0 0 320 180" aria-hidden="true">
@@ -86,14 +56,41 @@ const marks = Array.from({ length: 11 }, (_, k) => 50 + k * 62);
     <path class="ok" pathLength="1" d="M141 91l13 13 26-28" />
   </svg>
 )}
-{kind === 'wall' && (
-  <svg class="vz vz-wall" viewBox="0 0 720 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <g class="drift">
-      <g class="up">{[8, 20, 32, 44].map((y, i) => <path class="r" d={wave(y, i * 0.7)} />)}</g>
-      <g class="dn">{[76, 88, 100, 112].map((y, i) => <path class="r" d={wave(y, 2.8 + i * 0.7)} />)}</g>
-    </g>
-    <path class="hot" d={hotD} />
-    <path class="run" pathLength="1000" d={hotD} />
-    <g class="log">{marks.map((x, k) => <circle cx={x} cy={f(hot(x))} r="3.6" style={`--k:${k}`} />)}</g>
+{kind === 'house' && (
+  <svg class="vz vz-house" viewBox="0 0 320 180" aria-hidden="true">
+    <path class="sky" d="M30 150A130 130 0 0 1 290 150" />
+    <g class="sun"><circle cx="160" cy="20" r="9" /></g>
+    <path class="roof" d="M90 84 160 42l70 42" />
+    <rect class="wall" x="104" y="84" width="112" height="66" rx="3" />
+    {[116, 148, 180].map(x => (
+      <g><rect class="win" x={x} y="98" width="24" height="30" rx="2" /><rect class="bl" x={x} y="98" width="24" height="30" rx="2" /></g>
+    ))}
+    <path class="gnd" d="M24 150h272" />
+    <g class="pw">{[0, 1, 2].map(k => <rect x={248 + k * 12} y={128 - k * 8} width="7" height={22 + k * 8} rx="2" />)}</g>
+  </svg>
+)}
+{kind === 'flow' && (
+  <svg class="vz vz-flow" viewBox="0 0 320 180" aria-hidden="true">
+    {outs.map((o, k) => (
+      <>
+        <path class="st" d={`M24 90C140 90 170 ${o.y} 296 ${o.y}`} stroke-width={o.w} />
+        <path class="mv" d={`M24 90C140 90 170 ${o.y} 296 ${o.y}`} stroke-width={Math.max(1.6, o.w * 0.34)} style={`--k:${k}`} />
+      </>
+    ))}
+    <circle class="src" cx="24" cy="90" r="7" />
+  </svg>
+)}
+{kind === 'trade' && (
+  <svg class="vz vz-trade" viewBox="0 0 320 180" aria-hidden="true">
+    <path class="grid" d="M20 150h280M20 110h280M20 70h280M20 30h280" />
+    <path class="pr" d={priceD} />
+    <path class="run" pathLength="1000" d={priceD} />
+    {trades.map((m, k) => <path class:list={['mk', m.buy ? 'buy' : 'sell']} d={m.buy ? `M${m.x - 7} ${m.y + 24}h14l-7-11z` : `M${m.x - 7} ${m.y - 24}h14l-7 11z`} style={`--k:${k}`} />)}
+    <text class="t" x="300" y="170" text-anchor="end">paper money</text>
+  </svg>
+)}
+{kind === 'matrix' && (
+  <svg class="vz vz-matrix" viewBox="0 0 320 180" aria-hidden="true">
+    {cells.map(c => <circle class:list={[{ bad: c.bad }]} cx={f(c.x)} cy={c.y} r={c.bad ? 5.2 : 3.4} style={`--c:${c.c}`} />)}
   </svg>
 )}
