@@ -688,7 +688,7 @@
 
 /* ================= 12 November 2026, before publishing ================= */
 /* The BI sentence opens the Today card, across its width, above a fine line. */
-#work .today-ld{grid-column:1/-1;margin:0;padding-bottom:18px;border-bottom:1px solid var(--hair2);font-size:clamp(17px,1.45vw,21px);line-height:1.45;color:var(--fg2)}
+#work .today-ld{grid-column:1/-1;margin:0;padding-bottom:18px;text-align:center;text-wrap:balance;border-bottom:1px solid var(--hair2);font-size:clamp(17px,1.45vw,21px);line-height:1.45;color:var(--fg2)}
 /* Four recommendations in one row: the words a little smaller, so each card keeps to the same lines. */
 @media (min-width:1180px){#work .qs .qc-t{font-size:clamp(19px,1.32vw,20px)}}
 @media (min-width:1180px) and (max-width:1279px){#work .qs{grid-template-columns:repeat(2,minmax(0,1fr))}}
