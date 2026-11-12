@@ -10,40 +10,26 @@ import '../styles/hero.css';
 
     <header class="top">
       <a class="name" href="#top"><b>Wilson Mota</b><span>Business Intelligence Manager</span></a>
-      <nav aria-label="Primary">
-        <a href="#ai">Work</a>
-        <a href="#trajectory">Trajectory</a>
-        <a href="#contact">Contact</a>
-      </nav>
     </header>
 
     <div class="copy" id="copy">
       <h1 id="title"><span>Beyond the</span> <span>dashboards<span class="dot">.</span></span></h1>
       <div class="under">
-        <p class="lede">What if the charts I build are only a fraction of what I deliver?</p>
+        <p class="lede">What if the reports I build are only a fraction of what I can deliver?</p>
         <a class="cta" href="#work"><span>Step behind the dashboard</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
     </div>
 
+    <!-- The sentence is the menu (12 November 2026). Each of its three parts is a link: pointing at one lights its
+         force in the picture, as pointing at the force's own word does, and choosing it opens that chapter (see the
+         labels in membrane.js). The words in the picture stay buttons too. -->
     <div class="behind" id="behind">
-      <p class="kicker mono">Behind the dashboard</p>
-      <p class="big">I design data platforms, build with AI and lead a BI team.</p>
+      <p class="big">I <a class="say" href="#bi" data-k="0">design data platforms</a>, <a class="say" href="#ai" data-k="1">build with AI</a> and <a class="say" href="#leadership" data-k="2">lead a BI team</a>.</p>
+      <p class="pick" aria-hidden="true"><i></i><span id="hint" hidden>Choose one to explore</span></p>
     </div>
-
-    <div class="readout">
-      <p class="r-hint mono" id="hint" aria-hidden="true" hidden>Choose a word to explore</p>
-    </div>
-
-    <!-- The words on the far side are the buttons (see membrane.js). These links stay for the keyboard and for screen
-         readers, out of sight; focusing one lights its force up, as pointing does. -->
-    <nav class="forces sr" id="forces" aria-label="What lies behind the dashboard">
-      <a class="force" href="#bi" data-k="0"><b>Business Intelligence</b></a>
-      <a class="force" href="#ai" data-k="1"><b>Artificial Intelligence</b></a>
-      <a class="force" href="#leadership" data-k="2"><b>Leadership</b></a>
-    </nav>
 
     <!-- What comes out of the AI's point, typed (see membrane.js). Decorative, so hidden from screen readers. -->
-    <!-- Shown once the far side lets the scroll go on (see the gate in membrane.js). -->
+    <!-- Shown once the visitor is on the far side (see the gate in membrane.js). -->
     <span class="cue" id="cue" aria-hidden="true"><i></i><i></i></span>
     <p class="answer" id="answer" aria-hidden="true"><span class="t"><span class="x"></span><span class="c"></span></span></p>
   </div>

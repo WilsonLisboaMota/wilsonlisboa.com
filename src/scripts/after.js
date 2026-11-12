@@ -131,11 +131,14 @@ $$('#work .relay').forEach(fig => {
       if (nds[i]) svg.style.setProperty('--at', nds[i].dataset.f);
     });
     const s = steps[i], el = (tag, cls, text) => { const x = document.createElement(tag); if (cls) x.className = cls; x.textContent = text; return x; };
-    cap.replaceChildren(el('span', 'rl-k ' + s.who, s.who === 'me' ? 'Me' : 'AI'), el('b', '', s.t), el('span', '', s.e), el('span', 'rl-n', fig.dataset.case + ' · ' + (i + 1) + ' of ' + steps.length));
+    const top = el('span', 'rl-top', '');
+    top.append(el('span', 'rl-k ' + s.who, s.who === 'me' ? 'Me' : 'AI'), el('span', 'rl-s', s.t), el('span', 'rl-n', fig.dataset.case + ' · ' + (i + 1) + ' of ' + steps.length));
+    cap.className = 'rl-cap ' + s.who;
+    cap.replaceChildren(top, el('strong', 'rl-h', s.h), el('span', 'rl-e', s.e));
   };
   const walk = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => { if (!reduced && fig.classList.contains('live') && performance.now() > until) show((at + 1) % steps.length); walk(); }, 3200);
+    timer = setTimeout(() => { if (!reduced && fig.classList.contains('live') && performance.now() > until) show((at + 1) % steps.length); walk(); }, 4200);
   };
   const pick = (target, hold) => { const g = target.closest && target.closest('.nd'); if (!g) return; if (+g.dataset.i !== at) show(+g.dataset.i); until = performance.now() + hold; };
   fig.addEventListener('pointerover', e => pick(e.target, 7000));

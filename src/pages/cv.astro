@@ -182,11 +182,35 @@ html.e-dim .paper [data-line]:not(.e-held){opacity:.34}
 @keyframes current{from{background-position:0 0}to{background-position:100% 0}}
 @keyframes present{0%,100%{text-shadow:none}50%{text-shadow:0 0 .6em rgba(47,84,150,.45)}}
 .holo-pending .sheet{opacity:0}
+/* ---------- reading modes: how much time does the reader have? (12 November 2026) ----------
+   A small bar at the bottom of the window: 10 s, 1 min, Full. The sheet keeps lit what fits in that time and the
+   rest steps back; a skill or a role pointed at still lights its lines. The bar under the chosen time runs for
+   exactly that long. */
+.read{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:4px;padding:5px 5px 5px 15px;border-radius:999px;background:rgba(2,28,42,.88);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px rgba(150,205,255,.38),0 14px 40px -12px rgba(0,0,0,.75);font-size:14px;line-height:1.2;color:var(--mist);white-space:nowrap}
+.read-l{display:inline-flex;align-items:center;gap:7px;margin-right:6px;color:rgba(228,236,233,.78)}
+.read-l svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.read button{position:relative;overflow:hidden;border:0;border-radius:999px;padding:8px 13px;background:none;color:inherit;font:600 14px/1.2 'Mona Sans','Helvetica Neue',Arial,sans-serif;cursor:pointer;transition:background-color .25s,color .25s}
+.read button:hover{background:rgba(26,154,228,.2)}
+.read button[aria-pressed="true"]{background:var(--mist);color:var(--deep)}
+.read button:focus-visible{outline:2px solid #E0952F;outline-offset:2px}
+.read button::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:#E0952F;transform:scaleX(0);transform-origin:0 50%}
+@keyframes read-t{to{transform:none}}
+@media screen{
+  .sheet :is(.side > .t,.paper > .t,.paper li.t,.ck,.srow,.langs li,.ct-li,.sum > span){transition:opacity .5s var(--ease),color .35s var(--ease)}
+  html[data-read] .sheet .rd-off{opacity:.13}
+  html[data-read] .sheet .rd-off.e-held,html[data-read] .sheet .rd-off.e-on,html[data-read] .sheet .rd-off.e-link{opacity:1}
+}
+@media (prefers-reduced-motion:no-preference){
+  html[data-read="10"] .read button[aria-pressed="true"]::after{animation:read-t 10s linear forwards}
+  html[data-read="60"] .read button[aria-pressed="true"]::after{animation:read-t 60s linear forwards}
+  .sheet .rd-in{animation:rd-in 1s var(--ease)}
+}
+@keyframes rd-in{0%{text-shadow:0 0 0 rgba(120,190,255,0)}18%{text-shadow:0 0 .9em rgba(120,190,255,.95),0 0 .2em rgba(120,190,255,.8)}100%{text-shadow:0 0 0 rgba(120,190,255,0)}}
 /* ---------- print: the sheet alone, on one A4 page, in its final state ---------- */
 @page{size:A4;margin:0}
 @media print{
   html,body{background:#fff;height:297mm;overflow:hidden}
-  .top,canvas,.e-tip,.e-ctl,.hit,.hit-name,.hit-photo{display:none!important}
+  .top,.read,canvas,.e-tip,.e-ctl,.hit,.hit-name,.hit-photo{display:none!important}
   .stage{padding:0}
   .sheet{width:210mm;max-width:none;margin:0;box-shadow:none;opacity:1!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -195,6 +219,7 @@ html.e-dim .paper [data-line]:not(.e-held){opacity:.34}
   .bar .fill{width:calc(var(--v) * 100%)!important}
   .bar .flow,.bar .head,.dot::after{display:none!important}
   html.e-dim .paper [data-line]{opacity:1!important}
+  .sheet .rd-off{opacity:1!important}
 }
 </style>
 <script is:inline>try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!sessionStorage.getItem('cv-holo-a'))document.documentElement.classList.add('holo-pending')}catch(e){}</script>
@@ -208,6 +233,14 @@ html.e-dim .paper [data-line]:not(.e-held){opacity:.34}
   </nav>
 </header>
 
+<!-- How much time does the reader have? The sheet keeps lit only what fits in it (see "reading modes" in the script). -->
+<div class="read" role="group" aria-label="How much of the CV to read">
+  <span class="read-l"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.4V8l2.4 1.6"/></svg>Read it in</span>
+  <button type="button" data-read="10" aria-pressed="false">10 s</button>
+  <button type="button" data-read="60" aria-pressed="false">1 min</button>
+  <button type="button" data-read="all" aria-pressed="true">Full</button>
+</div>
+
 <main class="stage">
 <article class="sheet" aria-label="Curriculum vitae of Wilson Lisboa Mota">
  <div class="pg">
@@ -216,27 +249,27 @@ html.e-dim .paper [data-line]:not(.e-held){opacity:.34}
 
   <!-- ===== Sidebar ===== -->
   <div class="side">
-    <h1 class="t nm" style="--x:16.8;--b:47">LISBOA MOTA,</h1>
-    <p class="t gv" style="--x:16.8;--b:82">WILSON</p>
-    <p class="t sub" style="--x:19;--b:102.8">Business Intelligence Manager</p>
+    <h1 class="t nm" style="--x:16.8;--b:47" data-t="10">LISBOA MOTA,</h1>
+    <p class="t gv" style="--x:16.8;--b:82" data-t="10">WILSON</p>
+    <p class="t sub" style="--x:19;--b:102.8" data-t="10">Business Intelligence Manager</p>
     <div class="box sumbox" aria-hidden="true"></div>
     <div class="box photo" role="img" aria-label="Photo of Wilson"></div>
     <button class="hit-name" type="button" data-tip="tip-about" data-tip-place="right">About Wilson, beyond the CV</button>
     <button class="hit-photo" type="button" data-tip="tip-about" data-tip-place="right">About Wilson, beyond the CV</button>
-    <h2 class="t sec" style="--x:23;--b:229.9">Summary</h2>
-    <p class="sum">Business Intelligence Manager with 7 years in Business Intelligence. Deep experience running data operations in highly regulated environments, establishing data governance frameworks and ensuring audit compliance. With a background in finance, I treat data integrity as the foundation of operational safety and of strategic decisions.</p>
+    <h2 class="t sec" style="--x:23;--b:229.9" data-t="10">Summary</h2>
+    <p class="sum"><span data-t="10">Business Intelligence Manager with 7 years in Business Intelligence.</span> <span data-t="60">Deep experience running data operations in highly regulated environments, establishing data governance frameworks and ensuring audit compliance. With a background in finance, I treat data integrity as the foundation of operational safety and of strategic decisions.</span></p>
 
     <ul aria-label="Contact">
-      <li class="ct-li"><span class="box pill-c" style="--b:433.9" aria-hidden="true"></span>
+      <li class="ct-li" data-t="60"><span class="box pill-c" style="--b:433.9" aria-hidden="true"></span>
         <svg class="ico" style="--b:433.9" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="#fff" stroke-width="1.6" d="M3 6h18v12H3z M3 6l9 7 9-7"/></svg>
         <span class="t ct" style="--b:433.9"><a href="mailto:wilson.lisboa@wilsonlisboa.com">wilson.lisboa@wilsonlisboa.com</a></span></li>
-      <li class="ct-li"><span class="box pill-c" style="--b:465.2" aria-hidden="true"></span>
+      <li class="ct-li" data-t="60"><span class="box pill-c" style="--b:465.2" aria-hidden="true"></span>
         <svg class="ico" style="--b:465.2" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
         <span class="t ct" style="--b:465.2">Switzerland</span></li>
-      <li class="ct-li"><span class="box pill-c" style="--b:496.5" aria-hidden="true"></span>
+      <li class="ct-li" data-t="60"><span class="box pill-c" style="--b:496.5" aria-hidden="true"></span>
         <svg class="ico" style="--b:496.5" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M3 3h18v18H3z"/><path fill="#5574A8" d="M7 10h2.4v7H7zm1.2-3.6a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6zM11 10h2.3v1c.4-.7 1.2-1.2 2.4-1.2 2.2 0 2.6 1.4 2.6 3.3V17h-2.4v-3.4c0-.9 0-1.9-1.2-1.9s-1.3.9-1.3 1.8V17H11z"/></svg>
         <span class="t ct" style="--b:496.5"><a href="https://www.linkedin.com/in/wilson-lisboa-mota/" target="_blank" rel="noopener">linkedin.com/in/wilson-lisboa-mota</a></span></li>
-      <li class="ct-li"><span class="box pill-c" style="--b:527.8" aria-hidden="true"></span>
+      <li class="ct-li" data-t="60"><span class="box pill-c" style="--b:527.8" aria-hidden="true"></span>
         <img class="ico" style="--b:527.8;object-fit:contain" src="/cv/logo-white-mark.png" alt="">
         <span class="t ct" style="--b:527.8"><a href="https://wilsonlisboa.com">www.wilsonlisboa.com</a></span></li>
     </ul>
@@ -257,15 +290,15 @@ html.e-dim .paper [data-line]:not(.e-held){opacity:.34}
         <button class="hit" type="button" data-tip="tip-critical">Critical thinking, self-assessed 4.65 out of 5</button></li>
     </ul>
 
-    <h2 class="t sec" style="--x:15.8;--b:737.8">LANGUAGES</h2>
+    <h2 class="t sec" style="--x:15.8;--b:737.8" data-t="60">LANGUAGES</h2>
     <ul class="langs" aria-label="Languages, self-assessed">
-      <li><span class="t lg" style="--b:754.9" aria-hidden="true">ENG</span><span class="bar" style="--b:754.9;--v:.927" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
+      <li data-t="60"><span class="t lg" style="--b:754.9" aria-hidden="true">ENG</span><span class="bar" style="--b:754.9;--v:.927" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
         <button class="hit" type="button" style="--b:754.9" data-tip="tip-en">English, C1</button></li>
-      <li><span class="t lg" style="--b:774.3" aria-hidden="true">POR</span><span class="bar" style="--b:774.3;--v:1" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
+      <li data-t="60"><span class="t lg" style="--b:774.3" aria-hidden="true">POR</span><span class="bar" style="--b:774.3;--v:1" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
         <button class="hit" type="button" style="--b:774.3" data-tip="tip-pt">Portuguese, C2, native</button></li>
-      <li><span class="t lg" style="--b:792.8" aria-hidden="true">GER</span><span class="bar" style="--b:792.8;--v:.04" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
+      <li data-t="60"><span class="t lg" style="--b:792.8" aria-hidden="true">GER</span><span class="bar" style="--b:792.8;--v:.04" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
         <button class="hit" type="button" style="--b:792.8" data-tip="tip-de">German, A1</button></li>
-      <li><span class="t lg" style="--b:811.8" aria-hidden="true">FRA</span><span class="t lgn" style="--b:819.8" aria-hidden="true">(learning)</span><span class="bar" style="--b:811.8;--v:.295" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
+      <li data-t="60"><span class="t lg" style="--b:811.8" aria-hidden="true">FRA</span><span class="t lgn" style="--b:819.8" aria-hidden="true">(learning)</span><span class="bar" style="--b:811.8;--v:.295" aria-hidden="true"><i class="fill"><b class="flow"></b></i><i class="head"></i></span>
         <button class="hit" type="button" style="--b:811.8" data-tip="tip-fr">French, A2, learning</button></li>
     </ul>
   </div>
@@ -274,76 +307,76 @@ html.e-dim .paper [data-line]:not(.e-held){opacity:.34}
   <div class="paper">
     <h2 class="pill" style="--b:32.4">SKILLS</h2><i class="rule" style="--b:32.4" aria-hidden="true"></i>
     <ul class="checks" aria-label="Skills">
-      <li><button class="ck" type="button" style="--x:239.6;--b:52.2" data-skill="ssms"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>SSMS</button></li>
-      <li><button class="ck" type="button" style="--x:239.6;--b:64" data-skill="ssis"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>SSIS</button></li>
-      <li><button class="ck" type="button" style="--x:239.6;--b:76" data-skill="alteryx"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Alteryx</button></li>
-      <li><button class="ck" type="button" style="--x:239.6;--b:87.9" data-skill="mage"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Mage.ai</button></li>
-      <li><button class="ck" type="button" style="--x:332.2;--b:52.2" data-skill="powerbi"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Power BI (Service, SSRS)</button></li>
-      <li><button class="ck" type="button" style="--x:332.2;--b:64" data-skill="excel"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Excel (Power Query\Pivot)</button></li>
-      <li><button class="ck" type="button" style="--x:332.2;--b:76" data-skill="tableau"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Tableau</button></li>
-      <li><button class="ck" type="button" style="--x:332.2;--b:87.9" data-skill="databricks"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Databricks</button></li>
-      <li><button class="ck" type="button" style="--x:462.9;--b:52.2" data-skill="dremio"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Dremio Enterprise</button></li>
-      <li><button class="ck" type="button" style="--x:462.9;--b:64" data-skill="bc"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Business Central</button></li>
-      <li><button class="ck" type="button" style="--x:462.9;--b:76" data-skill="copilot"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Copilot</button></li>
-      <li><button class="ck" type="button" style="--x:462.9;--b:87.9" data-skill="claude"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Claude (Code\Cowork)</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:239.6;--b:52.2" data-skill="ssms"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>SSMS</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:239.6;--b:64" data-skill="ssis"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>SSIS</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:239.6;--b:76" data-skill="alteryx"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Alteryx</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:239.6;--b:87.9" data-skill="mage"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Mage.ai</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:332.2;--b:52.2" data-skill="powerbi"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Power BI (Service, SSRS)</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:332.2;--b:64" data-skill="excel"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Excel (Power Query\Pivot)</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:332.2;--b:76" data-skill="tableau"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Tableau</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:332.2;--b:87.9" data-skill="databricks"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Databricks</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:462.9;--b:52.2" data-skill="dremio"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Dremio Enterprise</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:462.9;--b:64" data-skill="bc"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Business Central</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:462.9;--b:76" data-skill="copilot"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Copilot</button></li>
+      <li><button class="ck" type="button" data-t="60" style="--x:462.9;--b:87.9" data-skill="claude"><svg class="tk" viewBox="0 0 10 10" aria-hidden="true"><path pathLength="1" d="M1.2 5.4 3.9 8.1 8.8 1.6"/></svg>Claude (Code\Cowork)</button></li>
     </ul>
 
     <h2 class="pill" style="--b:116.1">EXPERIENCE</h2><i class="rule" style="--b:116.1" aria-hidden="true"></i>
 
-    <h3 class="t ti" style="--x:245.1;--b:141.3" data-role="corient" tabindex="0">Manager – Business Intelligence Analyst <span class="dt">(01/2025 – <span class="live-w">Present</span>)</span></h3>
-    <p class="t co" style="--x:245.1;--b:153.2"><a href="https://www.corient.com/" target="_blank" rel="noopener">Corient</a><a class="mag" href="https://www.corient.com/" target="_blank" rel="noopener" aria-label="Corient website"><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></a></p>
+    <h3 class="t ti" style="--x:245.1;--b:141.3" data-role="corient" tabindex="0" data-t="10">Manager – Business Intelligence Analyst <span class="dt">(01/2025 – <span class="live-w">Present</span>)</span></h3>
+    <p class="t co" style="--x:245.1;--b:153.2" data-t="10"><a href="https://www.corient.com/" target="_blank" rel="noopener">Corient</a><a class="mag" href="https://www.corient.com/" target="_blank" rel="noopener" aria-label="Corient website"><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></a></p>
     <ul>
-      <li class="t bl" style="--x:261.9;--b:169.7" data-line data-r="corient">Lead a team of 6 BI developers to deliver analytical solutions to the whole group.</li>
-      <li class="t bl" style="--x:261.9;--b:182.1" data-line data-r="corient" data-uses="powerbi">Own the <span class="w">Power BI</span> platform, ensuring governance, security, and scalability.</li>
-      <li class="t bl" style="--x:261.9;--b:194.6" data-line data-r="corient">Drive automation and AI adoption to increase business performance.</li>
-      <li class="t bl" style="--x:261.9;--b:207.1" data-line data-r="corient">Partner with leadership to shape reporting strategy and ensure compliance.</li>
+      <li class="t bl" style="--x:261.9;--b:169.7" data-line data-r="corient" data-t="10">Lead a team of 6 BI developers to deliver analytical solutions to the whole group.</li>
+      <li class="t bl" style="--x:261.9;--b:182.1" data-line data-r="corient" data-t="60" data-uses="powerbi">Own the <span class="w">Power BI</span> platform, ensuring governance, security, and scalability.</li>
+      <li class="t bl" style="--x:261.9;--b:194.6" data-line data-r="corient" data-t="60">Drive automation and AI adoption to increase business performance.</li>
+      <li class="t bl" style="--x:261.9;--b:207.1" data-line data-r="corient" data-t="60">Partner with leadership to shape reporting strategy and ensure compliance.</li>
     </ul>
 
-    <h3 class="t ti" style="--x:243.9;--b:239.7" data-role="sf" tabindex="0">Senior Business Intelligence Analyst <span class="dt">(12/2021 – 12/2024)</span></h3>
-    <p class="t co" style="--x:243.9;--b:251.6"><a href="http://www.stonehagefleming.com/" target="_blank" rel="noopener">Stonehage Fleming</a><a class="mag" href="http://www.stonehagefleming.com/" target="_blank" rel="noopener" aria-label="Stonehage Fleming website"><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></a></p>
+    <h3 class="t ti" style="--x:243.9;--b:239.7" data-role="sf" tabindex="0" data-t="60">Senior Business Intelligence Analyst <span class="dt">(12/2021 – 12/2024)</span></h3>
+    <p class="t co" style="--x:243.9;--b:251.6" data-t="60"><a href="http://www.stonehagefleming.com/" target="_blank" rel="noopener">Stonehage Fleming</a><a class="mag" href="http://www.stonehagefleming.com/" target="_blank" rel="noopener" aria-label="Stonehage Fleming website"><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></a></p>
     <ul>
-      <li class="t bl" style="--x:260.7;--b:268.1" data-line data-r="sf" data-uses="powerbi">Lead the implementation and configuration of <span class="w">Power BI</span> Service in the Company.</li>
-      <li class="t bl" style="--x:260.7;--b:280.6" data-line data-r="sf" data-uses="dremio">Responsible for <span class="w">Dremio</span> DBT architecture, security and governance.</li>
-      <li class="t bl" style="--x:260.7;--b:293" data-line data-r="sf" data-uses="alteryx">Developed several <span class="w">Alteryx</span> processes that support business operations.</li>
-      <li class="t bl" style="--x:260.7;--b:305.6" data-line data-r="sf" data-uses="ssis mage">Developed products using tools such as <span class="w">SSIS</span>, Visual Studio, MDM, <span class="w">Mage.ai</span>, etc.</li>
+      <li class="t bl" style="--x:260.7;--b:268.1" data-line data-r="sf" data-t="60" data-uses="powerbi">Lead the implementation and configuration of <span class="w">Power BI</span> Service in the Company.</li>
+      <li class="t bl" style="--x:260.7;--b:280.6" data-line data-r="sf" data-t="60" data-uses="dremio">Responsible for <span class="w">Dremio</span> DBT architecture, security and governance.</li>
+      <li class="t bl" style="--x:260.7;--b:293" data-line data-r="sf" data-t="60" data-uses="alteryx">Developed several <span class="w">Alteryx</span> processes that support business operations.</li>
+      <li class="t bl" style="--x:260.7;--b:305.6" data-line data-r="sf" data-t="60" data-uses="ssis mage">Developed products using tools such as <span class="w">SSIS</span>, Visual Studio, MDM, <span class="w">Mage.ai</span>, etc.</li>
     </ul>
 
-    <h3 class="t ti" style="--x:244.8;--b:339.4" data-role="fl" tabindex="0">Business Intelligence Consultant <span class="dt">(03/2021 – 11/2021)</span></h3>
-    <p class="t co" style="--x:244.8;--b:351.2">Freelancer<span class="mag" aria-hidden="true"><svg viewBox="0 0 10 10"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></span></p>
+    <h3 class="t ti" style="--x:244.8;--b:339.4" data-role="fl" tabindex="0" data-t="60">Business Intelligence Consultant <span class="dt">(03/2021 – 11/2021)</span></h3>
+    <p class="t co" style="--x:244.8;--b:351.2" data-t="60">Freelancer<span class="mag" aria-hidden="true"><svg viewBox="0 0 10 10"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></span></p>
     <ul>
       <li class="t bl" style="--x:261.6;--b:367.3" data-line data-r="fl" data-uses="powerbi">Developing <span class="w">Power BI</span> reports has led to solid management gains to the clients.</li>
       <li class="t bl" style="--x:261.6;--b:379.8" data-line data-r="fl" data-uses="powerbi">Focus on the <span class="w">Power BI</span> User Experience, which provided positive feedback.</li>
       <li class="t bl" style="--x:261.6;--b:392.3" data-line data-r="fl" data-uses="ssis">Managed a SQL database and several <span class="w">SSIS</span> ETL processes.</li>
     </ul>
 
-    <h3 class="t ti" style="--x:245.1;--b:424.2" data-role="sl" tabindex="0">Business Intelligence Analyst <span class="dt">(09/2019 – 03/2021)</span></h3>
-    <p class="t co" style="--x:245.1;--b:436.1"><a href="https://scoresandlevels.com/" target="_blank" rel="noopener">Scores &amp; Levels</a><a class="mag" href="https://scoresandlevels.com/" target="_blank" rel="noopener" aria-label="Scores &amp; Levels website"><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></a></p>
+    <h3 class="t ti" style="--x:245.1;--b:424.2" data-role="sl" tabindex="0" data-t="60">Business Intelligence Analyst <span class="dt">(09/2019 – 03/2021)</span></h3>
+    <p class="t co" style="--x:245.1;--b:436.1" data-t="60"><a href="https://scoresandlevels.com/" target="_blank" rel="noopener">Scores &amp; Levels</a><a class="mag" href="https://scoresandlevels.com/" target="_blank" rel="noopener" aria-label="Scores &amp; Levels website"><svg viewBox="0 0 10 10" aria-hidden="true"><circle cx="4.2" cy="4.2" r="3" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6.4 6.4 9 9" stroke="currentColor" stroke-width="1.2"/></svg></a></p>
     <ul>
       <li class="t bl" style="--x:261.8;--b:452.4" data-line data-r="sl" data-uses="powerbi">Developed and maintained 10+ advanced <span class="w">Power BI</span> reports.</li>
       <li class="t bl" style="--x:261.8;--b:464.9" data-line data-r="sl">Developed the on-premises [small-scaled] Data Warehouse.</li>
     </ul>
 
-    <h3 class="t ti" style="--x:245.1;--b:496.5" data-role="wv" tabindex="0">Co-Founder <span class="dt">(11/2019 – 01/2021)</span></h3>
-    <p class="t co" style="--x:245.1;--b:508.4">WeValue – Consulting</p>
+    <h3 class="t ti" style="--x:245.1;--b:496.5" data-role="wv" tabindex="0" data-t="60">Co-Founder <span class="dt">(11/2019 – 01/2021)</span></h3>
+    <p class="t co" style="--x:245.1;--b:508.4" data-t="60">WeValue – Consulting</p>
     <ul>
       <li class="t bl" style="--x:261.9;--b:526.2" data-line data-r="wv">Management and client advisory: 9 of the 10 projects I submitted were approved.</li>
       <li class="t bl" style="--x:261.9;--b:539.8" data-line data-r="wv">Responsible for Public Contracts deals.</li>
     </ul>
 
     <h2 class="pill" style="--b:570.6">CERTIFICATES</h2><i class="rule" style="--b:570.6" aria-hidden="true"></i>
-    <h3 class="t cti" style="--x:256.2;--b:594.1" data-line data-uses="databricks"><span class="w">Databricks</span> Data Analyst Certificate <span class="dt">(2026)</span></h3>
-    <p class="t co" style="--x:256.2;--b:605.9">Databricks – <a class="lnk" href="https://credentials.databricks.com/c63b7e6e-c357-4cc9-9085-9081abb1aeb8#acc.pgCm5w0a" target="_blank" rel="noopener">Verification link</a></p>
+    <h3 class="t cti" style="--x:256.2;--b:594.1" data-line data-uses="databricks" data-t="10"><span class="w">Databricks</span> Data Analyst Certificate <span class="dt">(2026)</span></h3>
+    <p class="t co" style="--x:256.2;--b:605.9" data-t="60">Databricks – <a class="lnk" href="https://credentials.databricks.com/c63b7e6e-c357-4cc9-9085-9081abb1aeb8#acc.pgCm5w0a" target="_blank" rel="noopener">Verification link</a></p>
     <h3 class="t cti" style="--x:256;--b:630.1" data-line>Data Analyst Associate – Microsoft Certificate <span class="dt">(2021)</span></h3>
     <p class="t co" style="--x:256;--b:641.7">Microsoft – <span class="dt">Expired</span></p>
     <h3 class="t cti" style="--x:256.2;--b:665.1" data-line data-uses="excel">Advanced <span class="w">Excel</span> applied to management <span class="dt">(2016)</span></h3>
     <p class="t co" style="--x:256.2;--b:678.8">APEU</p>
 
     <h2 class="pill" style="--b:709.3">EDUCATION</h2><i class="rule" style="--b:709.3" aria-hidden="true"></i>
-    <h3 class="t cti" style="--x:256.2;--b:734.9">MSc in Management &amp; Business <span class="dt">(2019)</span></h3>
+    <h3 class="t cti" style="--x:256.2;--b:734.9" data-t="10">MSc in Management &amp; Business <span class="dt">(2019)</span></h3>
     <p class="t co" style="--x:256.2;--b:746.6">Atlantico Business School</p>
-    <h3 class="t cti" style="--x:256.2;--b:770">MBA in Business and Management <span class="dt">(2018)</span></h3>
+    <h3 class="t cti" style="--x:256.2;--b:770" data-t="60">MBA in Business and Management <span class="dt">(2018)</span></h3>
     <p class="t co" style="--x:256.2;--b:781.6">Atlantico Business School</p>
-    <h3 class="t cti" style="--x:256.2;--b:803.2">Degree in Economics <span class="dt">(2016)</span></h3>
+    <h3 class="t cti" style="--x:256.2;--b:803.2" data-t="60">Degree in Economics <span class="dt">(2016)</span></h3>
     <p class="t co" style="--x:256.2;--b:816.8">Lisbon School of Economics &amp; Management (ISEG)</p>
   </div>
  </div>
@@ -585,6 +618,30 @@ html.e-dim .paper [data-line]:not(.e-held){opacity:.34}
     E.burst($$('.dot', row)[4], { cell: 7, reach: 16, gain: 0.8 });
   }));
   $$('.langs li').forEach(li => li.querySelector('.hit').addEventListener('tipshow', () => flow(li.querySelector('.bar'))));
+
+  /* ---- reading modes: how much time does the reader have? ---- */
+  // Each unit of the sheet (a line, a skill, a row) says which reading it belongs to: data-t="10" is in the ten
+  // seconds and in the minute, data-t="60" in the minute only, nothing means the full CV only. Choosing a time dims
+  // what is outside it and walks a light through what is inside, in reading order, so the eye is led.
+  const readBtns = $$('.read [data-read]');
+  const units = $$('.side > .t, .paper > .t, .paper li.t, .ck, .srow, .langs li, .ct-li, .sum > span');
+  const inRead = (el, m) => m === 'all' || el.dataset.t === '10' || (m === '60' && el.dataset.t === '60');
+  let readTimers = [];
+  function setRead(m) {
+    readTimers.forEach(clearTimeout);
+    readTimers = [];
+    readBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.read === m)));
+    if (m === 'all') delete document.documentElement.dataset.read; else document.documentElement.dataset.read = m;
+    units.forEach(el => el.classList.toggle('rd-off', !inRead(el, m)));
+    if (m === 'all' || E.reduced) return;
+    const keep = units.filter(el => inRead(el, m)), step = m === '10' ? 170 : 45;
+    keep.forEach((el, i) => readTimers.push(setTimeout(() => {
+      restart(el, 'rd-in', 1000);
+      // In the ten seconds each line also gives off a little of the sheet's energy as its turn comes.
+      if (m === '10') E.burst(el, { reach: 12, gain: 0.7 });
+    }, 200 + i * step)));
+  }
+  readBtns.forEach(b => b.addEventListener('click', () => setRead(b.dataset.read)));
 
 
 })();

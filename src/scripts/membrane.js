@@ -8,7 +8,8 @@ const canvas = document.getElementById('gl');
 const copyEl = document.getElementById('copy');
 const behindEl = document.getElementById('behind');
 const hintEl = document.getElementById('hint');
-const labels = [...document.querySelectorAll('.force')];
+// The three parts of the sentence on the far side: each stands for a force, lights it, and opens its chapter.
+const labels = [...document.querySelectorAll('.say')];
 const answerEl = document.getElementById('answer');
 const answerText = answerEl.querySelector('.x');
 const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
@@ -423,7 +424,12 @@ function init() {
         float isHot = 1.0 - step(0.5, abs(aReg - uHot));
         float hot = isHot * uHotAmt;
         float dim = 1.0 - 0.6 * uHotAmt * (1.0 - isHot);
-        float seen = (base * dash * (1.0 + 1.0 * en) + (0.8 + 1.2 * en) * flow + 0.35 * heat) * dim * (1.0 + 0.9 * hot);
+        // Pointed at, the AI's lines step back instead of flaring (Wilson, 12 November 2026: they made noise, and the
+        // word lost its impact). They thin out most inside the word, so the letters stand clear.
+        float ai = step(0.0, aCi);
+        base *= 1.0 - ai * en * (0.5 + 0.4 * (1.0 - smoothstep(0.05, 0.45, aT)));
+        float enL = en * (1.0 - ai), hotL = hot * (1.0 - ai);
+        float seen = (base * dash * (1.0 + enL) + (0.8 + 1.2 * enL) * flow * (1.0 - 0.55 * ai * en) + 0.35 * heat) * dim * (1.0 + 0.9 * hotL);
         // Each stroke of a Leadership arrowhead is brightest at its tip (aT = 1) and fades towards the wing (aT = 0).
         float trail = mix(1.0, smoothstep(0.0, 1.0, aT), step(1.5, aReg) * step(aReg, 2.5));
         vec4 wp = modelMatrix * vec4(p, 1.0);
@@ -1444,7 +1450,7 @@ function init() {
     const w = WORDS[1], N = w.net, E = w.E;
     if (!N) return;
     if (!reduced && E > 0.02 && (w.ph === 'in' || w.ph === 'hold')) {
-      spawnN(9 * E, s, () => {
+      spawnN(4 * E, s, () => {
         const [x, y] = N.right[(Math.random() * N.right.length) | 0], R = Math.random;
         N.shards.push({ x, y, oy: (R() - 0.5) * 60, t0: now, dur: 1 + R() * 0.7, rot: R() * 6.283, vr: (R() - 0.5) * 8, sz: 2 + R() * 3.5, v: [0, 1, 2].map(k => { const an = k * 2.094 + (R() - 0.5) * 1.2; return [Math.cos(an), Math.sin(an) * (0.6 + R() * 0.6)]; }) });
       });
@@ -2110,6 +2116,9 @@ function init() {
     const bo = smooth(0.82, 0.96, u);
     // Only faded, never hidden: screen readers get this sentence whether or not the visitor has crossed.
     behindEl.style.opacity = bo.toFixed(3);
+    // Its links take the pointer only while the sentence is there.
+    const bon = bo > 0.6;
+    if (bon !== behindEl._on) { behindEl._on = bon; behindEl.classList.toggle('on', bon); }
     hintEl.style.opacity = smooth(0.84, 0.96, u).toFixed(3);
 
     const lo = smooth(0.84, 0.96, u);
@@ -2163,7 +2172,7 @@ function init() {
     // The front needs no instructions: the surface shows it reacts. Only the far side gets a hint.
     const side = u > 0.5;
     if (side !== lastSide) { lastSide = side; hintEl.hidden = !side; }
-    const hint = mqFine.matches ? 'Choose a word to explore' : S.hotTouch >= 0 ? 'Tap again to open' : 'Tap a word to explore';
+    const hint = mqFine.matches ? 'Choose one to explore' : S.hotTouch >= 0 ? 'Tap again to open' : 'Tap one to explore';
     if (hint !== lastHint) { hintEl.textContent = hint; lastHint = hint; }
   }
 

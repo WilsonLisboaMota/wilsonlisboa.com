@@ -23,9 +23,6 @@ html.held body{touch-action:none}
 .top .name{display:flex;flex-direction:column;gap:1px;font-size:15px;letter-spacing:-.005em;text-decoration:none;padding:6px 0}
 .top .name b{font-weight:600}
 .top .name span{font-size:12.5px;line-height:1.3;color:var(--mist-70)}
-.top nav{display:flex;gap:clamp(16px,2.4vw,34px)}
-.top nav a{font-size:15px;text-decoration:none;color:var(--mist-70);padding:10px 0;background:linear-gradient(currentColor,currentColor) 0 calc(100% - 7px)/0 1px no-repeat;transition:color .2s var(--ease),background-size .4s var(--ease)}
-.top nav a:hover{color:var(--mist);background-size:100% 1px}
 
 .copy{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:1040px;pointer-events:none;will-change:opacity,transform}
 .copy a{pointer-events:auto}
@@ -34,7 +31,7 @@ h1{margin:0;font-size:clamp(52px,9.4vw,164px);line-height:.86;font-weight:620;fo
 h1 span{display:block}
 h1 .dot{display:inline;color:var(--signal)}
 .under{display:flex;flex-wrap:wrap;align-items:center;gap:18px 36px;margin-top:clamp(20px,3.2vh,34px)}
-.lede{margin:0;font-size:clamp(17px,1.45vw,21px);line-height:1.35;color:var(--mist-70);max-width:24ch;text-shadow:0 0 24px rgba(2,28,42,.9)}
+.lede{margin:0;font-size:clamp(17px,1.45vw,21px);line-height:1.35;color:var(--mist-70);max-width:33ch;text-shadow:0 0 24px rgba(2,28,42,.9)}
 .cta{display:inline-flex;align-items:center;gap:12px;height:48px;padding:0 20px 0 22px;background:var(--mist);color:var(--deep);text-decoration:none;font-weight:600;font-size:15px;border-radius:3px;transition:background-color .25s var(--ease)}
 .cta:hover{background:#fff}
 /* The button invites across: its arrow leans towards the wall, and a ring leaves it now and then, like the CV's. */
@@ -51,19 +48,20 @@ h1 .dot{display:inline;color:var(--signal)}
 @media (prefers-reduced-motion:reduce){.cta svg,.cta::after{animation:none}}
 
 .behind{position:absolute;z-index:2;left:var(--gutter);bottom:var(--base);width:calc(100% - 2*var(--gutter));max-width:620px;opacity:0;pointer-events:none}
-.behind .big{margin:0;font-size:clamp(25px,2.6vw,40px);line-height:1.12;font-weight:480;font-stretch:104%;letter-spacing:-.022em;max-width:24ch;text-shadow:0 0 30px rgba(2,28,42,.9)}
+.behind .big{margin:0;font-size:clamp(25px,2.6vw,40px);line-height:1.12;font-weight:480;font-stretch:104%;letter-spacing:-.022em;max-width:24ch;text-shadow:0 0 30px rgba(2,28,42,.9);transition:color .25s var(--ease)}
+/* The sentence is the menu: each of its three parts lights its force, as pointing at its word does, and opens its
+   chapter. Pointed at, a part turns white and the rest of the sentence steps back. The links only take the pointer
+   once the sentence is there (.on, set in membrane.js): from the front they would sit, unseen, over the button. */
+.behind .big a{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:.2em;text-decoration-color:rgba(228,236,233,.38);border-radius:4px;transition:color .25s var(--ease),text-decoration-color .25s var(--ease),text-shadow .25s var(--ease)}
+.behind.on .big a{pointer-events:auto;cursor:pointer}
+.behind .big:has(a.hot){color:rgba(228,236,233,.5)}
+.behind .big a.hot,.behind .big a:focus-visible{color:#fff;text-decoration-color:var(--signal);text-shadow:0 0 22px rgba(143,208,255,.55),0 0 30px rgba(2,28,42,.9)}
+.behind .big a:focus-visible{outline:2px solid var(--signal);outline-offset:4px}
+/* Under it, the invitation, with the dot that marks where to act everywhere on the page. */
+.pick{display:flex;align-items:center;gap:10px;min-height:20px;margin:16px 0 0;font-size:14px;line-height:1.3;color:var(--mist-70)}
+.pick i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--signal);animation:pick 2.2s ease-in-out infinite}
+@keyframes pick{0%,100%{box-shadow:0 0 0 0 rgba(224,149,47,.6)}50%{box-shadow:0 0 0 7px rgba(224,149,47,0)}}
 
-/* Labels sit on the structure; their position is set from the 3D scene every frame. A force pointed at turns gold. */
-.forces{position:absolute;inset:0;z-index:3;pointer-events:none;--gold:#F0C778}
-/* Out of sight, still in the tab order: each link is a focusable point, its force lit while it has focus. */
-.forces.sr .force{opacity:1;visibility:visible;width:1px;height:1px;padding:0;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;transform:none!important}
-.forces.sr .force::before{display:none}
-.force{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:3px;padding:2px 0 6px 20px;margin-top:-9px;text-decoration:none;color:var(--mist);opacity:0;visibility:hidden;pointer-events:auto;white-space:nowrap;will-change:transform,opacity}
-.force::before{content:"";position:absolute;left:0;top:12px;width:12px;height:1px;background:var(--mist-45);transition:background-color .2s var(--ease),width .3s var(--ease)}
-.force b{font-weight:600;font-size:15px;letter-spacing:-.005em;transition:color .2s var(--ease);text-shadow:0 0 4px var(--deep),0 0 10px var(--deep),0 0 18px rgba(2,28,42,.95)}
-.force.hot b,.force:focus-visible b{color:var(--gold)}
-.force.hot::before,.force:focus-visible::before{background:var(--gold);width:16px}
-.force:focus-visible{outline-offset:2px}
 
 /* The AI's answer: a short line from the point, then the text as it types, with the site's orange caret. */
 .answer{position:absolute;left:0;top:0;z-index:3;margin:0;padding-top:30px;font:500 13px/1 var(--mono);letter-spacing:.01em;color:var(--mist);white-space:pre;pointer-events:none;opacity:0;visibility:hidden;will-change:transform,opacity;text-shadow:0 0 6px var(--deep),0 0 14px var(--deep)}
@@ -74,23 +72,14 @@ h1 .dot{display:inline;color:var(--signal)}
 .answer.blink .c{animation:caret 1.06s steps(1) infinite}
 @keyframes caret{50%{opacity:0}}
 
-.readout{position:absolute;z-index:4;right:var(--gutter);bottom:var(--base);display:flex;flex-direction:column;align-items:flex-end;gap:12px;text-align:right;pointer-events:none}
-.readout p{margin:0}
-.r-hint{color:var(--mist-70)}
-.r-note{color:var(--mist-45)}
 
 .fallback{position:absolute;left:30%;top:16%;width:60%;height:46%}
-.no-gl #gl,.no-gl #fx,.no-gl .forces{display:none}
+.no-gl #gl,.no-gl #fx{display:none}
 
 @media (max-width:759px){
-  .top nav a,.top .name{font-size:14px}
+  .top .name{font-size:14px}
   .copy,.behind{bottom:calc(env(safe-area-inset-bottom,0px) + 118px)}
   .kicker{margin-bottom:14px}
-  .readout{left:var(--gutter);right:var(--gutter);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);align-items:flex-start;text-align:left;gap:8px}
-  .r-note{display:none}
-  .force{padding-left:16px}
-  .force::before{width:9px}
-  .force b{font-size:13px}
   .answer{font-size:12px}
   .fallback{left:5%;top:14%;width:90%;height:34%}
 }
@@ -101,5 +90,5 @@ h1 .dot{display:inline;color:var(--signal)}
 /* With reduced motion the scroll still leads behind, but as a cut instead of a flight. */
 @media (prefers-reduced-motion:reduce){
   .hero{height:250vh;height:250svh}
-  .stage.tug,.cue i{animation:none}
+  .stage.tug,.cue i,.pick i{animation:none}
 }

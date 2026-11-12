@@ -34,10 +34,10 @@
 
 /* ---------- the wall behind the page: the hero's fine lines, shown only round the pointer (placed by after.js) ---------- */
 #work .wl-defs{position:absolute}
-#work .glow{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;opacity:0;background:color-mix(in srgb,var(--acc) 7%,transparent);transition:opacity .8s;
-  -webkit-mask-image:radial-gradient(circle 400px at var(--lx,50%) var(--ly,50%),#000,rgba(0,0,0,.5) 34%,rgba(0,0,0,.14) 70%,transparent);
-  mask-image:radial-gradient(circle 400px at var(--lx,50%) var(--ly,50%),#000,rgba(0,0,0,.5) 34%,rgba(0,0,0,.14) 70%,transparent)}
-#work .glow svg{position:absolute;left:0;top:0;width:calc(100% + 1440px);height:100%;opacity:.7}
+#work .glow{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;opacity:0;background:color-mix(in srgb,var(--acc) 3.5%,transparent);transition:opacity .8s;
+  -webkit-mask-image:radial-gradient(circle 330px at var(--lx,50%) var(--ly,50%),#000,rgba(0,0,0,.4) 30%,rgba(0,0,0,.1) 64%,transparent);
+  mask-image:radial-gradient(circle 330px at var(--lx,50%) var(--ly,50%),#000,rgba(0,0,0,.4) 30%,rgba(0,0,0,.1) 64%,transparent)}
+#work .glow svg{position:absolute;left:0;top:0;width:calc(100% + 1440px);height:100%;opacity:.34}
 #work .lit > .glow{opacity:1;transition-duration:.35s}
 #work .lit > .glow svg{animation:wl 90s linear infinite}
 @keyframes wl{to{transform:translateX(-1440px)}}
@@ -63,16 +63,14 @@
 #work .dock-line path{fill:none;stroke:rgba(228,236,233,.17);stroke-width:1.2}
 #work .dock-line.dl-p{display:none}
 #work .dock-line.dl-p path{stroke:#E4ECE9;stroke-width:1.6}
-#work .dock-name{flex:none;font-weight:600;font-size:15px;text-decoration:none;white-space:nowrap}
-#work .dock-nav{display:flex;gap:clamp(16px,2.2vw,30px);margin-left:auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+#work .dock-nav{display:flex;gap:clamp(16px,2.2vw,30px);min-width:0;overflow-x:auto;scrollbar-width:none}
 #work .dock-nav::-webkit-scrollbar{display:none}
 #work .dock-nav a{flex:none;font-size:14.5px;line-height:54px;color:rgba(228,236,233,.7);text-decoration:none;white-space:nowrap;box-shadow:inset 0 -2px 0 transparent;transition:color .2s,box-shadow .2s}
 #work .dock-nav a:hover{color:#fff}
 #work .dock-nav a.on{color:#fff;box-shadow:inset 0 -2px 0 var(--signal)}
-#work .dock-cv{flex:none;padding:7px 15px;border-radius:999px;background:#E4ECE9;color:#021C2A;font:600 13.5px/1.2 var(--sans);text-decoration:none;transition:background-color .2s,transform .25s var(--ease)}
+#work .dock-cv{flex:none;margin-left:auto;padding:7px 15px;border-radius:999px;background:#E4ECE9;color:#021C2A;font:600 13.5px/1.2 var(--sans);text-decoration:none;transition:background-color .2s,transform .25s var(--ease)}
 #work .dock-cv:hover{background:#fff;transform:translateY(-1px)}
 @media (max-width:699px){
-  #work .dock-name{display:none}
   #work .dock-nav{margin-left:0;gap:18px;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:16px}
   #work .dock-cv{margin-left:auto}
 }
@@ -576,12 +574,19 @@
 #work .rl .nd.me.on circle{fill:#E0952F}
 #work .rl .nd.ai.on circle{fill:#1A9AE4}
 #work .rl .nd.on text{fill:var(--fg);font-weight:680}
-#work .rl-cap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;min-height:2.9em;margin-top:20px;padding:14px 18px;border-radius:16px;background:var(--card);box-shadow:inset 0 0 0 1px var(--hair);font-size:clamp(16px,1.4vw,19px);line-height:1.4;color:var(--fg2)}
-#work .rl-cap .rl-k{flex:none;font:680 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;border-radius:999px;background:var(--signal);color:#021C2A}
-#work .rl-cap .rl-k.ai{background:var(--acc);color:#fff}
-#work .rl-cap b{color:var(--fg);font-weight:640}
-#work .rl-cap .rl-n{margin-left:auto;font-size:13.5px;color:var(--fg3);white-space:nowrap}
-@media (max-width:759px){#work .rl-cap .rl-n{margin-left:0;flex-basis:100%}}
+/* The caption tells the case: who and which step, small; the headline of the step, large; one line under it.
+   Its height is fixed, so the page does not move as the steps change. The edge takes the colour of whose step it is. */
+#work .rl-cap{display:block;min-height:176px;margin-top:22px;padding:18px 22px 20px;border-radius:18px;background:var(--card);box-shadow:inset 0 0 0 1px var(--hair),inset 4px 0 0 var(--signal);transition:box-shadow .4s var(--ease)}
+#work .rl-cap.ai{box-shadow:inset 0 0 0 1px var(--hair),inset 4px 0 0 var(--acc)}
+#work .rl-top{display:flex;align-items:center;gap:12px;font-size:14px;line-height:1.3;color:var(--fg3)}
+#work .rl-top .rl-k{flex:none;font:680 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;border-radius:999px;background:var(--signal);color:#021C2A}
+#work .rl-top .rl-k.ai{background:var(--acc);color:#fff}
+#work .rl-top .rl-s{color:var(--fg2)}
+#work .rl-top .rl-n{margin-left:auto;white-space:nowrap}
+#work .rl-h{display:block;margin-top:14px;font-size:clamp(30px,3.7vw,56px);line-height:1.02;font-weight:640;font-stretch:104%;letter-spacing:-.032em;color:var(--fg);animation:rl-in .55s var(--ease) both}
+#work .rl-e{display:block;margin-top:10px;font-size:clamp(16px,1.35vw,19px);line-height:1.4;color:var(--fg2);animation:rl-in .55s var(--ease) .1s both}
+@keyframes rl-in{from{opacity:0;transform:translateY(14px)}}
+@media (max-width:759px){#work .rl-top .rl-s{display:none}}
 
 /* ---------- contact, rebuilt: the title on one side, four ways in as rows of large type on the other.
    A row fills from the left when it is pointed at; its icon does what it stands for. ---------- */
@@ -615,3 +620,5 @@
 #work .ct.live .sig-c .ln{animation:dash-c 1.1s linear infinite}
 @keyframes ping-c{0%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(3.4)}}
 @keyframes dash-c{to{stroke-dashoffset:-9}}
+
+#work .rl-cap:empty{display:none}

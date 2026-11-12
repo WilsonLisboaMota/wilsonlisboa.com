@@ -10,7 +10,6 @@ let line = '';
 for (let x = 0; x <= 1440; x += 16) line += `${line ? 'L' : 'M'}${x} ${(6.5 + 2.6 * Math.sin(x / 1440 * Math.PI * 3 + 0.4) + 1.1 * Math.sin(x / 1440 * Math.PI * 7 + 1)).toFixed(1)}`;
 ---
 <nav class="dock" aria-label="Sections">
-  <a class="dock-name" href="#top">Wilson Mota</a>
   <div class="dock-nav">
     <a href="#ai">AI</a>
     <a href="#bi">Business Intelligence</a>

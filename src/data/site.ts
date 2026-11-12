@@ -17,16 +17,17 @@ export const person = {
 const bot = '/work/ai-trading-bot/';
 
 // How the work passes between Wilson and the AI, in order. The four rules approved on 19 Oct 2026, as one drawing.
-// e: what that step was in one real case, the AI Trading Bot (from its record below).
+// One real case, the AI Trading Bot, told step by step (from its record below). h: the headline of the step, a few
+// words; e: one line under it. Nothing here is new: every number and fact is on the bot's card.
 export const relayCase = 'AI Trading Bot';
-export const relay: { who: 'me' | 'ai'; t: string; e: string }[] = [
-  { who: 'me', t: 'choose the tools', e: 'Alpaca as the broker, with one paper account per bot.' },
-  { who: 'ai', t: 'builds', e: 'The test engine, the bots and their tests.' },
-  { who: 'me', t: 'set the bar first', e: '95% sure the edge is real, written down before the tests.' },
-  { who: 'ai', t: 'runs the tests', e: 'Three ideas tested: 62%, 91% and almost 0%.' },
-  { who: 'ai', t: 'a second AI re-checks', e: 'It redid the sums and found 3 bugs in the test code.' },
-  { who: 'me', t: 'decide', e: 'None reached the bar, so no real money.' },
-  { who: 'me', t: 'show what failed', e: 'The three results are on the card below, as they are.' },
+export const relay: { who: 'me' | 'ai'; t: string; h: string; e: string }[] = [
+  { who: 'me', t: 'choose the tools', h: 'Paper money only.', e: 'My rules before any code: one broker, one paper account per bot, stocks only.' },
+  { who: 'ai', t: 'builds', h: 'Built in minutes.', e: 'The AI wrote the test engine, the bots and their tests. That was the easy part.' },
+  { who: 'me', t: 'set the bar first', h: '95%, or nothing.', e: 'I wrote the bar down before a single test ran: 95% sure the edge is real.' },
+  { who: 'ai', t: 'runs the tests', h: '91%.', e: 'Three ideas tested. One came close. The other two: 62% and almost 0%.' },
+  { who: 'ai', t: 'a second AI re-checks', h: '3 bugs.', e: 'A second AI redid the sums and found them in the test code.' },
+  { who: 'me', t: 'decide', h: 'Close is not 95%.', e: 'None of the three reached the bar. So: no real money.' },
+  { who: 'me', t: 'show what failed', h: 'No edge yet.', e: 'That is the result, and it is the one I publish. It is on the card below.' },
 ];
 
 export interface Work {
