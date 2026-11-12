@@ -369,7 +369,7 @@
 #work h2 .wd > span{display:inline-block}
 
 /* ---------- BI: what Wilson is today, then the path, then the proof ---------- */
-#work .today{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:26px 48px;margin-top:clamp(36px,6vh,64px);padding:clamp(22px,3vw,40px);border-radius:22px;background:#fff;box-shadow:0 30px 70px -44px rgba(13,27,36,.45),inset 0 0 0 1px var(--hair2);transform:perspective(1600px) rotateX(calc(var(--rx,0deg) * .28)) rotateY(calc(var(--ry,0deg) * .28));transition:transform .5s var(--ease),box-shadow .3s}
+#work .today{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:26px 48px;margin-top:clamp(22px,3.4vh,36px);padding:clamp(22px,3vw,40px);border-radius:22px;background:#fff;box-shadow:0 30px 70px -44px rgba(13,27,36,.45),inset 0 0 0 1px var(--hair2);transform:perspective(1600px) rotateX(calc(var(--rx,0deg) * .28)) rotateY(calc(var(--ry,0deg) * .28));transition:transform .5s var(--ease),box-shadow .3s}
 #work .today.tilting{transition:box-shadow .3s}
 #work .today:hover{box-shadow:0 46px 80px -46px rgba(13,27,36,.6),inset 0 0 0 1px var(--hair)}
 #work .today::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(460px circle at var(--mx,50%) var(--my,0%),rgba(26,154,228,.11),transparent 62%);opacity:0;transition:opacity .3s;pointer-events:none}
@@ -685,3 +685,10 @@
 #work .qc-wide .qc-w{margin-top:10px;padding-top:0}
 @media (max-width:699px){#work .qs .qc-wide{display:flex;padding:22px 24px}#work .qc-wide .ic-quote{width:42px;height:42px}}
 @media (min-width:700px) and (max-width:1099px){#work .tile.big:not(.shot) .card-v{aspect-ratio:5/2}}
+
+/* ================= 12 November 2026, before publishing ================= */
+/* The BI sentence opens the Today card, across its width, above a fine line. */
+#work .today-ld{grid-column:1/-1;margin:0;padding-bottom:18px;border-bottom:1px solid var(--hair2);font-size:clamp(17px,1.45vw,21px);line-height:1.45;color:var(--fg2)}
+/* Four recommendations in one row: the words a little smaller, so each card keeps to the same lines. */
+@media (min-width:1180px){#work .qs .qc-t{font-size:clamp(19px,1.32vw,20px)}}
+@media (min-width:1180px) and (max-width:1279px){#work .qs{grid-template-columns:repeat(2,minmax(0,1fr))}}

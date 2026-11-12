@@ -178,7 +178,7 @@ export const roles: Role[] = [
   {
     // The CV gives years only for the end ("10/2016 – 2019").
     id: 'hop', org: 'HOP', short: 'HOP', title: 'Business consulting', when: '2016 – 2019', from: 2016, level: 1, kind: 'pre',
-    bullets: ['Business consulting, before BI.', 'A few highly technical spreadsheets were the first step towards working with data.'],
+    bullets: ['Led the market research team.', 'Business consulting, before BI.', 'A few highly technical spreadsheets were the first step towards working with data.'],
     tools: [],
   },
   {
@@ -255,12 +255,10 @@ export const proofs: Work[] = [
 // ---------- Leadership ----------
 // Only recommendations their authors approved. Excerpts are exact cuts, marked with an ellipsis.
 // cut: the few words on the card, an exact cut of the excerpt. text: the excerpt, shown when the card is opened.
-// wide: the featured card, across the row, with a longer cut.
 export const quotes = [
   {
     id: 'cr',
-    wide: true,
-    cut: 'He takes ownership, asks the right questions before building anything and turns complex data into something leadership can act on.',
+    cut: 'I would recommend him without hesitation.',
     text: 'He takes ownership, asks the right questions before building anything and turns complex data into something leadership can act on. I would recommend him without hesitation.',
     name: 'Carla Silva Reis',
     job: 'CEO',

@@ -1,7 +1,7 @@
 ---
 // Leadership, on its own colour. The hero's formation, in the hero's own strokes: seven arrowheads that fall in behind
-// one, then follow the pointer as one (see the flock in after.js). Below, what colleagues say: the featured card
-// across the row, then three side by side; each opens the longer excerpt.
+// one, then follow the pointer as one (see the flock in after.js). Below, what colleagues say: four cards in one row
+// (two by two on a tablet); each opens the longer excerpt.
 import { quotes } from '../data/site';
 import Icon from './Icon.astro';
 import Title from './Title.astro';
@@ -38,9 +38,9 @@ const initials = (n: string) => { const p = n.split(' '); return p[0][0] + p[p.l
     </div>
 
     <h3 class="sub">What colleagues say</h3>
-    <div class="cards three qs" data-seq>
+    <div class="cards qs" data-seq>
       {quotes.map(q => (
-        <button class:list={['card', 'qc', { 'qc-wide': q.wide }]} type="button" data-sheet={`sheet-q-${q.id}`} data-tilt data-play aria-haspopup="dialog">
+        <button class="card qc" type="button" data-sheet={`sheet-q-${q.id}`} data-tilt data-play aria-haspopup="dialog">
           <Icon name="quote" />
           <span class="qc-t">{q.cut}</span>
           <span class="qc-w">

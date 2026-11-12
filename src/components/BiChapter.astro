@@ -31,14 +31,14 @@ const chev = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.2 6 8l4-
     <div class="hd">
       <div class="ent"><svg class="sig" viewBox="0 0 320 200" aria-hidden="true" set:html={sig}></svg><p class="ent-n">Business Intelligence</p></div>
       <Title id="bi-t" a="Data you can trust." b="Built to be audited." />
-      <p class="ld">Seven years in regulated environments, from analyst to manager.</p>
     </div>
 
     <div class="today" data-tilt="soft" data-play>
+      <p class="today-ld">Seven years in regulated environments, from analyst to manager.</p>
       <div class="today-h">
         <p class="st live">Today</p>
         <h3>{now.title}</h3>
-        <p class="org">{now.org} · since {now.from}</p>
+        <p class="org">In this position since June 2025</p>
       </div>
       <ul class="tiles" data-seq>
         {todayTiles.map(t => <li><Icon name={t.icon} /><span>{t.t}</span></li>)}
