@@ -616,7 +616,7 @@
   #work .tile-p{width:auto;height:340px;padding:26px 0 0}
   #work .tile-p .phone{width:230px}
   #work .tile.big .tile-b{padding:18px 20px 20px}
-  #work .tile-o{display:none}
+  #work .tile.shot .tile-o{display:none}
 }
 
 /* ---------- the new drawings ---------- */
@@ -692,3 +692,5 @@
 /* Four recommendations in one row: the words a little smaller, so each card keeps to the same lines. */
 @media (min-width:1180px){#work .qs .qc-t{font-size:clamp(19px,1.32vw,20px)}}
 @media (min-width:1180px) and (max-width:1279px){#work .qs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* On a phone the app's picture rises out of the tile and fades into it, so the cut reads as meant. */
+@media (max-width:699px){#work .tile.shot .tile-p{height:300px;-webkit-mask-image:linear-gradient(#000 72%,transparent);mask-image:linear-gradient(#000 72%,transparent)}}
