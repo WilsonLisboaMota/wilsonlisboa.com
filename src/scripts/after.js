@@ -113,34 +113,6 @@ if (aro && !reduced) {
   sec.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { stamp = -1e9; follow(e); clearTimeout(rest); rest = setTimeout(goHome, 2600); } });
 }
 
-// ---------- the relay: the light walks from step to step, and goes to the one that is pointed at ----------
-// Only classes and one custom property change here: the light slides along the line with a CSS transition.
-$$('#work .relay').forEach(fig => {
-  const svgs = $$('.rl', fig), count = svgs.length ? $$('.nd', svgs[0]).length : 0;
-  if (!count) return;
-  let at = -1, timer = 0, until = 0;
-  const show = i => {
-    at = i;
-    svgs.forEach(svg => {
-      const nds = $$('.nd', svg);
-      nds.forEach((g, k) => g.classList.toggle('on', k === i));
-      if (nds[i]) svg.style.setProperty('--at', nds[i].dataset.f);
-    });
-  };
-  const walk = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => { if (!reduced && fig.classList.contains('live') && performance.now() > until) show((at + 1) % count); walk(); }, 2200);
-  };
-  fig.addEventListener('pointerover', e => {
-    const g = e.target.closest && e.target.closest('.nd');
-    if (!g) return;
-    if (+g.dataset.i !== at) show(+g.dataset.i);
-    until = performance.now() + 5000;
-  });
-  show(0);
-  walk();
-});
-
 // ---------- things that start when they are seen ----------
 const countUp = el => {
   const to = +el.dataset.count;

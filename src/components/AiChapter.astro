@@ -1,7 +1,9 @@
 ---
-// Artificial Intelligence: how the work passes between Wilson and the AI, as one drawing (the relay), then each
-// project as a card with its own small moving drawing. What is behind a card opens in a sheet.
-import { relay, projects } from '../data/site';
+// Artificial Intelligence: what the AI does in Wilson's life, one tile per project, each with its own moving drawing.
+// What is behind a tile opens in a sheet: what he decided, what the AI did, and what is not there yet.
+// (The relay between "ME" and "AI" was removed on 12 November 2026: it said nothing to the visitor. The same split
+// is in every sheet, with the facts of that project.)
+import { projects } from '../data/site';
 import Tile from './Tile.astro';
 import Sheet from './Sheet.astro';
 import Title from './Title.astro';
@@ -21,32 +23,6 @@ for (let i = 0; i < 44; i++) {
 }
 sig += pulses + `<circle class="ring" cx="${fx}" cy="${fy}" r="3.5"/><circle cx="${fx}" cy="${fy}" r="3.5"/>`;
 
-// The relay, drawn twice from the same steps: across on a wide screen, down on a phone. Two lanes, one line passing
-// between them; each step lights as the line's bright stretch reaches it (its share of the line's length).
-function track(across: boolean) {
-  const n = relay.length;
-  const pts = relay.map((s, i) => across
-    ? { x: 84 + i * (1032 / (n - 1)), y: s.who === 'me' ? 62 : 146 }
-    : { x: s.who === 'me' ? 40 : 190, y: 46 + i * 76 });
-  let d = `M${pts[0].x.toFixed(1)} ${pts[0].y}`;
-  const cum = [0];
-  for (let i = 1; i < n; i++) {
-    const a = pts[i - 1], b = pts[i];
-    const c1 = across ? { x: (a.x + b.x) / 2, y: a.y } : { x: a.x, y: (a.y + b.y) / 2 };
-    const c2 = across ? { x: (a.x + b.x) / 2, y: b.y } : { x: b.x, y: (a.y + b.y) / 2 };
-    d += `C${c1.x.toFixed(1)} ${c1.y.toFixed(1)} ${c2.x.toFixed(1)} ${c2.y.toFixed(1)} ${b.x.toFixed(1)} ${b.y}`;
-    let len = 0, px = a.x, py = a.y;
-    for (let s = 1; s <= 24; s++) {
-      const t = s / 24, u = 1 - t;
-      const x = u * u * u * a.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * b.x;
-      const y = u * u * u * a.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * b.y;
-      len += Math.hypot(x - px, y - py); px = x; py = y;
-    }
-    cum.push(cum[i - 1] + len);
-  }
-  return { d, pts: pts.map((p, i) => ({ ...p, f: cum[i] / cum[n - 1], ...relay[i] })) };
-}
-const wide = track(true), tall = track(false);
 ---
 <section class="sx" id="ai" data-sec data-glow aria-labelledby="ai-t">
   <div class="glow" aria-hidden="true"><svg><rect width="100%" height="100%" fill="url(#wl-dark)" /></svg></div>
@@ -55,29 +31,6 @@ const wide = track(true), tall = track(false);
       <div class="ent"><svg class="sig" viewBox="0 0 320 200" aria-hidden="true" set:html={sig}></svg><p class="ent-n">Artificial Intelligence</p></div>
       <Title id="ai-t" a="AI brings speed." b="We bring judgement." />
     </div>
-
-    <figure class="relay" data-live aria-label={`How the work passes between me and the AI: ${relay.map(s => `${s.who === 'me' ? 'I' : 'the AI'} ${s.t}`).join(', ')}.`}>
-      <svg class="rl rl-w" viewBox="0 0 1200 208" aria-hidden="true">
-        <text class="lane me" x="0" y="67">ME</text><text class="lane ai" x="0" y="151">AI</text>
-        <path class="ln" d={wide.d} /><path class="run" pathLength="1000" d={wide.d} />
-        {wide.pts.map((p, i) => (
-          <g class:list={['nd', p.who]} style={`--f:${p.f.toFixed(3)}`} data-i={i} data-f={p.f.toFixed(3)}>
-            <circle cx={p.x.toFixed(1)} cy={p.y} r="7" />
-            <text x={p.x.toFixed(1)} y={p.who === 'me' ? p.y - 22 : p.y + 34} text-anchor="middle">{p.t}</text>
-          </g>
-        ))}
-      </svg>
-      <svg class="rl rl-t" viewBox="0 0 360 548" aria-hidden="true">
-        <text class="lane me" x="40" y="16" text-anchor="middle">ME</text><text class="lane ai" x="190" y="16" text-anchor="middle">AI</text>
-        <path class="ln" d={tall.d} /><path class="run" pathLength="1000" d={tall.d} />
-        {tall.pts.map((p, i) => (
-          <g class:list={['nd', p.who]} style={`--f:${p.f.toFixed(3)}`} data-i={i} data-f={p.f.toFixed(3)}>
-            <circle cx={p.x} cy={p.y} r="7" />
-            <text x={p.x + 18} y={p.y + 5}>{p.t}</text>
-          </g>
-        ))}
-      </svg>
-    </figure>
 
     <h3 class="sub">My AI projects</h3>
     <div class="bento" data-seq>

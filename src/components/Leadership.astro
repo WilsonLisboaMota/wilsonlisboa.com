@@ -1,7 +1,7 @@
 ---
 // Leadership, on its own colour. The hero's formation, in the hero's own strokes: seven arrowheads that fall in behind
-// one, then follow the pointer as one (see the flock in after.js). Below, what colleagues say, as three cards side by
-// side; each opens the longer excerpt.
+// one, then follow the pointer as one (see the flock in after.js). Below, what colleagues say: the featured card
+// across the row, then three side by side; each opens the longer excerpt.
 import { quotes } from '../data/site';
 import Icon from './Icon.astro';
 import Title from './Title.astro';
@@ -17,7 +17,7 @@ const birds = home.map(([x, y], i) => ({
   x0: Math.round(10 + rnd() * 184), y0: Math.round(6 + rnd() * 108), r0: Math.round(rnd() * 300 - 150),
   dl: (i ? 0.2 + rnd() * 0.6 : 0).toFixed(2),
 }));
-const initials = (n: string) => n.split(' ').map(s => s[0]).join('').slice(0, 2);
+const initials = (n: string) => { const p = n.split(' '); return p[0][0] + p[p.length - 1][0]; };
 ---
 <section class="sx blue" id="leadership" data-sec data-glow aria-labelledby="ld-t">
   <div class="glow" aria-hidden="true"><svg><rect width="100%" height="100%" fill="url(#wl-blue)" /></svg></div>
@@ -40,7 +40,7 @@ const initials = (n: string) => n.split(' ').map(s => s[0]).join('').slice(0, 2)
     <h3 class="sub">What colleagues say</h3>
     <div class="cards three qs" data-seq>
       {quotes.map(q => (
-        <button class="card qc" type="button" data-sheet={`sheet-q-${q.id}`} data-tilt data-play aria-haspopup="dialog">
+        <button class:list={['card', 'qc', { 'qc-wide': q.wide }]} type="button" data-sheet={`sheet-q-${q.id}`} data-tilt data-play aria-haspopup="dialog">
           <Icon name="quote" />
           <span class="qc-t">{q.cut}</span>
           <span class="qc-w">

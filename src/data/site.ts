@@ -16,17 +16,6 @@ export const person = {
 // ---------- Artificial Intelligence ----------
 const bot = '/work/ai-trading-bot/';
 
-// How the work passes between Wilson and the AI, in order. The four rules approved on 19 Oct 2026, as one drawing.
-export const relay: { who: 'me' | 'ai'; t: string }[] = [
-  { who: 'me', t: 'choose the tools' },
-  { who: 'ai', t: 'builds' },
-  { who: 'me', t: 'set the bar first' },
-  { who: 'ai', t: 'runs the tests' },
-  { who: 'ai', t: 'a second AI re-checks' },
-  { who: 'me', t: 'decide' },
-  { who: 'me', t: 'show what failed' },
-];
-
 export interface Work {
   id: string;
   name: string;
@@ -35,12 +24,12 @@ export interface Work {
   tag: string;
   live?: boolean;
   /** Which small drawing the card carries. */
-  viz: 'radar' | 'orbit' | 'stack' | 'seal' | 'house' | 'flow' | 'trade' | 'matrix';
+  viz: 'radar' | 'orbit' | 'stack' | 'seal' | 'house' | 'flow' | 'trade' | 'term';
   /** AI projects: the part of Wilson's life it is for, its icon, and what it does there, in a few words. */
   area?: string;
   icon?: 'heart' | 'home' | 'coins' | 'pin' | 'trend';
   benefit?: string;
-  /** The large tile, with the app on a phone, and the names of its parts. */
+  /** A large tile (with the app on a phone when there is one), and the names of its parts. */
   big?: boolean;
   parts?: string[];
   /** Proof cards (Business Intelligence): the few words on the card. */
@@ -96,13 +85,15 @@ export const projects: Work[] = [
     viz: 'house',
     area: 'Home',
     icon: 'home',
-    benefit: 'Runs the blinds and watches the energy.',
-    line: 'A Home Assistant system that runs the blinds through the day, shows the house’s energy on a wall display and suggests each morning what to wear for the weather.',
+    big: true,
+    benefit: 'The house follows the sun, the weather and the energy.',
+    parts: ['Blinds that follow the sun', 'A wall display', 'Solar and energy', 'The heat pump', 'What to wear, by AI', 'A voice shopping list'],
+    line: 'A Home Assistant system that moves the blinds with the sun, shows the solar power and the energy on a wall display, keeps an eye on the heat pump, and has an AI say each morning what to wear for the weather.',
     aiLabel: 'What the AI does',
     me: ['Set the rules: check first, simulate before changing, back up before every change.', 'An automation never overrides something done by hand.', 'The AI only suggests. Nothing physical moves without my consent.'],
-    ai: ['Writes the configuration and the dashboards.', 'Simulated 25 cases with fake sensors before one set of rules went live.', 'Reads the energy data and explains what the house makes and uses.'],
+    ai: ['Writes the configuration and the wall display, straight through Home Assistant.', 'Simulated 25 cases with fake sensors before one set of rules went live.', 'Works inside the house too: what to wear, morning and evening, and a plan for the day.'],
     not: ['The lighting routine is written, but not yet seen live.', 'Knowing which room is in use is still to come.'],
-    proof: { kind: 'stats', cap: 'From the project’s own record.', stats: [{ v: '10', l: 'blinds under its routines' }, { v: '25', l: 'cases simulated before going live' }] },
+    proof: { kind: 'stats', cap: 'From the project’s own record.', stats: [{ v: '9', l: 'screens on the wall display' }, { v: '10', l: 'blinds under its routines' }, { v: '25', l: 'cases simulated before going live' }] },
   },
   {
     id: 'cfo',
@@ -128,7 +119,7 @@ export const projects: Work[] = [
     viz: 'radar',
     area: 'Property',
     icon: 'pin',
-    benefit: 'Looks for property deals that add up.',
+    benefit: 'Looks for deals that add up.',
     line: 'Brings together the property investments with the best economic viability, and alerts me when a hot deal appears.',
     aiLabel: 'What the AI is built to do',
     me: ['Set the criteria for a deal that makes economic sense.', 'Keep one list, so the same property is never shown twice.', 'Asked for an alert only when a new hot deal appears.'],
@@ -145,7 +136,7 @@ export const projects: Work[] = [
     viz: 'trade',
     area: 'Investing',
     icon: 'trend',
-    benefit: 'Tests trading ideas on paper first.',
+    benefit: 'Tests trading ideas on paper.',
     line: 'AI builds a trading bot in minutes. The hard part is tuning it to behave the way I would.',
     href: bot,
     cta: 'Read the case study',
@@ -225,7 +216,7 @@ export const proofs: Work[] = [
     status: 'Live · read-only',
     tag: 'Live · read-only',
     live: true,
-    viz: 'matrix',
+    viz: 'term',
     answer: '7 of 98 measures fail.',
     line: 'The AI asks the model, under my permissions. It never touches the data. On its first day it ran every measure once.',
     href: '/work/power-bi-mcp/',
@@ -238,16 +229,16 @@ export const proofs: Work[] = [
   },
   {
     id: 'crm',
-    name: 'One report, three versions',
-    status: 'Audit done · repair next',
+    name: 'My version vs AI version',
+    status: 'Audit done · the AI version is next',
     tag: 'In progress',
     viz: 'stack',
-    answer: 'mine, repaired, rebuilt.',
-    line: "My original report, Claude's repair of it, and a dashboard Claude builds on the same model. Recorded, so the comparison can be watched.",
+    answer: 'same model, two reports.',
+    line: 'My own report next to one Claude builds on the same model, so anyone can compare the two. Recorded, so the comparison can be watched.',
     aiLabel: 'What the AI did',
-    me: ['Built the original report, and keep it untouched as the reference.', 'Set the rule: improvements are measured, not claimed.'],
+    me: ['Built my version, and keep it untouched as the reference.', 'Set the rule: improvements are measured, not claimed.'],
     ai: ['Audited the model through the live connection: 98 measures, 7 failing, 2 root causes.'],
-    not: ['The repair has not started.', 'The recording is still to come.'],
+    not: ['The AI version has not been built yet.', 'The recording is still to come.'],
   },
   {
     id: 'dbx',
@@ -264,7 +255,18 @@ export const proofs: Work[] = [
 // ---------- Leadership ----------
 // Only recommendations their authors approved. Excerpts are exact cuts, marked with an ellipsis.
 // cut: the few words on the card, an exact cut of the excerpt. text: the excerpt, shown when the card is opened.
+// wide: the featured card, across the row, with a longer cut.
 export const quotes = [
+  {
+    id: 'cr',
+    wide: true,
+    cut: 'He takes ownership, asks the right questions before building anything and turns complex data into something leadership can act on.',
+    text: 'He takes ownership, asks the right questions before building anything and turns complex data into something leadership can act on. I would recommend him without hesitation.',
+    name: 'Carla Silva Reis',
+    job: 'CEO',
+    org: "Scores & Levels · Wilson's manager",
+    role: 'CEO at Scores & Levels. Wilson reported directly to her',
+  },
   {
     id: 'dg',
     cut: 'Any team would be lucky to have him.',

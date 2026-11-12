@@ -1,6 +1,6 @@
 ---
 // One AI project as a tile: which part of Wilson's life it is for and what it does there, first; its name and its
-// state after. The first tile is the large one and carries the real app on a phone. Each opens a sheet with what is
+// state after. The two large tiles carry what each part is made of; Life HQ's also carries the real app on a phone. Each opens a sheet with what is
 // behind it (see after.js). A tile is a card (it tilts, its drawing plays when pointed at) with its own layout.
 import type { Work } from '../data/site';
 import Viz from './Viz.astro';
@@ -10,7 +10,7 @@ interface Props { w: Work }
 const { w } = Astro.props;
 const shot = w.big && w.proof && w.proof.kind === 'phone' ? w.proof : null;
 ---
-<button class:list={['card', 'tile', { big: w.big }]} type="button" data-sheet={`sheet-${w.id}`} data-tilt={w.big ? 'soft' : 'on'} data-play aria-haspopup="dialog">
+<button class:list={['card', 'tile', { big: w.big, shot: !!shot }]} type="button" data-sheet={`sheet-${w.id}`} data-tilt={w.big ? 'soft' : 'on'} data-play aria-haspopup="dialog">
   {shot
     ? <span class="tile-p"><span class="phone"><img src={shot.src} alt={shot.alt} width="390" height="800" loading="lazy" decoding="async" /></span></span>
     : <span class="card-v"><Viz kind={w.viz} /></span>}
@@ -18,7 +18,7 @@ const shot = w.big && w.proof && w.proof.kind === 'phone' ? w.proof : null;
     <span class="tile-a">{w.icon && <Icon name={w.icon} />}{w.area}</span>
     {shot && <span class="tile-o"><Viz kind="orbit" /></span>}
     <span class="tile-h">{w.benefit}</span>
-    {shot && w.parts && <span class="tile-parts">{w.parts.map(p => <span>{p}</span>)}</span>}
+    {w.big && w.parts && <span class="tile-parts">{w.parts.map(p => <span>{p}</span>)}</span>}
     <span class="tile-n"><b>{w.name}</b><span class:list={['st', { live: w.live }]}>{w.tag}</span><svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
   </span>
 </button>

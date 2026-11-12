@@ -172,27 +172,9 @@
   #work .kpi .ic{margin-left:auto}
 }
 
-/* ---------- AI: the relay, two lanes and one line passing between them ---------- */
+/* ---------- the room under each section, for the sheet of the next one ---------- */
 #work :is(#ai,.paper,.blue){padding-bottom:calc(clamp(56px,8vh,96px) + var(--sheet))}
-#work .relay{margin-top:clamp(36px,6vh,64px)}
-#work .rl{display:block;width:100%;height:auto;overflow:visible}
-#work .rl-t{display:none;max-width:360px}
-@media (max-width:759px){#work .rl-w{display:none}#work .rl-t{display:block}}
-#work .rl .ln{fill:none;stroke:var(--hair);stroke-width:1.5}
-#work .rl .run{fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:70 1000;stroke-dashoffset:70;opacity:0}
-#work .rl text{font:500 16px var(--sans);fill:var(--fg)}
-#work .rl .lane{font:500 12px var(--mono);letter-spacing:.1em}
-#work .rl .lane.me{fill:var(--signal)}
-#work .rl .lane.ai{fill:var(--acc)}
-#work .rl .nd circle{fill:var(--bg);stroke-width:2.2;transform-box:fill-box;transform-origin:center}
-#work .rl .nd.me circle{stroke:var(--signal)}
-#work .rl .nd.ai circle{stroke:var(--acc)}
-#work .relay.live .run{opacity:1;animation:run 9s linear infinite}
-#work .relay.live .nd circle{animation:nd 9s linear infinite;animation-delay:calc((70 + 1000 * var(--f)) / 1070 * 9s - .25s)}
-#work .relay.live .nd.me circle{animation-name:nd-me}
 @keyframes run{to{stroke-dashoffset:-1000}}
-@keyframes nd{0%,10%,100%{transform:none;fill:var(--bg)}3.5%{transform:scale(1.8);fill:#1A9AE4}}
-@keyframes nd-me{0%,10%,100%{transform:none;fill:var(--bg)}3.5%{transform:scale(1.8);fill:#E0952F}}
 
 /* ---------- cards: one piece of work each, with its own small moving drawing ---------- */
 #work .cards{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:22px}
@@ -293,15 +275,18 @@
 @keyframes say{0%{opacity:0;transform:translateY(5px)}5%,80%{opacity:1;transform:none}86%,100%{opacity:0}}
 @keyframes say-p{0%{opacity:0;transform:translateX(-10px)}7%,82%{opacity:1;transform:none}90%,100%{opacity:0}}
 @keyframes flag{50%{color:#fff}}
-/* one report, three versions */
+/* my version vs the AI's: two pages that part when pointed at */
 #work .vz-stack g{transform-box:fill-box;transform-origin:50% 100%;transition:transform .5s var(--ease)}
 #work .vz-stack .pg{fill:#0A2D40;stroke:rgba(228,236,233,.4)}
 #work .vz-stack .in{fill:none;stroke:#8FD0FF;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-#work .vz-stack .s1{transform:rotate(-10deg) translate(-30px,2px)}
-#work .vz-stack .s2{transform:rotate(10deg) translate(30px,2px)}
-#work .card:is(:hover,:focus-visible,.play) .vz-stack .s1{transform:rotate(-16deg) translate(-52px,4px)}
-#work .card:is(:hover,:focus-visible,.play) .vz-stack .s2{transform:rotate(16deg) translate(52px,4px)}
-#work .card:is(:hover,:focus-visible,.play) .vz-stack .s3{transform:translateY(-7px)}
+#work .vz-stack .s1{transform:rotate(-7deg) translate(-12px,2px)}
+#work .vz-stack .s2{transform:rotate(7deg) translate(12px,2px)}
+#work .vz-stack .tg.me{fill:#E0952F}
+#work .vz-stack .tg.ai{fill:#1A9AE4}
+#work .vz-stack .tt{font:700 7.5px/1 var(--sans);letter-spacing:.06em;fill:#021C2A}
+#work .vz-stack .s2 .tt{fill:#fff}
+#work .card:is(:hover,:focus-visible,.play) .vz-stack .s1{transform:rotate(-3deg) translate(-40px,-4px)}
+#work .card:is(:hover,:focus-visible,.play) .vz-stack .s2{transform:rotate(3deg) translate(40px,-4px)}
 /* the Databricks certificate */
 #work .vz-seal .ticks{fill:none;stroke:rgba(228,236,233,.4);stroke-width:6;stroke-dasharray:1.5 9.5;transform-origin:160px 90px}
 #work .vz-seal :is(.fast,.echo){transform-origin:160px 90px}
@@ -558,18 +543,6 @@
   #work .hd .ent .aro{order:0}
 }
 
-/* ---------- the relay: the light walks from step to step, and goes to the step that is pointed at (after.js) ---------- */
-#work .relay.live .run,#work .relay.live .nd circle{animation:none}
-#work .rl .run{opacity:1;stroke-dasharray:70 1000;stroke-dashoffset:calc(35px - 1000px * var(--at,0));transition:stroke-dashoffset .9s var(--ease)}
-#work .rl .nd{pointer-events:bounding-box}
-#work .rl .nd circle{transition:transform .4s var(--ease),fill .3s}
-#work .rl .nd text{fill:var(--fg2);transition:fill .3s}
-#work .rl .nd:is(:hover,:focus-visible) circle{transform:scale(1.4)}
-#work .rl .nd:is(:hover,:focus-visible) text{fill:var(--fg)}
-#work .rl .nd.on circle{transform:scale(1.8)}
-#work .rl .nd.me.on circle{fill:#E0952F}
-#work .rl .nd.ai.on circle{fill:#1A9AE4}
-#work .rl .nd.on text{fill:var(--fg);font-weight:680}
 
 
 /* ---------- contact, rebuilt: the title on one side, four ways in as rows of large type on the other.
@@ -611,8 +584,11 @@
    One large tile with the real app on a phone, and four small ones, each with its drawing. A tile is a card
    (it tilts, its drawing plays when pointed at) with its own layout. */
 #work .bento{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:22px}
-@media (min-width:700px){#work .bento{grid-template-columns:repeat(2,minmax(0,1fr))}#work .bento .big{grid-column:1/-1}}
-@media (min-width:1100px){#work .bento{grid-template-columns:repeat(4,minmax(0,1fr))}#work .bento .big{grid-column:span 2;grid-row:span 2}}
+@media (min-width:700px){#work .bento{grid-template-columns:repeat(6,minmax(0,1fr))}#work .bento .tile{grid-column:span 2}#work .bento .big{grid-column:1/-1}}
+@media (min-width:1100px){#work .bento .big{grid-column:span 3}}
+/* three small tiles in a row on a tablet: the name on one line, the state under it, the same for all three */
+#work .tile-n{flex-wrap:wrap}
+@media (min-width:700px) and (max-width:1099px){#work .tile:not(.big) .tile-n .st{order:3;flex-basis:100%}#work .tile:not(.big) .tile-n .go{order:2}}
 #work .tile-b{flex:1;display:flex;flex-direction:column;gap:10px;padding:16px 20px 18px}
 #work .tile-a{display:inline-flex;align-items:center;gap:8px;font:640 12.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#8FD0FF}
 #work .tile-a .ic{width:18px;height:18px}
@@ -622,23 +598,24 @@
 #work .tile-n .st{font-size:13.5px;white-space:nowrap}
 #work .tile .go{position:static;flex:none;margin-left:auto}
 /* the large one: the words on the left, the phone on the right */
-#work .tile.big{flex-direction:row-reverse;min-height:430px;transform:perspective(1600px) rotateX(calc(var(--rx,0deg) * .3)) rotateY(calc(var(--ry,0deg) * .3))}
+#work .tile.big{min-height:430px;transform:perspective(1600px) rotateX(calc(var(--rx,0deg) * .3)) rotateY(calc(var(--ry,0deg) * .3))}
 #work .tile-p{flex:none;width:47%;display:flex;justify-content:center;align-items:flex-start;padding:34px 22px 0 0;overflow:hidden}
-#work .tile-p .phone{width:min(290px,100%);padding:7px 7px 0;border-radius:36px 36px 0 0;transition:transform .6s var(--ease)}
+#work .tile.shot{flex-direction:row-reverse}
+#work .tile-p .phone{width:min(270px,100%);padding:7px 7px 0;border-radius:36px 36px 0 0;transform-origin:50% 100%;transition:transform .6s var(--ease)}
 #work .tile-p .phone img{border-radius:29px 29px 0 0}
-#work .tile.big:is(:hover,:focus-visible,.play) .phone{transform:translateY(-12px)}
+#work .tile.shot:is(:hover,:focus-visible,.play) .phone{transform:scale(1.04)}
 #work .tile.big .tile-b{justify-content:flex-end;gap:14px;padding:28px 10px 26px 28px}
-#work .tile.big .tile-a{margin-bottom:auto}
+#work .tile.shot .tile-o{flex:1;display:flex;align-items:center;min-height:0}
 #work .tile.big .tile-h{font-size:clamp(26px,2.5vw,38px);line-height:1.08;letter-spacing:-.025em}
 #work .tile-o{display:block;width:min(280px,92%);margin:0 0 4px -18px}
 #work .tile-parts{display:flex;flex-wrap:wrap;gap:6px}
 #work .tile-parts span{font-size:13.5px;line-height:1;padding:7px 11px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--hair);color:var(--fg2)}
 @media (max-width:699px){
-  #work .tile.big{flex-direction:column;min-height:0}
+  #work .tile.big{min-height:0}
+  #work .tile.shot{flex-direction:column}
   #work .tile-p{width:auto;height:340px;padding:26px 0 0}
   #work .tile-p .phone{width:230px}
   #work .tile.big .tile-b{padding:18px 20px 20px}
-  #work .tile.big .tile-a{margin-bottom:0}
   #work .tile-o{display:none}
 }
 
@@ -676,13 +653,6 @@
 #work .live .vz-trade .run{opacity:1;animation:run var(--tr,5s) linear infinite}
 #work .live .vz-trade .mk{animation:beat var(--tr,5s) var(--ease) infinite;animation-delay:calc(var(--k) * .9s)}
 #work .card:is(:hover,:focus-visible,.play) .vz-trade{--tr:2s}
-/* the audit: 98 measures, and the 7 that fail (the real count) */
-#work .vz-matrix circle{fill:rgba(143,208,255,.42)}
-#work .vz-matrix .bad{fill:#E0952F;transform-box:fill-box;transform-origin:center}
-#work .live .vz-matrix circle:not(.bad){animation:mx var(--mx,4.2s) linear infinite;animation-delay:calc(var(--c) * .11s)}
-#work .live .vz-matrix .bad{animation:gone 2.2s ease-in-out infinite}
-#work .card:is(:hover,:focus-visible,.play) .vz-matrix{--mx:1.8s}
-@keyframes mx{0%,34%,100%{fill:rgba(143,208,255,.42)}9%{fill:#fff}}
 
 /* ---------- the sheet's last column: a numbered list of steps, or two or three numbers ----------
    (ol.steps shares its class name with the career path's row of steps, so its grid is set here in full.) */
@@ -701,3 +671,17 @@
 @media (min-width:700px){#work .tile-o{width:300px;margin:0 0 0 -62px}}
 /* two tiles side by side keep the same number of lines */
 @media (min-width:700px){#work .tile:not(.big) .tile-h{min-height:2.4em}}
+/* ================= Round 10 (12 November 2026) ================= */
+/* The smart home's large tile: its drawing across the top, then what it does and what it is made of. */
+#work .tile.big:not(.shot){flex-direction:column}
+#work .tile.big:not(.shot) .card-v{aspect-ratio:2/1}
+@media (min-width:1100px){#work .tile.big:not(.shot) .card-v{aspect-ratio:auto;flex:1;min-height:220px}}
+#work .tile.big:not(.shot) .tile-b{flex:none;padding:20px 24px 24px}
+#work .tile.big:not(.shot) .tile-h{max-width:22ch}
+/* The featured recommendation: across the row, larger, the author beside the words. */
+#work .qs .qc-wide{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 22px;align-items:start;padding:28px 30px}
+#work .qc-wide .ic-quote{width:56px;height:56px;grid-row:1/3}
+#work .qc-wide .qc-t{font-size:clamp(23px,2.35vw,34px);line-height:1.2;max-width:60ch;text-wrap:balance}
+#work .qc-wide .qc-w{margin-top:10px;padding-top:0}
+@media (max-width:699px){#work .qs .qc-wide{display:flex;padding:22px 24px}#work .qc-wide .ic-quote{width:42px;height:42px}}
+@media (min-width:700px) and (max-width:1099px){#work .tile.big:not(.shot) .card-v{aspect-ratio:5/2}}
