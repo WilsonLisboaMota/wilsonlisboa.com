@@ -909,7 +909,7 @@ function init() {
     ];
     // Each force's own point, which its word is placed from: the middle table, the one point, the lead.
     const keys = [[TB[1].cx, TB[1].cy, TB[1].z], apexA, lead];
-    return { lines, nodes, river, picks, anchors, keys, curves, aiOrig, rerootAI, lineage, form };
+    return { lines, nodes, river, picks, anchors, keys, curves, aiOrig, rerootAI, lineage, form, tables: TB };
   }
 
   // ---------- the crossing: a camera path through the membrane, then round to look back at it ----------
@@ -1072,6 +1072,22 @@ function init() {
         const hv = 0.92 * Math.abs(a5[0] - a6[0]) / SX / asp, sxv = (a5[0] + a6[0]) / 2, syv = (a5[1] + a6[1]) / 2 - 0.15 * hv;
         const ht = 0.075 * short, half = 16 + ht * asp / 2, sxt = clamp(key[0] + 0.5 * ht, half, L.w - half), syt = Math.max(a5[1], a6[1]) + 1.1 * ht;
         hc = lerp(ht, hv, t); sx = lerp(sxt, sxv, t); sy = lerp(syt, syv, t);
+      }
+      // BI keeps clear of its tables (Wilson, 13 November 2026: its I sat on the edge of the middle table). The tables
+      // drift and the word does not (see step), so each table is taken as far as it drifts, 0.28 sideways and 0.2 up
+      // and down: on a wide screen the word steps left of them, on a tall one below them.
+      if (k === 0) {
+        const hw = hc * (w.x1 - w.x0) / (w.y1 - w.y0) / 2, hh = hc / 2, gap = 14;
+        for (let pass = 0; pass < 2; pass++) STRUCT.tables.forEach(tb => {
+          const xs = [], ys = [];
+          for (const ex of [-1, 1]) for (const ey of [-1, 1]) for (const dx of [-0.28, 0.28]) for (const dy of [-0.2, 0.2]) {
+            const q = toPx([tb.cx + ex * tb.w / 2 + dx, tb.cy + ey * tb.h / 2 + dy, tb.z]); xs.push(q[0]); ys.push(q[1]);
+          }
+          const x0 = Math.min(...xs) - gap, x1 = Math.max(...xs) + gap, y0 = Math.min(...ys) - gap, y1 = Math.max(...ys) + gap;
+          if (sx + hw <= x0 || sx - hw >= x1 || sy + hh <= y0 || sy - hh >= y1) return;
+          if (t >= 0.5) sx = x0 - hw; else sy = y1 + hh;
+        });
+        sx = Math.max(sx, hw + 16);
       }
       // The word lies on a plane through that point of the screen, at the depth of its force, facing the visitor.
       wv.set(STRUCT.keys[k][0] * SX + OX, STRUCT.keys[k][1], STRUCT.keys[k][2]).sub(endCam.position);
