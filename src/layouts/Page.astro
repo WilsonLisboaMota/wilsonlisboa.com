@@ -7,11 +7,12 @@ interface Props {
   title: string;
   description: string;
   back: { href: string; label: string };
+  noindex?: boolean;
 }
 
-const { title, description, back } = Astro.props;
+const { title, description, back, noindex = false } = Astro.props;
 ---
-<Base title={title} description={description} bodyClass="work">
+<Base title={title} description={description} noindex={noindex} bodyClass="work">
   <header class="top">
     <a class="home" href="/">Wilson Mota</a>
     <a class="back" href={back.href}><span aria-hidden="true">←</span> {back.label}</a>

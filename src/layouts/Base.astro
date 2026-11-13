@@ -4,7 +4,7 @@ import '../styles/base.css';
 interface Props {
   title?: string;
   description?: string;
-  /** Keeps search engines out until launch. */
+  /** Keeps search engines out of one page (the 404). The site launched on 13 November 2026. */
   noindex?: boolean;
   /** Lets a page family raise its own body styles above the shared ones without relying on stylesheet order. */
   bodyClass?: string;
@@ -13,7 +13,7 @@ interface Props {
 const {
   title = 'Beyond the Dashboards',
   description = 'Wilson Mota. Business Intelligence, AI, leadership and the things I build beyond the dashboard.',
-  noindex = true,
+  noindex = false,
   bodyClass,
 } = Astro.props;
 ---
@@ -25,6 +25,19 @@ const {
 <title>{title}</title>
 <meta name="description" content={description}>
 {noindex && <meta name="robots" content="noindex">}
+<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)}>
+<!-- What a shared link shows (LinkedIn, WhatsApp, Teams…): the title, the line, and the hero's front. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Wilson Mota">
+<meta property="og:title" content={title}>
+<meta property="og:description" content={description}>
+<meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)}>
+<meta property="og:image" content="https://wilsonlisboa.com/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Beyond the dashboards: a line chart on a surface of fine blue lines.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="sitemap" href="/sitemap.xml">
 <meta name="theme-color" content="#021C2A">
 <!-- Set before the first paint, so what only makes sense with scripts on (closed panels, their buttons) never flashes. -->
 <script is:inline>document.documentElement.classList.add('js')</script>

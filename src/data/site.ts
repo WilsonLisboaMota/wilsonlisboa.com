@@ -202,7 +202,7 @@ export const roles: Role[] = [
     tools: ['SQL Server', 'SSIS', 'Alteryx', 'Mage.ai', 'Power BI', 'Excel', 'Dremio', 'Business Central', 'Copilot'],
   },
   {
-    id: 'corient', org: 'Corient', short: 'Corient', title: 'Business Intelligence Manager', when: '01/2025 – today', from: 2025, level: 5, kind: 'main',
+    id: 'corient', org: 'Corient', short: 'Corient', title: 'Business Intelligence Manager', when: '06/2025 – today', from: 2025, level: 5, kind: 'main',
     bullets: ['Lead a team of 6 BI developers delivering analytical solutions to the whole group.', 'Own the Power BI platform, ensuring governance, security and scalability.', 'Drive automation and AI adoption to increase business performance.', 'Partner with leadership to shape reporting strategy and ensure compliance.'],
     tools: ['SQL Server', 'Mage.ai', 'Power BI', 'Tableau', 'Databricks', 'Copilot', 'Claude'],
     note: 'Stonehage Fleming became part of Corient: one continuous path since 2021.',
