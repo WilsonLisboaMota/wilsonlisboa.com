@@ -86,6 +86,8 @@ function fallback() {
 }
 
 function init() {
+  // No frame before the graphics card has built the scene's programs (see the end of init).
+  let glReady = false;
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
   renderer.setClearColor(0x021C2A, 1);
 
@@ -1923,11 +1925,63 @@ function init() {
     fc.globalAlpha = 1; fc.globalCompositeOperation = 'source-over';
   }
 
+  // ----- the overlay's rehearsal (13 November 2026). The first time each kind of 2D drawing appears (text, circles,
+  // hairlines, blurred shadows, gradients and images added as light), the graphics card builds a program for it and
+  // the frame waits: on Wilson's PC, three stops of 50 to 100 ms just as the words arrived on the far side, and up to
+  // 180 ms at the first pulsar. So once the words are ready, while the visitor is still on the front, every effect of
+  // the overlay is drawn once, with the overlay at a hundredth of its light, and wiped at the next frame. The far
+  // side's state is put back as it was.
+  let rehearsed = reduced;
+  function rehearseFx() {
+    rehearsed = true;
+    const W = WORDS.map(w => ({ ...w })), N = WORDS[1].net, NA = N.arcs, NS = N.shards, P0 = { ...PUL };
+    const LS = LD.st, LSp = LD.specks, LP = LD.P.map(o => ({ ...o })), LF = LD.strands.map(f => ({ ...f }));
+    const nPk = packets.length, nPl = pulses.length, now = S.time, ms = now * 1000;
+    try {
+      fx.style.opacity = '0.01';
+      fc.setTransform(1, 0, 0, 1, 0, 0); fc.clearRect(0, 0, fx.width, fx.height);
+      WORDS.forEach(w => { w.E = 1; w.ph = 'hold'; w.on = false; });
+      // The formation's current, BI's packets of data.
+      pulses.push({ side: 0, t0: now - 0.4, dur: 1 });
+      formFx(now, 0);
+      const edge = WORDS[0].pts.find(p => p.edge);
+      if (edge) packets.push({ p: edge, li: edge.li, ls: edge.ls, t0: now - 0.5, dur: 1 });
+      biFxDraw(now);
+      // The AI's mesh, with a spark jumping along it and a shard coming off.
+      const [i, j] = N.links[0] || [0, 0], a = N.nodes[i], b = N.nodes[j];
+      if (a && b) N.arcs = [{ pts: [[a.x, a.y], [(a.x + b.x) / 2 + 2, (a.y + b.y) / 2], [b.x, b.y]], t0: now - 0.02, life: 0.15 }];
+      const r = N.right[0];
+      if (r) N.shards = [{ x: r[0], y: r[1], oy: 10, t0: now - 0.3, dur: 1.2, rot: 0, vr: 1, sz: 3, v: [[1, 0], [-0.5, 0.6], [-0.5, -0.6]] }];
+      aiFxDraw(now);
+      // LEADER coming in (the wipe is a gradient), with its smoke, its specks and its points on the move; then
+      // standing, energised (the band of light through the mesh, the stars).
+      const wisp = { l: 2000, rs: 1, off: 0, k: 1, dx: 0, dy: 0 };
+      LD.strands.forEach(f => { f.live = true; f.pts = Array.from({ length: 8 }, (_, k) => ({ x: f.rx + k * 1.5, y: f.ry - k * 5, t0: ms - k * 150, w: wisp })); });
+      LD.specks = [0, 1, 2].map(kind => ({ x: LD.cx + kind * 20, y: LD.cy - 40, t0: ms - 300, life: 2000, kind, sz: 2, tw: 0 }));
+      LD.P.slice(0, 20).forEach((o, k) => Object.assign(o, { vis: true, mv: true, a: 1, x: LD.pts[k].bx, y: LD.pts[k].by }));
+      const m2 = planeOf(WORDS[2]);
+      WORDS[2].E = 0; LD.st = { ph: 'in', t: ms - 900, moment: false, soft: false };
+      leaderDraw(ms, m2);
+      WORDS[2].E = 1; LD.st = { ph: 'hold', t: ms, moment: false };
+      leaderDraw(ms, m2);
+      // The pulsar: its ring, its star, its gold point.
+      PUL.k = 1; PUL.t0 = now - 0.5;
+      pulsarDraw(now);
+    } catch (e) { /* a rehearsal must never stop the hero */ }
+    WORDS.forEach((w, k) => Object.assign(w, W[k]));
+    N.arcs = NA; N.shards = NS; Object.assign(PUL, P0);
+    LD.st = LS; LD.specks = LSp; LD.P.forEach((o, k) => Object.assign(o, LP[k])); LD.strands.forEach((f, k) => Object.assign(f, LF[k]));
+    packets.length = nPk; pulses.length = nPl;
+    fc.setTransform(1, 0, 0, 1, 0, 0); fc.globalAlpha = 1; fc.globalCompositeOperation = 'source-over';
+    FXS.drawn = true;
+  }
+
   // Every frame, after the scene: step and draw the overlay. Off the far side it is cleared once and left alone.
   function fxFrame(dt) {
     const show = wordsReady && STRUCT && WORDS[2].frame && (S.arrivedAt >= 0 || (reduced && S.u > 0.5));
     if (!show) {
-      if (FXS.drawn) { fc.setTransform(1, 0, 0, 1, 0, 0); fc.clearRect(0, 0, fx.width, fx.height); FXS.drawn = false; }
+      if (FXS.drawn) { fc.setTransform(1, 0, 0, 1, 0, 0); fc.clearRect(0, 0, fx.width, fx.height); FXS.drawn = false; fx.style.opacity = ''; }
+      else if (!rehearsed && wordsReady && STRUCT && LD && WORDS[1].net && WORDS[2].frame && S.time > 0.4) rehearseFx();
       return;
     }
     FXS.drawn = true;
@@ -2186,7 +2240,7 @@ function init() {
     if (visible && (!reduced || S.intro < 2 || Math.abs(S.cursor.s - S.cursorT.s) > 0.002 || Math.abs(S.hotAmt - (S.hot >= 0 ? 1 : 0)) > 0.002 || S.time - lastPoke < 2)) requestAnimationFrame(frame);
     else running = false;
   }
-  function kick() { lastPoke = S.time; if (!running && visible) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
+  function kick() { lastPoke = S.time; if (glReady && !running && visible) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
 
   // ---------- input ----------
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(), hit = new THREE.Vector3(), nrm = new THREE.Vector3();
@@ -2451,5 +2505,9 @@ function init() {
 
   layout();
   onScroll();
-  kick();
+  // The scene's programs are built in parallel, without holding up the page (13 November 2026): built inside the
+  // first frame, they froze the whole page for 1.7 s on a first visit to Wilson's PC. The first frame waits for them,
+  // and the intro then plays from its start.
+  const ready = () => { glReady = true; kick(); };
+  if (renderer.compileAsync) renderer.compileAsync(scene, camera).then(ready, ready); else ready();
 }
