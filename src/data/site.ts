@@ -197,7 +197,7 @@ export const roles: Role[] = [
     tools: ['SQL Server', 'SSIS', 'Power BI', 'Excel'],
   },
   {
-    id: 'sf', org: 'Stonehage Fleming', short: 'Stonehage F.', title: 'Senior BI Analyst', when: '12/2021 – 12/2024', from: 2021, level: 4, kind: 'main',
+    id: 'sf', org: 'Stonehage Fleming', short: 'Stonehage F.', title: 'Senior BI Analyst', when: '12/2021 – 05/2025', from: 2021, level: 4, kind: 'main',
     bullets: ['Led the implementation and configuration of Power BI Service in the company.', 'Responsible for the Dremio and dbt architecture, security and governance.', 'Developed several Alteryx processes that support business operations.', 'Developed products with SSIS, Visual Studio, MDM and Mage.ai.'],
     tools: ['SQL Server', 'SSIS', 'Alteryx', 'Mage.ai', 'Power BI', 'Excel', 'Dremio', 'Business Central', 'Copilot'],
   },
